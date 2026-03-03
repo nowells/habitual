@@ -405,9 +405,9 @@ struct CalendarDayCell: View {
 
 #Preview {
     let store = HabitStore(context: PersistenceController.preview.container.viewContext)
-    if let habit = store.habits.first {
-        NavigationStack {
-            HabitDetailView(habit: habit, habitStore: store)
-        }
+    let habit = store.habits.first ?? Habit(name: "Preview")
+
+    return NavigationStack {
+        HabitDetailView(habit: habit, habitStore: store)
     }
 }

@@ -201,16 +201,13 @@ struct CompactHeatmapView: View {
 }
 
 #Preview {
-    let controller = PersistenceController.preview
-    let context = controller.container.viewContext
-    let store = HabitStore(context: context)
+    let store = HabitStore(context: PersistenceController.preview.container.viewContext)
+    let habit = store.habits.first ?? Habit(name: "Preview")
 
-    if let habit = store.habits.first {
-        VStack {
-            HeatmapGridView(habit: habit)
-                .padding()
-            CompactHeatmapView(habit: habit)
-                .padding()
-        }
+    return VStack {
+        HeatmapGridView(habit: habit)
+            .padding()
+        CompactHeatmapView(habit: habit)
+            .padding()
     }
 }

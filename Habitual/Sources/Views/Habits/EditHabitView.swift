@@ -148,7 +148,7 @@ struct EditHabitView: View {
 
 #Preview {
     let store = HabitStore(context: PersistenceController.preview.container.viewContext)
-    if let habit = store.habits.first {
-        EditHabitView(habit: habit, habitStore: store)
-    }
+    let habit = store.habits.first ?? Habit(name: "Preview")
+
+    return EditHabitView(habit: habit, habitStore: store)
 }

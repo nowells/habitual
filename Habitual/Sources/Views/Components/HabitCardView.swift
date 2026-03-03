@@ -137,7 +137,7 @@ struct StatBadge: View {
     let context = controller.container.viewContext
     let store = HabitStore(context: context)
 
-    ScrollView {
+    return ScrollView {
         LazyVStack(spacing: 16) {
             ForEach(store.habits) { habit in
                 HabitCardView(habit: habit, habitStore: store)
