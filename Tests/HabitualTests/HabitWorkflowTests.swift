@@ -3,7 +3,6 @@ import CoreData
 @testable import HabitualCore
 
 /// Integration tests that validate complete user workflows end-to-end.
-@MainActor
 final class HabitWorkflowTests: XCTestCase {
 
     var persistenceController: PersistenceController!

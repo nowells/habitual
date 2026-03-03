@@ -2,7 +2,6 @@ import XCTest
 import CoreData
 @testable import HabitualCore
 
-@MainActor
 final class HabitStoreTests: XCTestCase {
 
     var persistenceController: PersistenceController!
