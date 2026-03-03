@@ -1,0 +1,165 @@
+import SwiftUI
+import CoreData
+import Combine
+
+@MainActor
+class HabitStore: ObservableObject {
+    private let viewContext: NSManagedObjectContext
+    private var cancellables = Set<AnyCancellable>()
+
+    @Published var habits: [Habit] = []
+    @Published var searchText: String = ""
+
+    var activeHabits: [Habit] {
+        habits.filter { !$0.isArchived }
+    }
+
+    var archivedHabits: [Habit] {
+        habits.filter { $0.isArchived }
+    }
+
+    var filteredHabits: [Habit] {
+        if searchText.isEmpty {
+            return activeHabits
+        }
+        return activeHabits.filter {
+            $0.name.localizedCaseInsensitiveContains(searchText) ||
+            $0.description.localizedCaseInsensitiveContains(searchText)
+        }
+    }
+
+    init(context: NSManagedObjectContext) {
+        self.viewContext = context
+        fetchHabits()
+
+        // Listen for remote changes from CloudKit
+        NotificationCenter.default.publisher(for: .NSPersistentStoreRemoteChange)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.fetchHabits()
+            }
+            .store(in: &cancellables)
+    }
+
+    func fetchHabits() {
+        let request: NSFetchRequest<CDHabit> = CDHabit.fetchRequest() as! NSFetchRequest<CDHabit>
+        request.sortDescriptors = [
+            NSSortDescriptor(keyPath: \CDHabit.sortOrder, ascending: true),
+            NSSortDescriptor(keyPath: \CDHabit.createdAt, ascending: false),
+        ]
+
+        do {
+            let cdHabits = try viewContext.fetch(request)
+            self.habits = cdHabits.map { $0.toHabit() }
+        } catch {
+            print("Error fetching habits: \(error)")
+        }
+    }
+
+    func addHabit(_ habit: Habit) {
+        let cdHabit = CDHabit(context: viewContext)
+        cdHabit.id = habit.id
+        cdHabit.name = habit.name
+        cdHabit.habitDescription = habit.description
+        cdHabit.icon = habit.icon
+        cdHabit.colorRed = habit.colorComponents.red
+        cdHabit.colorGreen = habit.colorComponents.green
+        cdHabit.colorBlue = habit.colorComponents.blue
+        cdHabit.createdAt = habit.createdAt
+        cdHabit.isArchived = false
+        cdHabit.goalFrequency = Int16(habit.goalFrequency)
+        cdHabit.goalPeriod = habit.goalPeriod.rawValue
+        cdHabit.reminderTime = habit.reminderTime
+        cdHabit.sortOrder = Int16(habits.count)
+
+        save()
+        fetchHabits()
+    }
+
+    func updateHabit(_ habit: Habit) {
+        guard let cdHabit = fetchCDHabit(by: habit.id) else { return }
+        cdHabit.update(from: habit)
+        save()
+        fetchHabits()
+    }
+
+    func deleteHabit(_ habit: Habit) {
+        guard let cdHabit = fetchCDHabit(by: habit.id) else { return }
+        viewContext.delete(cdHabit)
+        save()
+        fetchHabits()
+    }
+
+    func archiveHabit(_ habit: Habit) {
+        guard let cdHabit = fetchCDHabit(by: habit.id) else { return }
+        cdHabit.isArchived = true
+        save()
+        fetchHabits()
+    }
+
+    func unarchiveHabit(_ habit: Habit) {
+        guard let cdHabit = fetchCDHabit(by: habit.id) else { return }
+        cdHabit.isArchived = false
+        save()
+        fetchHabits()
+    }
+
+    func toggleCompletion(for habit: Habit, on date: Date) {
+        let calendar = Calendar.current
+        let targetDay = calendar.startOfDay(for: date)
+
+        guard let cdHabit = fetchCDHabit(by: habit.id) else { return }
+        let completionSet = (cdHabit.completions as? Set<CDCompletion>) ?? []
+
+        if let existing = completionSet.first(where: { calendar.startOfDay(for: $0.date ?? Date()) == targetDay }) {
+            // Remove completion
+            viewContext.delete(existing)
+        } else {
+            // Add completion
+            let completion = CDCompletion(context: viewContext)
+            completion.id = UUID()
+            completion.date = targetDay
+            completion.value = 1.0
+            completion.habit = cdHabit
+        }
+
+        save()
+        fetchHabits()
+    }
+
+    func toggleTodayCompletion(for habit: Habit) {
+        toggleCompletion(for: habit, on: Date())
+    }
+
+    func moveHabits(from source: IndexSet, to destination: Int) {
+        var reordered = activeHabits
+        reordered.move(fromOffsets: source, toOffset: destination)
+
+        for (index, habit) in reordered.enumerated() {
+            if let cdHabit = fetchCDHabit(by: habit.id) {
+                cdHabit.sortOrder = Int16(index)
+            }
+        }
+
+        save()
+        fetchHabits()
+    }
+
+    // MARK: - Private Helpers
+
+    private func fetchCDHabit(by id: UUID) -> CDHabit? {
+        let request: NSFetchRequest<CDHabit> = CDHabit.fetchRequest() as! NSFetchRequest<CDHabit>
+        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        request.fetchLimit = 1
+        return try? viewContext.fetch(request).first
+    }
+
+    private func save() {
+        guard viewContext.hasChanges else { return }
+        do {
+            try viewContext.save()
+        } catch {
+            print("Error saving context: \(error)")
+        }
+    }
+}

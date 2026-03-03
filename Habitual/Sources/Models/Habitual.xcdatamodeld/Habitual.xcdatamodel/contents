@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22225" systemVersion="23F79" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
+    <entity name="CDHabit" representedClassName="CDHabit" syncable="YES" codeGenerationType="class">
+        <attribute name="colorBlue" attributeType="Double" defaultValueString="0.5" usesScalarValueType="YES"/>
+        <attribute name="colorGreen" attributeType="Double" defaultValueString="0.5" usesScalarValueType="YES"/>
+        <attribute name="colorRed" attributeType="Double" defaultValueString="0.3" usesScalarValueType="YES"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="goalFrequency" attributeType="Integer 16" defaultValueString="1" usesScalarValueType="YES"/>
+        <attribute name="goalPeriod" attributeType="String" defaultValueString="daily"/>
+        <attribute name="habitDescription" optional="YES" attributeType="String"/>
+        <attribute name="icon" attributeType="String" defaultValueString="star.fill"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isArchived" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="name" attributeType="String" defaultValueString=""/>
+        <attribute name="reminderTime" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="sortOrder" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="completions" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CDCompletion" inverseName="habit" inverseEntity="CDCompletion"/>
+    </entity>
+    <entity name="CDCompletion" representedClassName="CDCompletion" syncable="YES" codeGenerationType="class">
+        <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="note" optional="YES" attributeType="String"/>
+        <attribute name="value" attributeType="Double" defaultValueString="1" usesScalarValueType="YES"/>
+        <relationship name="habit" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDHabit" inverseName="completions" inverseEntity="CDHabit"/>
+    </entity>
+</model>
