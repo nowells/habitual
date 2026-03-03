@@ -33,3 +33,7 @@ xcuserdata/
 # Playgrounds
 timeline.xctimeline
 playground.xcworkspace/
+
+# Test artifacts (keep __Snapshots__ reference images)
+test-output.txt
+snapshot-test-output.txt

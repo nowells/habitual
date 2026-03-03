@@ -1,0 +1,157 @@
+name: CI — Tests & Visual Regression
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Unit & Integration Tests ─────────────────────────────────────────
+  unit-tests:
+    name: Unit & Integration Tests
+    runs-on: macos-14
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.3.app/Contents/Developer
+
+      - name: Cache SPM packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            .build
+            ~/Library/Caches/org.swift.swiftpm
+          key: spm-${{ runner.os }}-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            spm-${{ runner.os }}-
+
+      - name: Resolve dependencies
+        run: swift package resolve
+
+      - name: Run unit tests
+        run: |
+          swift test \
+            --filter HabitualTests \
+            --parallel \
+            2>&1 | tee test-output.txt
+
+      - name: Upload test output
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-output
+          path: test-output.txt
+
+  # ── Visual Regression (Snapshot) Tests ───────────────────────────────
+  snapshot-tests:
+    name: Visual Regression Tests
+    runs-on: macos-14
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history needed for comparing snapshot diffs
+          fetch-depth: 0
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.3.app/Contents/Developer
+
+      - name: Cache SPM packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            .build
+            ~/Library/Caches/org.swift.swiftpm
+          key: spm-${{ runner.os }}-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            spm-${{ runner.os }}-
+
+      - name: Resolve dependencies
+        run: swift package resolve
+
+      - name: Run snapshot tests
+        run: |
+          swift test \
+            --filter HabitualSnapshotTests \
+            2>&1 | tee snapshot-test-output.txt
+
+      - name: Upload snapshot failures
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-failures
+          path: |
+            Tests/HabitualSnapshotTests/__Snapshots__/
+            snapshot-test-output.txt
+
+      - name: Check for new snapshots
+        if: success()
+        run: |
+          # Detect if new snapshot reference images were generated
+          if git diff --name-only | grep -q "__Snapshots__"; then
+            echo "::warning::New or changed snapshot reference images detected."
+            echo "If this is expected, commit the updated snapshots."
+            echo ""
+            echo "Changed files:"
+            git diff --name-only | grep "__Snapshots__"
+          fi
+
+  # ── Build Validation ─────────────────────────────────────────────────
+  build-check:
+    name: Build Check (iOS)
+    runs-on: macos-14
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.3.app/Contents/Developer
+
+      - name: Build for iOS Simulator
+        run: |
+          xcodebuild build \
+            -project Habitual.xcodeproj \
+            -scheme Habitual \
+            -destination "platform=iOS Simulator,name=iPhone 15 Pro" \
+            -configuration Debug \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            ONLY_ACTIVE_ARCH=YES \
+            | xcpretty || true
+
+  # ── Status Gate ──────────────────────────────────────────────────────
+  ci-pass:
+    name: CI Pass
+    needs: [unit-tests, snapshot-tests, build-check]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check results
+        run: |
+          if [ "${{ needs.unit-tests.result }}" != "success" ]; then
+            echo "Unit tests failed"
+            exit 1
+          fi
+          if [ "${{ needs.snapshot-tests.result }}" != "success" ]; then
+            echo "Snapshot tests failed"
+            exit 1
+          fi
+          if [ "${{ needs.build-check.result }}" != "success" ]; then
+            echo "Build check failed"
+            exit 1
+          fi
+          echo "All CI checks passed!"

@@ -1,0 +1,8 @@
+# Snapshot reference images — use Git LFS if the repo grows large
+# For now, store directly in git (typical for small-medium projects)
+*.png binary
+*.jpg binary
+*.jpeg binary
+
+# Swift Package resolved file
+Package.resolved merge=union

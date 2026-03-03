@@ -1,0 +1,143 @@
+import XCTest
+import SwiftUI
+import SnapshotTesting
+@testable import HabitualCore
+
+final class ContentViewSnapshotTests: XCTestCase {
+
+    override func setUp() {
+        super.setUp()
+        // isRecording = true
+    }
+
+    // MARK: - Empty State
+
+    func testEmptyStateView_Light() {
+        let view = SnapshotContainer(width: 390, height: 600) {
+            EmptyStateView(showingAddHabit: .constant(false))
+        }
+        .environment(\.colorScheme, .light)
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
+    func testEmptyStateView_Dark() {
+        let view = SnapshotContainer(width: 390, height: 600) {
+            EmptyStateView(showingAddHabit: .constant(false))
+        }
+        .environment(\.colorScheme, .dark)
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
+    // MARK: - Archive View (empty)
+
+    func testArchiveView_Empty() {
+        let controller = PersistenceController(inMemory: true)
+        let store = HabitStore(context: controller.container.viewContext)
+
+        let view = SnapshotContainer(width: 390, height: 400) {
+            ArchiveView(habitStore: store)
+        }
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
+    // MARK: - Form Components
+
+    func testIconPickerView() {
+        let view = SnapshotContainer(width: 390) {
+            IconPickerView(
+                selectedIcon: .constant("figure.run"),
+                color: Color(red: 0.35, green: 0.65, blue: 0.85)
+            )
+            .padding()
+        }
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
+    func testIconPickerView_DifferentSelection() {
+        let view = SnapshotContainer(width: 390) {
+            IconPickerView(
+                selectedIcon: .constant("book.fill"),
+                color: Color(red: 0.95, green: 0.55, blue: 0.20)
+            )
+            .padding()
+        }
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
+    func testColorPickerView() {
+        let view = SnapshotContainer(width: 390) {
+            ColorPickerView(
+                selectedColor: .constant(HabitColor.presets[0])
+            )
+            .padding()
+        }
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
+    func testColorPickerView_DifferentSelection() {
+        let view = SnapshotContainer(width: 390) {
+            ColorPickerView(
+                selectedColor: .constant(HabitColor.presets[4]) // Purple
+            )
+            .padding()
+        }
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
+    // MARK: - iPhone vs iPad Width
+
+    func testHabitCardView_iPhoneSE() {
+        let controller = PersistenceController(inMemory: true)
+        let store = HabitStore(context: controller.container.viewContext)
+
+        let view = SnapshotContainer(width: 320) {
+            HabitCardView(habit: TestData.exerciseHabit, habitStore: store)
+                .padding()
+        }
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
+    func testHabitCardView_iPadWidth() {
+        let controller = PersistenceController(inMemory: true)
+        let store = HabitStore(context: controller.container.viewContext)
+
+        let view = SnapshotContainer(width: 600) {
+            HabitCardView(habit: TestData.exerciseHabit, habitStore: store)
+                .padding()
+        }
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
+    // MARK: - Accessibility Sizes
+
+    func testHabitCardView_LargeText() {
+        let controller = PersistenceController(inMemory: true)
+        let store = HabitStore(context: controller.container.viewContext)
+
+        let view = SnapshotContainer(width: 390) {
+            HabitCardView(habit: TestData.exerciseHabit, habitStore: store)
+                .padding()
+        }
+        .environment(\.sizeCategory, .accessibilityLarge)
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
+    func testEmptyStateView_LargeText() {
+        let view = SnapshotContainer(width: 390, height: 700) {
+            EmptyStateView(showingAddHabit: .constant(false))
+        }
+        .environment(\.sizeCategory, .accessibilityLarge)
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+}

@@ -1,6 +1,6 @@
 // swift-tools-version: 5.9
-// This Package.swift provides structure reference for the project.
-// The actual build is managed through the Xcode project (Habitual.xcodeproj).
+// The Xcode project (Habitual.xcodeproj) is the primary build system.
+// This Package.swift enables SPM-based testing with `swift test`.
 
 import PackageDescription
 
@@ -17,6 +17,9 @@ let package = Package(
             targets: ["HabitualCore"]
         ),
     ],
+    dependencies: [
+        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.15.0"),
+    ],
     targets: [
         .target(
             name: "HabitualCore",
@@ -25,6 +28,19 @@ let package = Package(
             resources: [
                 .process("Models/Habitual.xcdatamodeld"),
             ]
+        ),
+        .testTarget(
+            name: "HabitualTests",
+            dependencies: ["HabitualCore"],
+            path: "Tests/HabitualTests"
+        ),
+        .testTarget(
+            name: "HabitualSnapshotTests",
+            dependencies: [
+                "HabitualCore",
+                .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
+            ],
+            path: "Tests/HabitualSnapshotTests"
         ),
     ]
 )
