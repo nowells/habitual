@@ -1,5 +1,7 @@
-# Snapshot reference images — use Git LFS if the repo grows large
-# For now, store directly in git (typical for small-medium projects)
+# Snapshot reference images — stored in Git LFS
+Tests/HabitualSnapshotTests/__Snapshots__/**/*.png filter=lfs diff=lfs merge=lfs -text
+
+# Other images — binary attribute for correct diffing
 *.png binary
 *.jpg binary
 *.jpeg binary

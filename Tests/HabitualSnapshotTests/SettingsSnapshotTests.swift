@@ -3,12 +3,7 @@ import SwiftUI
 import SnapshotTesting
 @testable import HabitualCore
 
-final class SettingsSnapshotTests: XCTestCase {
-
-    override func setUp() {
-        super.setUp()
-        // isRecording = true
-    }
+final class SettingsSnapshotTests: SnapshotTestCase {
 
     // MARK: - Settings View
 

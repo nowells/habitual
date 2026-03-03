@@ -3,14 +3,7 @@ import SwiftUI
 import SnapshotTesting
 @testable import HabitualCore
 
-final class HeatmapSnapshotTests: XCTestCase {
-
-    override func setUp() {
-        super.setUp()
-        // On first run, set `isRecording = true` to generate reference images.
-        // After reference images are generated, set back to false.
-        // isRecording = true
-    }
+final class HeatmapSnapshotTests: SnapshotTestCase {
 
     // MARK: - HeatmapGridView
 

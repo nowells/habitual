@@ -1,6 +1,23 @@
+import SnapshotTesting
 import SwiftUI
 import XCTest
 @testable import HabitualCore
+
+/// Base class for snapshot tests that respects the SNAPSHOT_RECORD environment variable.
+/// When SNAPSHOT_RECORD=true, tests record new reference images instead of comparing.
+class SnapshotTestCase: XCTestCase {
+    override func setUp() {
+        super.setUp()
+        if ProcessInfo.processInfo.environment["SNAPSHOT_RECORD"] == "true" {
+            isRecording = true
+        }
+    }
+
+    override func tearDown() {
+        isRecording = false
+        super.tearDown()
+    }
+}
 
 /// Deterministic test data factory for snapshot tests.
 /// Uses fixed dates and UUIDs to ensure pixel-perfect reproducibility.

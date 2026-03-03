@@ -39,6 +39,7 @@ jobs:
 
       - name: Run unit tests
         run: |
+          set -o pipefail
           swift test \
             --filter HabitualTests \
             --parallel \
@@ -56,6 +57,8 @@ jobs:
     name: Visual Regression Tests
     runs-on: macos-14
     timeout-minutes: 25
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
@@ -63,6 +66,16 @@ jobs:
         with:
           # Full history needed for comparing snapshot diffs
           fetch-depth: 0
+          # On PRs, check out the head branch so we can push back to it
+          ref: ${{ github.head_ref || github.ref }}
+
+      - name: Install Git LFS
+        run: |
+          brew install git-lfs
+          git lfs install
+
+      - name: Pull LFS objects
+        run: git lfs pull
 
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_15.3.app/Contents/Developer
@@ -80,11 +93,53 @@ jobs:
       - name: Resolve dependencies
         run: swift package resolve
 
-      - name: Run snapshot tests
+      - name: Run snapshot tests (comparison mode)
+        id: compare
+        continue-on-error: ${{ github.event_name == 'pull_request' }}
         run: |
+          set -o pipefail
           swift test \
             --filter HabitualSnapshotTests \
             2>&1 | tee snapshot-test-output.txt
+
+      # ── PR-only: re-record and commit updated golden images ──────────
+      - name: Re-record snapshots
+        if: github.event_name == 'pull_request' && steps.compare.outcome == 'failure'
+        env:
+          SNAPSHOT_RECORD: "true"
+        run: |
+          echo "::notice::Snapshot comparison failed — re-recording golden images…"
+          swift test \
+            --filter HabitualSnapshotTests \
+            2>&1 | tee snapshot-record-output.txt || true
+
+      - name: Commit updated snapshots
+        if: github.event_name == 'pull_request' && steps.compare.outcome == 'failure'
+        run: |
+          # Track any new/changed snapshot images
+          git add Tests/HabitualSnapshotTests/__Snapshots__/
+
+          if git diff --cached --quiet; then
+            echo "::warning::Snapshot tests failed but no image files changed."
+            echo "This likely indicates a test infrastructure issue, not a visual diff."
+            exit 1
+          fi
+
+          echo "Changed snapshot files:"
+          git diff --cached --name-only
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git commit -m "chore: update VRT golden images [ci]
+
+          Automatically recorded by CI after snapshot comparison failed.
+          Review the image diffs in this PR to verify the visual changes."
+
+          git push
+
+          echo "::notice::Updated golden images have been committed to this PR."
+          echo "A new CI run will start automatically to verify the updated snapshots."
 
       - name: Upload snapshot failures
         if: failure()
@@ -94,18 +149,7 @@ jobs:
           path: |
             Tests/HabitualSnapshotTests/__Snapshots__/
             snapshot-test-output.txt
-
-      - name: Check for new snapshots
-        if: success()
-        run: |
-          # Detect if new snapshot reference images were generated
-          if git diff --name-only | grep -q "__Snapshots__"; then
-            echo "::warning::New or changed snapshot reference images detected."
-            echo "If this is expected, commit the updated snapshots."
-            echo ""
-            echo "Changed files:"
-            git diff --name-only | grep "__Snapshots__"
-          fi
+            snapshot-record-output.txt
 
   # ── Build Validation ─────────────────────────────────────────────────
   build-check:
@@ -122,6 +166,7 @@ jobs:
 
       - name: Build for iOS Simulator
         run: |
+          set -o pipefail
           xcodebuild build \
             -project Habitual.xcodeproj \
             -scheme Habitual \
@@ -131,7 +176,7 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
             ONLY_ACTIVE_ARCH=YES \
-            | xcpretty || true
+            | xcpretty
 
   # ── Status Gate ──────────────────────────────────────────────────────
   ci-pass:

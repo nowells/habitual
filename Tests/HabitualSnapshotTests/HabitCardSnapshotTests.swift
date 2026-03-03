@@ -3,12 +3,7 @@ import SwiftUI
 import SnapshotTesting
 @testable import HabitualCore
 
-final class HabitCardSnapshotTests: XCTestCase {
-
-    override func setUp() {
-        super.setUp()
-        // isRecording = true
-    }
+final class HabitCardSnapshotTests: SnapshotTestCase {
 
     // MARK: - StatBadge
 
