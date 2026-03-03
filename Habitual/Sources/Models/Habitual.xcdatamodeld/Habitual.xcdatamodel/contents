@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22225" systemVersion="23F79" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="YES" userDefinedModelVersionIdentifier="">
-    <entity name="CDHabit" representedClassName="CDHabit" syncable="YES">
+    <entity name="CDHabit" representedClassName="CDHabit" syncable="YES" codeGenerationType="class">
         <attribute name="colorBlue" attributeType="Double" defaultValueString="0.5" usesScalarValueType="YES"/>
         <attribute name="colorGreen" attributeType="Double" defaultValueString="0.5" usesScalarValueType="YES"/>
         <attribute name="colorRed" attributeType="Double" defaultValueString="0.3" usesScalarValueType="YES"/>
@@ -16,7 +16,7 @@
         <attribute name="sortOrder" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <relationship name="completions" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CDCompletion" inverseName="habit" inverseEntity="CDCompletion"/>
     </entity>
-    <entity name="CDCompletion" representedClassName="CDCompletion" syncable="YES">
+    <entity name="CDCompletion" representedClassName="CDCompletion" syncable="YES" codeGenerationType="class">
         <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="note" optional="YES" attributeType="String"/>

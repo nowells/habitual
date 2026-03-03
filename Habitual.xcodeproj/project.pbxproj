@@ -23,10 +23,6 @@
 		A10014 /* WidgetUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10014; };
 		A10015 /* Habitual.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B10015; };
 		A10016 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B10016; };
-		A10018 /* CDHabit+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10019; };
-		A10019 /* CDHabit+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10020; };
-		A10020 /* CDCompletion+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10021; };
-		A10021 /* CDCompletion+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10022; };
 		A10017 /* Habitual.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = B10017; };
 		A20001 /* HabitualWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20001; };
 		A20002 /* WatchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20002; };
@@ -423,10 +419,6 @@
 				A10013 /* Color+Extensions.swift in Sources */,
 				A10014 /* WidgetUpdateService.swift in Sources */,
 				A10015 /* Habitual.xcdatamodeld in Sources */,
-				A10018 /* CDHabit+CoreDataClass.swift in Sources */,
-				A10019 /* CDHabit+CoreDataProperties.swift in Sources */,
-				A10020 /* CDCompletion+CoreDataClass.swift in Sources */,
-				A10021 /* CDCompletion+CoreDataProperties.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
