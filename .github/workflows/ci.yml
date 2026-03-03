@@ -22,7 +22,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_15.3.app/Contents/Developer
+        run: |
+          if [ -d "/Applications/Xcode_15.3.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_15.3.app/Contents/Developer
+          else
+            XCODE_PATH=$(ls -d /Applications/Xcode_15.*.app 2>/dev/null | sort -V | tail -1)
+            if [ -z "$XCODE_PATH" ]; then
+              XCODE_PATH=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
+            fi
+            sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
+          fi
+          xcodebuild -version
 
       - name: Cache SPM packages
         uses: actions/cache@v4
@@ -78,7 +88,17 @@ jobs:
         run: git lfs pull
 
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_15.3.app/Contents/Developer
+        run: |
+          if [ -d "/Applications/Xcode_15.3.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_15.3.app/Contents/Developer
+          else
+            XCODE_PATH=$(ls -d /Applications/Xcode_15.*.app 2>/dev/null | sort -V | tail -1)
+            if [ -z "$XCODE_PATH" ]; then
+              XCODE_PATH=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
+            fi
+            sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
+          fi
+          xcodebuild -version
 
       - name: Cache SPM packages
         uses: actions/cache@v4
@@ -116,8 +136,11 @@ jobs:
       - name: Commit updated snapshots
         if: github.event_name == 'pull_request' && steps.compare.outcome == 'failure'
         run: |
-          # Track any new/changed snapshot images
-          git add Tests/HabitualSnapshotTests/__Snapshots__/
+          # Track any new/changed snapshot images (directory may not exist yet)
+          if [ -d "Tests/HabitualSnapshotTests/__Snapshots__" ]; then
+            find Tests/HabitualSnapshotTests/__Snapshots__ -name "*.png" | head -1 | grep -q . && \
+              git add Tests/HabitualSnapshotTests/__Snapshots__/
+          fi
 
           if git diff --cached --quiet; then
             echo "::warning::Snapshot tests failed but no image files changed."
@@ -162,7 +185,22 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_15.3.app/Contents/Developer
+        run: |
+          # Use Xcode 15.3 if available, otherwise fall back to latest 15.x
+          if [ -d "/Applications/Xcode_15.3.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_15.3.app/Contents/Developer
+          else
+            XCODE_PATH=$(ls -d /Applications/Xcode_15.*.app 2>/dev/null | sort -V | tail -1)
+            if [ -z "$XCODE_PATH" ]; then
+              XCODE_PATH=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
+            fi
+            echo "Xcode 15.3 not found, using: $XCODE_PATH"
+            sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
+          fi
+          xcodebuild -version
+
+      - name: Install xcpretty
+        run: gem install xcpretty
 
       - name: Build for iOS Simulator
         run: |
