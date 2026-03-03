@@ -1,0 +1,94 @@
+import SwiftUI
+
+struct SettingsView: View {
+    @Environment(\.dismiss) private var dismiss
+    @AppStorage("appTheme") private var appTheme: String = "system"
+    @AppStorage("heatmapMonths") private var heatmapMonths: Int = 4
+    @AppStorage("showCompletionAnimations") private var showCompletionAnimations: Bool = true
+    @AppStorage("startOfWeek") private var startOfWeek: Int = 1 // 1 = Sunday (Calendar default)
+
+    var body: some View {
+        Form {
+            // Appearance
+            Section("Appearance") {
+                Picker("Theme", selection: $appTheme) {
+                    Text("System").tag("system")
+                    Text("Light").tag("light")
+                    Text("Dark").tag("dark")
+                }
+
+                Picker("Heatmap Range", selection: $heatmapMonths) {
+                    Text("3 Months").tag(3)
+                    Text("4 Months").tag(4)
+                    Text("6 Months").tag(6)
+                    Text("12 Months").tag(12)
+                }
+            }
+
+            // Behavior
+            Section("Behavior") {
+                Toggle("Completion Animations", isOn: $showCompletionAnimations)
+
+                Picker("Week Starts On", selection: $startOfWeek) {
+                    Text("Sunday").tag(1)
+                    Text("Monday").tag(2)
+                    Text("Saturday").tag(7)
+                }
+            }
+
+            // Notifications
+            Section("Notifications") {
+                Button("Request Notification Permission") {
+                    NotificationService.shared.requestPermission()
+                }
+            }
+
+            // Data
+            Section("Data & Sync") {
+                HStack {
+                    Image(systemName: "icloud")
+                        .foregroundStyle(.blue)
+                    VStack(alignment: .leading) {
+                        Text("iCloud Sync")
+                            .font(.body)
+                        Text("Your habits sync automatically across all devices via iCloud.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
+            // About
+            Section("About") {
+                HStack {
+                    Text("Version")
+                    Spacer()
+                    Text("1.0.0")
+                        .foregroundStyle(.secondary)
+                }
+
+                HStack {
+                    Text("Built with")
+                    Spacer()
+                    Text("SwiftUI + CloudKit")
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .navigationTitle("Settings")
+        #if os(iOS)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Done") { dismiss() }
+            }
+        }
+        #endif
+    }
+}
+
+#Preview {
+    NavigationStack {
+        SettingsView()
+    }
+}

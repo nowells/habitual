@@ -1,0 +1,755 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10001 /* HabitualApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10001; };
+		A10002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10002; };
+		A10003 /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10003; };
+		A10004 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10004; };
+		A10005 /* HabitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10005; };
+		A10006 /* HeatmapGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10006; };
+		A10007 /* HabitCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10007; };
+		A10008 /* AddHabitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10008; };
+		A10009 /* EditHabitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10009; };
+		A10010 /* HabitDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10010; };
+		A10011 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10011; };
+		A10012 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10012; };
+		A10013 /* Color+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10013; };
+		A10014 /* WidgetUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10014; };
+		A10015 /* Habitual.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B10015; };
+		A10016 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B10016; };
+		A10017 /* Habitual.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = B10017; };
+		A20001 /* HabitualWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20001; };
+		A20002 /* WatchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20002; };
+		A20003 /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10003; };
+		A20004 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10004; };
+		A20005 /* HabitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10005; };
+		A30001 /* HabitualWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30001; };
+		A30002 /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10003; };
+		A30003 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10004; };
+		A30004 /* HabitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10005; };
+		A40001 /* HabitualComplications.swift in Sources */ = {isa = PBXBuildFile; fileRef = B40001; };
+		A40002 /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10003; };
+		A40003 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10004; };
+		A40004 /* HabitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10005; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B10001 /* HabitualApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitualApp.swift; sourceTree = "<group>"; };
+		B10002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B10003 /* Habit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Habit.swift; sourceTree = "<group>"; };
+		B10004 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		B10005 /* HabitStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitStore.swift; sourceTree = "<group>"; };
+		B10006 /* HeatmapGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeatmapGridView.swift; sourceTree = "<group>"; };
+		B10007 /* HabitCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitCardView.swift; sourceTree = "<group>"; };
+		B10008 /* AddHabitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddHabitView.swift; sourceTree = "<group>"; };
+		B10009 /* EditHabitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditHabitView.swift; sourceTree = "<group>"; };
+		B10010 /* HabitDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitDetailView.swift; sourceTree = "<group>"; };
+		B10011 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		B10012 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		B10013 /* Color+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extensions.swift"; sourceTree = "<group>"; };
+		B10014 /* WidgetUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetUpdateService.swift; sourceTree = "<group>"; };
+		B10015 /* Habitual.xcdatamodeld */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodeld; path = Habitual.xcdatamodeld; sourceTree = "<group>"; };
+		B10016 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B10017 /* Habitual.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Habitual.entitlements; sourceTree = "<group>"; };
+		B10018 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B20001 /* HabitualWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitualWatchApp.swift; sourceTree = "<group>"; };
+		B20002 /* WatchContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContentView.swift; sourceTree = "<group>"; };
+		B30001 /* HabitualWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitualWidgets.swift; sourceTree = "<group>"; };
+		B30002 /* HabitualWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HabitualWidgets.entitlements; sourceTree = "<group>"; };
+		B40001 /* HabitualComplications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitualComplications.swift; sourceTree = "<group>"; };
+		C10001 /* Habitual.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Habitual.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C20001 /* HabitualWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Habitual Watch.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C30001 /* HabitualWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HabitualWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C40001 /* HabitualComplicationsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HabitualComplicationsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		D00001 = {
+			isa = PBXGroup;
+			children = (
+				D10001 /* Habitual */,
+				D20001 /* HabitualWatch */,
+				D30001 /* HabitualWidgets */,
+				D40001 /* HabitualComplications */,
+				D90001 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D10001 /* Habitual */ = {
+			isa = PBXGroup;
+			children = (
+				D11001 /* Sources */,
+				D12001 /* Resources */,
+			);
+			path = Habitual;
+			sourceTree = "<group>";
+		};
+		D11001 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				B10001 /* HabitualApp.swift */,
+				D11002 /* Models */,
+				D11003 /* Views */,
+				D11004 /* ViewModels */,
+				D11005 /* Services */,
+				D11006 /* Extensions */,
+				D11007 /* Utilities */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		D11002 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B10003 /* Habit.swift */,
+				B10004 /* Persistence.swift */,
+				B10015 /* Habitual.xcdatamodeld */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		D11003 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B10002 /* ContentView.swift */,
+				D11008 /* Components */,
+				D11009 /* Habits */,
+				D11010 /* Settings */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		D11004 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				B10005 /* HabitStore.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		D11005 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				B10012 /* NotificationService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		D11006 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				B10013 /* Color+Extensions.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		D11007 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				B10014 /* WidgetUpdateService.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		D11008 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				B10006 /* HeatmapGridView.swift */,
+				B10007 /* HabitCardView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		D11009 /* Habits */ = {
+			isa = PBXGroup;
+			children = (
+				B10008 /* AddHabitView.swift */,
+				B10009 /* EditHabitView.swift */,
+				B10010 /* HabitDetailView.swift */,
+			);
+			path = Habits;
+			sourceTree = "<group>";
+		};
+		D11010 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				B10011 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		D12001 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B10016 /* Assets.xcassets */,
+				B10017 /* Habitual.entitlements */,
+				B10018 /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		D20001 /* HabitualWatch */ = {
+			isa = PBXGroup;
+			children = (
+				D21001 /* Sources */,
+			);
+			path = HabitualWatch;
+			sourceTree = "<group>";
+		};
+		D21001 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				B20001 /* HabitualWatchApp.swift */,
+				D21002 /* Views */,
+				D21003 /* Complications */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		D21002 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B20002 /* WatchContentView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		D21003 /* Complications */ = {
+			isa = PBXGroup;
+			children = (
+				B40001 /* HabitualComplications.swift */,
+			);
+			path = Complications;
+			sourceTree = "<group>";
+		};
+		D30001 /* HabitualWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				D31001 /* Sources */,
+				D32001 /* Resources */,
+			);
+			path = HabitualWidgets;
+			sourceTree = "<group>";
+		};
+		D31001 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				B30001 /* HabitualWidgets.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		D32001 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B30002 /* HabitualWidgets.entitlements */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		D40001 /* HabitualComplications */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = HabitualComplications;
+			sourceTree = "<group>";
+		};
+		D90001 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C10001 /* Habitual.app */,
+				C20001 /* HabitualWatch.app */,
+				C30001 /* HabitualWidgetsExtension.appex */,
+				C40001 /* HabitualComplicationsExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		T10001 /* Habitual */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E10001;
+			buildPhases = (
+				F10001 /* Sources */,
+				F10002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Habitual;
+			productName = Habitual;
+			productReference = C10001;
+			productType = "com.apple.product-type.application";
+		};
+		T20001 /* HabitualWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E20001;
+			buildPhases = (
+				F20001 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Habitual Watch";
+			productName = "Habitual Watch";
+			productReference = C20001;
+			productType = "com.apple.product-type.application";
+		};
+		T30001 /* HabitualWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E30001;
+			buildPhases = (
+				F30001 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HabitualWidgets;
+			productName = HabitualWidgets;
+			productReference = C30001;
+			productType = "com.apple.product-type.app-extension";
+		};
+		T40001 /* HabitualComplications */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E40001;
+			buildPhases = (
+				F40001 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HabitualComplications;
+			productName = HabitualComplications;
+			productReference = C40001;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		P00001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1530;
+				LastUpgradeCheck = 1530;
+				TargetAttributes = {
+					T10001 = {
+						CreatedOnToolsVersion = 15.3;
+					};
+					T20001 = {
+						CreatedOnToolsVersion = 15.3;
+					};
+					T30001 = {
+						CreatedOnToolsVersion = 15.3;
+					};
+					T40001 = {
+						CreatedOnToolsVersion = 15.3;
+					};
+				};
+			};
+			buildConfigurationList = E00001;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D00001;
+			productRefGroup = D90001 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				T10001 /* Habitual */,
+				T20001 /* HabitualWatch */,
+				T30001 /* HabitualWidgets */,
+				T40001 /* HabitualComplications */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F10002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10016 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F10001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10001 /* HabitualApp.swift in Sources */,
+				A10002 /* ContentView.swift in Sources */,
+				A10003 /* Habit.swift in Sources */,
+				A10004 /* Persistence.swift in Sources */,
+				A10005 /* HabitStore.swift in Sources */,
+				A10006 /* HeatmapGridView.swift in Sources */,
+				A10007 /* HabitCardView.swift in Sources */,
+				A10008 /* AddHabitView.swift in Sources */,
+				A10009 /* EditHabitView.swift in Sources */,
+				A10010 /* HabitDetailView.swift in Sources */,
+				A10011 /* SettingsView.swift in Sources */,
+				A10012 /* NotificationService.swift in Sources */,
+				A10013 /* Color+Extensions.swift in Sources */,
+				A10014 /* WidgetUpdateService.swift in Sources */,
+				A10015 /* Habitual.xcdatamodeld in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F20001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A20001 /* HabitualWatchApp.swift in Sources */,
+				A20002 /* WatchContentView.swift in Sources */,
+				A20003 /* Habit.swift in Sources */,
+				A20004 /* Persistence.swift in Sources */,
+				A20005 /* HabitStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F30001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A30001 /* HabitualWidgets.swift in Sources */,
+				A30002 /* Habit.swift in Sources */,
+				A30003 /* Persistence.swift in Sources */,
+				A30004 /* HabitStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F40001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A40001 /* HabitualComplications.swift in Sources */,
+				A40002 /* Habit.swift in Sources */,
+				A40003 /* Persistence.swift in Sources */,
+				A40004 /* HabitStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		G00001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		G00002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		G10001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Habitual/Resources/Habitual.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Habitual/Resources/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Habitual;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.habitual.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		G10002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Habitual/Resources/Habitual.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Habitual/Resources/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Habitual;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.habitual.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		G20001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Habitual;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.habitual.app;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.habitual.app.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		G20002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Habitual;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.habitual.app;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.habitual.app.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		G30001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = HabitualWidgets/Resources/HabitualWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Habitual Widgets";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.habitual.app.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		G30002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = HabitualWidgets/Resources/HabitualWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Habitual Widgets";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.habitual.app.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		G40001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Habitual Complications";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.habitual.app.watchkitapp.complications;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		G40002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Habitual Complications";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.habitual.app.watchkitapp.complications;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E00001 /* Build configuration list for PBXProject */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				G00001 /* Debug */,
+				G00002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E10001 /* Build configuration list for Habitual */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				G10001 /* Debug */,
+				G10002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E20001 /* Build configuration list for HabitualWatch */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				G20001 /* Debug */,
+				G20002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E30001 /* Build configuration list for HabitualWidgets */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				G30001 /* Debug */,
+				G30002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E40001 /* Build configuration list for HabitualComplications */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				G40001 /* Debug */,
+				G40002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = P00001 /* Project object */;
+}
