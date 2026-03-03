@@ -155,7 +155,7 @@ struct HeatmapCell: View {
         if day.isCompleted {
             return color.opacity(min(1.0, 0.4 + day.value * 0.6))
         }
-        return Color(.systemGray5)
+        return Color.systemGray5
     }
 }
 
@@ -196,7 +196,7 @@ struct CompactHeatmapView: View {
         if day.isCompleted {
             return habit.color.opacity(min(1.0, 0.4 + day.value * 0.6))
         }
-        return Color(.systemGray5)
+        return Color.systemGray5
     }
 }
 

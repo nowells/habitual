@@ -38,7 +38,7 @@ struct HabitCardView: View {
                 }) {
                     Image(systemName: habit.isCompletedOn(date: Date()) ? "checkmark.circle.fill" : "circle")
                         .font(.title2)
-                        .foregroundStyle(habit.isCompletedOn(date: Date()) ? habit.color : Color(.systemGray3))
+                        .foregroundStyle(habit.isCompletedOn(date: Date()) ? habit.color : Color.systemGray3)
                 }
                 .buttonStyle(.plain)
             }
@@ -78,19 +78,19 @@ struct HabitCardView: View {
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
-                    .background(Color(.systemGray6))
+                    .background(Color.systemGray6)
                     .clipShape(Capsule())
             }
         }
         .padding()
         .background {
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemBackground))
+                .fill(Color.systemBackground)
                 .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 2)
         }
         .overlay {
             RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(Color(.systemGray5), lineWidth: 0.5)
+                .strokeBorder(Color.systemGray5, lineWidth: 0.5)
         }
         .contextMenu {
             Button(action: { habitStore.toggleTodayCompletion(for: habit) }) {
