@@ -17,7 +17,7 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
         )
         .frame(width: 170)
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color.systemBackground)
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
@@ -32,7 +32,7 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
         )
         .frame(width: 170)
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color.systemBackground)
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
@@ -47,7 +47,7 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
         )
         .frame(width: 170)
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color.systemBackground)
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
@@ -62,7 +62,7 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
         )
         .frame(width: 170)
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color.systemBackground)
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
@@ -117,7 +117,7 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
             onTap: {}
         )
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color.systemBackground)
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
@@ -132,7 +132,7 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
             onTap: {}
         )
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color.systemBackground)
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
@@ -148,7 +148,7 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
             onTap: {}
         )
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color.systemBackground)
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
@@ -164,7 +164,7 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
             onTap: {}
         )
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color.systemBackground)
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }

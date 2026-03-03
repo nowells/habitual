@@ -10,7 +10,7 @@ final class HabitCardSnapshotTests: SnapshotTestCase {
     func testStatBadge_Streak() {
         let view = StatBadge(label: "Streak", value: "7", icon: "flame.fill", color: .orange)
             .padding()
-            .background(Color(.systemBackground))
+            .background(Color.systemBackground)
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
@@ -18,7 +18,7 @@ final class HabitCardSnapshotTests: SnapshotTestCase {
     func testStatBadge_Total() {
         let view = StatBadge(label: "Total", value: "42", icon: "checkmark", color: .blue)
             .padding()
-            .background(Color(.systemBackground))
+            .background(Color.systemBackground)
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
@@ -26,7 +26,7 @@ final class HabitCardSnapshotTests: SnapshotTestCase {
     func testStatBadge_Rate() {
         let view = StatBadge(label: "Rate", value: "85%", icon: "chart.line.uptrend.xyaxis", color: .green)
             .padding()
-            .background(Color(.systemBackground))
+            .background(Color.systemBackground)
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }

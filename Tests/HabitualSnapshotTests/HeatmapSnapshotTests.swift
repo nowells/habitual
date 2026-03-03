@@ -145,7 +145,7 @@ final class HeatmapSnapshotTests: SnapshotTestCase {
         let day = DayData(date: Date(), value: 1.0, isFuture: false)
         let view = HeatmapCell(day: day, color: .blue, size: 24)
             .padding(8)
-            .background(Color(.systemBackground))
+            .background(Color.systemBackground)
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
@@ -154,7 +154,7 @@ final class HeatmapSnapshotTests: SnapshotTestCase {
         let day = DayData(date: Date(), value: 0.0, isFuture: false)
         let view = HeatmapCell(day: day, color: .blue, size: 24)
             .padding(8)
-            .background(Color(.systemBackground))
+            .background(Color.systemBackground)
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
@@ -164,7 +164,7 @@ final class HeatmapSnapshotTests: SnapshotTestCase {
         let day = DayData(date: futureDate, value: 0.0, isFuture: true)
         let view = HeatmapCell(day: day, color: .blue, size: 24)
             .padding(8)
-            .background(Color(.systemBackground))
+            .background(Color.systemBackground)
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
@@ -173,7 +173,7 @@ final class HeatmapSnapshotTests: SnapshotTestCase {
         let day = DayData(date: Date(), value: 0.5, isFuture: false)
         let view = HeatmapCell(day: day, color: .green, size: 24)
             .padding(8)
-            .background(Color(.systemBackground))
+            .background(Color.systemBackground)
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }

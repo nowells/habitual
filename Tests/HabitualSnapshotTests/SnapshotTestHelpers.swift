@@ -169,6 +169,6 @@ struct SnapshotContainer<Content: View>: View {
         content
             .frame(width: width)
             .frame(height: height)
-            .background(Color(.systemBackground))
+            .background(Color.systemBackground)
     }
 }
