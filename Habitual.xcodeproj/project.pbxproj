@@ -54,7 +54,7 @@
 		B10012 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		B10013 /* Color+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extensions.swift"; sourceTree = "<group>"; };
 		B10014 /* WidgetUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetUpdateService.swift; sourceTree = "<group>"; };
-		B10015 /* Habitual.xcdatamodeld */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodeld; path = Habitual.xcdatamodeld; sourceTree = "<group>"; };
+		B10015V /* Habitual.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Habitual.xcdatamodel; sourceTree = "<group>"; };
 		B10019 /* CDHabit+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CDHabit+CoreDataClass.swift"; sourceTree = "<group>"; };
 		B10020 /* CDHabit+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CDHabit+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		B10021 /* CDCompletion+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CDCompletion+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -758,6 +758,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		B10015 /* Habitual.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				B10015V /* Habitual.xcdatamodel */,
+			);
+			currentVersion = B10015V /* Habitual.xcdatamodel */;
+			path = Habitual.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = P00001 /* Project object */;
 }
