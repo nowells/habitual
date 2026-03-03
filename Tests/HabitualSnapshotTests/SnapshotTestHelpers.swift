@@ -36,6 +36,7 @@ extension Snapshotting where Value: SwiftUI.View, Format == NSImage {
 
 /// Base class for snapshot tests that respects the SNAPSHOT_RECORD environment variable.
 /// When SNAPSHOT_RECORD=true, tests record new reference images instead of comparing.
+@MainActor
 class SnapshotTestCase: XCTestCase {
     override func setUp() {
         super.setUp()
