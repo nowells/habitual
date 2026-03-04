@@ -1,3 +1,8 @@
+---
+name: swift-concurrency
+description: Guidelines for Swift 6 concurrency and @MainActor isolation in tests and previews. Use when encountering actor isolation errors or concurrency warnings.
+---
+
 # Skill: Swift 6 Concurrency & Actor Isolation
 
 ## Context

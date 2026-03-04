@@ -1,3 +1,8 @@
+---
+name: ci-workflow
+description: Guidelines for the CI pipeline including unit tests, snapshot tests, build validation, and auto-recording flow. Use when modifying CI workflows or debugging CI failures.
+---
+
 # Skill: CI Pipeline — Tests & Visual Regression
 
 ## Pipeline Structure

@@ -1,3 +1,8 @@
+---
+name: snapshot-testing
+description: Guidelines for writing SwiftUI snapshot tests with deterministic data, SnapshotContainer, and cross-platform compatibility. Use when creating or modifying snapshot tests.
+---
+
 # Skill: SwiftUI Snapshot Testing (VRT)
 
 ## Setup

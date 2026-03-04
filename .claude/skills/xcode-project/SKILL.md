@@ -1,3 +1,8 @@
+---
+name: xcode-project
+description: Guidelines for Xcode project structure with multi-target CoreData apps. Use when modifying the Xcode project, adding targets, or fixing build errors related to CoreData code generation.
+---
+
 # Skill: Xcode Project Structure for Multi-Target Apps
 
 ## Architecture

@@ -1,3 +1,8 @@
+---
+name: coredata-spm
+description: Guidelines for CoreData model loading with SPM and CloudKit compatibility. Use when working with CoreData models, Persistence.swift, or fixing model loading issues.
+---
+
 # Skill: CoreData with SPM and CloudKit
 
 ## Problem
