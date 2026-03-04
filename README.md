@@ -2,6 +2,57 @@
 
 A beautiful habit tracking app inspired by [HabitKit](https://www.habitkit.app/) with GitHub-style heatmap grids. Built natively with SwiftUI for iOS, macOS, and Apple Watch with iCloud sync across all devices.
 
+## Screenshots
+
+> Golden images are auto-recorded by CI via [snapshot tests](Tests/HabitualSnapshotTests/ShowcaseSnapshotTests.swift).
+> See the full gallery in [`__Snapshots__/ShowcaseSnapshotTests/`](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/).
+
+### Dashboard
+
+| Light | Dark |
+|:---:|:---:|
+| ![Dashboard Light](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_Dashboard_Light.1.png) | ![Dashboard Dark](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_Dashboard_Dark.1.png) |
+
+### Habit Detail
+
+| Active Streak | Perfect Streak | New Habit |
+|:---:|:---:|:---:|
+| ![Active Streak](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_HabitDetail_ActiveStreak_Light.1.png) | ![Perfect Streak](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_HabitDetail_PerfectStreak.1.png) | ![Fresh Habit](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_HabitDetail_FreshHabit.1.png) |
+
+| Dark Mode Detail |
+|:---:|
+| ![Detail Dark](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_HabitDetail_ActiveStreak_Dark.1.png) |
+
+### Heatmaps
+
+| 6-Month Heatmap | Multi-Color Comparison |
+|:---:|:---:|
+| ![Heatmap 6 Months](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_Heatmap_6Months.1.png) | ![Multi-Color Heatmaps](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_Heatmap_MultiColor.1.png) |
+
+### Statistics & Calendar
+
+| Statistics Grid | Calendar View |
+|:---:|:---:|
+| ![Stats](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_StatisticsGrid.1.png) | ![Calendar](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_CalendarView.1.png) |
+
+### Create Habit
+
+| Icon Picker | Color Picker | Preview Card |
+|:---:|:---:|:---:|
+| ![Icons](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_IconPicker.1.png) | ![Colors](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_ColorPicker.1.png) | ![Preview](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_HabitPreviewCard.1.png) |
+
+### Settings & States
+
+| Settings Light | Settings Dark | Habit Card States |
+|:---:|:---:|:---:|
+| ![Settings Light](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_Settings_Light.1.png) | ![Settings Dark](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_Settings_Dark.1.png) | ![Card States](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_HabitCardStates.1.png) |
+
+### Empty State
+
+| First Launch |
+|:---:|
+| ![Empty State](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_EmptyState.1.png) |
+
 ## Features
 
 ### Core Habit Tracking
