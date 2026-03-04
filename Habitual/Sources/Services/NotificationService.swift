@@ -5,6 +5,13 @@ class NotificationService {
     static let shared = NotificationService()
     private init() {}
 
+    /// UNUserNotificationCenter.current() crashes when there is no app bundle
+    /// (e.g. SPM unit-test runner). Guard every call with this check.
+    private var notificationCenter: UNUserNotificationCenter? {
+        guard Bundle.main.bundleIdentifier != nil else { return nil }
+        return UNUserNotificationCenter.current()
+    }
+
     // MARK: - Identifiers
 
     enum Category {
@@ -27,7 +34,8 @@ class NotificationService {
     // MARK: - Permission
 
     func requestPermission(completion: ((Bool) -> Void)? = nil) {
-        UNUserNotificationCenter.current().requestAuthorization(
+        guard let center = notificationCenter else { completion?(false); return }
+        center.requestAuthorization(
             options: [.alert, .badge, .sound]
         ) { granted, error in
             if let error { print("Notification permission error: \(error)") }
@@ -92,7 +100,7 @@ class NotificationService {
             options: []
         )
 
-        UNUserNotificationCenter.current().setNotificationCategories([
+        notificationCenter?.setNotificationCategories([
             reminderCategory, nudgeCategory, streakCategory,
         ])
     }
@@ -122,7 +130,7 @@ class NotificationService {
             content: content,
             trigger: trigger
         )
-        UNUserNotificationCenter.current().add(request) { error in
+        notificationCenter?.add(request) { error in
             if let error { print("Error scheduling reminder: \(error)") }
         }
     }
@@ -180,7 +188,7 @@ class NotificationService {
                 content: content,
                 trigger: trigger
             )
-            UNUserNotificationCenter.current().add(request) { error in
+            notificationCenter?.add(request) { error in
                 if let error { print("Error scheduling nudge day+\(dayOffset): \(error)") }
             }
         }
@@ -208,7 +216,7 @@ class NotificationService {
             content: content,
             trigger: trigger
         )
-        UNUserNotificationCenter.current().add(request) { error in
+        notificationCenter?.add(request) { error in
             if let error { print("Error scheduling snooze: \(error)") }
         }
     }
@@ -216,18 +224,18 @@ class NotificationService {
     // MARK: - Removal
 
     func removeReminder(for habit: Habit) {
-        UNUserNotificationCenter.current().removePendingNotificationRequests(
+        notificationCenter?.removePendingNotificationRequests(
             withIdentifiers: [reminderID(for: habit)]
         )
     }
 
     func removeNudges(for habit: Habit) {
         let ids = (0..<7).map { nudgeID(for: habit, dayOffset: $0) }
-        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
+        notificationCenter?.removePendingNotificationRequests(withIdentifiers: ids)
     }
 
     func removeAllReminders() {
-        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        notificationCenter?.removeAllPendingNotificationRequests()
     }
 
     // MARK: - Private helpers
