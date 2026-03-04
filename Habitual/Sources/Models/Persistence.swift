@@ -8,6 +8,25 @@ struct PersistenceController {
 
     let container: NSPersistentCloudKitContainer
 
+    /// Loads the NSManagedObjectModel from the correct bundle.
+    /// SPM places compiled resources in Bundle.module; Xcode uses Bundle.main.
+    static let managedObjectModel: NSManagedObjectModel = {
+        let modelName = containerName
+
+        #if SWIFT_PACKAGE
+        let bundle = Bundle.module
+        #else
+        let bundle = Bundle.main
+        #endif
+
+        guard let url = bundle.url(forResource: modelName, withExtension: "momd")
+                ?? bundle.url(forResource: modelName, withExtension: "mom"),
+              let model = NSManagedObjectModel(contentsOf: url) else {
+            fatalError("Failed to load CoreData model '\(modelName)' from \(bundle.bundlePath)")
+        }
+        return model
+    }()
+
     static var preview: PersistenceController = {
         let controller = PersistenceController(inMemory: true)
         let viewContext = controller.container.viewContext
@@ -60,7 +79,10 @@ struct PersistenceController {
     }()
 
     init(inMemory: Bool = false) {
-        container = NSPersistentCloudKitContainer(name: Self.containerName)
+        container = NSPersistentCloudKitContainer(
+            name: Self.containerName,
+            managedObjectModel: Self.managedObjectModel
+        )
 
         if inMemory {
             container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")

@@ -37,6 +37,9 @@
 		A40002 /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10003; };
 		A40003 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10004; };
 		A40004 /* HabitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10005; };
+		A20006 /* Habitual.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B10015; };
+		A30005 /* Habitual.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B10015; };
+		A40005 /* Habitual.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B10015; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -431,6 +434,7 @@
 				A20003 /* Habit.swift in Sources */,
 				A20004 /* Persistence.swift in Sources */,
 				A20005 /* HabitStore.swift in Sources */,
+				A20006 /* Habitual.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -442,6 +446,7 @@
 				A30002 /* Habit.swift in Sources */,
 				A30003 /* Persistence.swift in Sources */,
 				A30004 /* HabitStore.swift in Sources */,
+				A30005 /* Habitual.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -453,6 +458,7 @@
 				A40002 /* Habit.swift in Sources */,
 				A40003 /* Persistence.swift in Sources */,
 				A40004 /* HabitStore.swift in Sources */,
+				A40005 /* Habitual.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
