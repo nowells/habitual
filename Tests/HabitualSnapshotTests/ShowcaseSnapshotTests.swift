@@ -547,7 +547,7 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
         let controller = PersistenceController(inMemory: true)
         let store = HabitStore(context: controller.container.viewContext)
 
-        let view = SnapshotContainer(width: 390, height: 900) {
+        let view = SnapshotContainer(width: 390) {
             AddHabitView(habitStore: store)
         }
         .environment(\.colorScheme, .light)
@@ -560,7 +560,7 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
         let controller = PersistenceController(inMemory: true)
         let store = HabitStore(context: controller.container.viewContext)
 
-        let view = SnapshotContainer(width: 390, height: 900) {
+        let view = SnapshotContainer(width: 390) {
             AddHabitView(habitStore: store)
         }
         .environment(\.colorScheme, .dark)
@@ -576,7 +576,7 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
         let controller = PersistenceController(inMemory: true)
         let store = HabitStore(context: controller.container.viewContext)
 
-        let view = SnapshotContainer(width: 390, height: 950) {
+        let view = SnapshotContainer(width: 390) {
             EditHabitView(habit: TestData.exerciseHabit, habitStore: store)
         }
         .environment(\.colorScheme, .light)
@@ -623,7 +623,7 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
             store.archiveHabit(habit)
         }
 
-        let view = SnapshotContainer(width: 390, height: 500) {
+        let view = SnapshotContainer(width: 390) {
             ArchiveView(habitStore: store)
         }
         .environment(\.colorScheme, .light)
@@ -635,10 +635,8 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
 
     /// Full settings screen showing all configuration options.
     func testShowcase_Settings_Light() {
-        let view = SnapshotContainer(width: 390, height: 700) {
-            NavigationStack {
-                SettingsView()
-            }
+        let view = SnapshotContainer(width: 390) {
+            SettingsView()
         }
         .environment(\.colorScheme, .light)
 
@@ -646,10 +644,8 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
     }
 
     func testShowcase_Settings_Dark() {
-        let view = SnapshotContainer(width: 390, height: 700) {
-            NavigationStack {
-                SettingsView()
-            }
+        let view = SnapshotContainer(width: 390) {
+            SettingsView()
         }
         .environment(\.colorScheme, .dark)
 

@@ -52,7 +52,9 @@ struct HabitDetailView: View {
             }
         }
         .sheet(isPresented: $showingEditSheet) {
-            EditHabitView(habit: currentHabit, habitStore: habitStore)
+            NavigationStack {
+                EditHabitView(habit: currentHabit, habitStore: habitStore)
+            }
         }
         .overlay {
             if showingCelebration {

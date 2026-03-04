@@ -16,116 +16,119 @@ struct AddHabitView: View {
     @State private var nudgeTime = NudgeSettings.defaultNudgeTime
 
     var body: some View {
-        NavigationStack {
-            Form {
-                // Name & Description
-                Section {
-                    TextField("Habit Name", text: $name)
-                        .font(.headline)
-                    TextField("Description (optional)", text: $description)
-                }
+        Form {
+            // MARK: Name & Description
 
-                // Icon Selection
-                Section("Icon") {
-                    IconPickerView(selectedIcon: $selectedIcon, color: selectedColor.color)
-                }
+            Section {
+                TextField("e.g. Morning Run, Read, Meditate", text: $name)
+                    .font(.headline)
+                TextField("What's this habit about? (optional)", text: $description)
+            } header: {
+                Text("Habit")
+            }
 
-                // Color Selection
-                Section("Color") {
-                    ColorPickerView(selectedColor: $selectedColor)
-                }
+            // MARK: Appearance — Icon + Color in one section
 
-                // Goal
-                Section("Goal") {
-                    Stepper(value: $goalFrequency, in: 1...30) {
-                        HStack {
-                            Text("Frequency")
-                            Spacer()
-                            Text("\(goalFrequency)x")
-                                .foregroundStyle(.secondary)
-                        }
-                    }
+            Section("Appearance") {
+                IconPickerView(selectedIcon: $selectedIcon, color: selectedColor.color)
+                ColorPickerView(selectedColor: $selectedColor)
+            }
 
-                    Picker("Period", selection: $goalPeriod) {
-                        ForEach(Habit.GoalPeriod.allCases) { period in
-                            Text(period.displayName).tag(period)
-                        }
-                    }
-                }
+            // MARK: Live Preview — see it before you commit
 
-                // Reminder
-                Section("Reminder") {
-                    Toggle("Enable Reminder", isOn: $reminderEnabled)
+            Section("Preview") {
+                HStack(spacing: 12) {
+                    Image(systemName: selectedIcon)
+                        .font(.title2)
+                        .foregroundStyle(selectedColor.color)
+                        .frame(width: 44, height: 44)
+                        .background(selectedColor.color.opacity(0.15))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
 
-                    if reminderEnabled {
-                        DatePicker(
-                            "Time",
-                            selection: $reminderTime,
-                            displayedComponents: .hourAndMinute
-                        )
-                    }
-                }
-
-                // Smart Nudges
-                Section {
-                    Toggle("Enable Smart Nudges", isOn: $nudgeEnabled)
-
-                    if nudgeEnabled {
-                        DatePicker(
-                            "Nudge Time",
-                            selection: $nudgeTime,
-                            displayedComponents: .hourAndMinute
-                        )
-                        Text("A gentle reminder fires if you haven't logged this habit by the nudge time. Streak-at-risk alerts appear automatically when you have 3+ days in a row.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                } header: {
-                    Text("Smart Nudges")
-                } footer: {
-                    if !nudgeEnabled {
-                        Text("Nudges are gentle, context-aware reminders that adapt to your streak.")
-                            .font(.caption)
-                    }
-                }
-
-                // Preview
-                Section("Preview") {
-                    HStack(spacing: 12) {
-                        Image(systemName: selectedIcon)
-                            .font(.title2)
-                            .foregroundStyle(selectedColor.color)
-                            .frame(width: 44, height: 44)
-                            .background(selectedColor.color.opacity(0.15))
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-
-                        VStack(alignment: .leading) {
-                            Text(name.isEmpty ? "Habit Name" : name)
-                                .font(.headline)
-                                .foregroundStyle(name.isEmpty ? .secondary : .primary)
-                            Text("\(goalFrequency)x / \(goalPeriod.periodLabel)")
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(name.isEmpty ? "Habit Name" : name)
+                            .font(.headline)
+                            .foregroundStyle(name.isEmpty ? .secondary : .primary)
+                        if !description.isEmpty {
+                            Text(description)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
+                        Text("\(goalFrequency)x / \(goalPeriod.periodLabel)")
+                            .font(.caption)
+                            .foregroundStyle(description.isEmpty ? .secondary : .tertiary)
                     }
-                    .padding(.vertical, 4)
+                }
+                .padding(.vertical, 4)
+            }
+
+            // MARK: Goal
+
+            Section {
+                Stepper(value: $goalFrequency, in: 1...30) {
+                    HStack {
+                        Text("Frequency")
+                        Spacer()
+                        Text("\(goalFrequency)x")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Picker("Period", selection: $goalPeriod) {
+                    ForEach(Habit.GoalPeriod.allCases) { period in
+                        Text(period.displayName).tag(period)
+                    }
+                }
+            } header: {
+                Text("Goal")
+            } footer: {
+                Text("How often do you want to do this? Example: 3x / week means at least 3 times per week.")
+            }
+
+            // MARK: Notifications — Reminders + Smart Nudges combined
+
+            Section {
+                Toggle("Daily Reminder", isOn: $reminderEnabled)
+                if reminderEnabled {
+                    DatePicker(
+                        "Time",
+                        selection: $reminderTime,
+                        displayedComponents: .hourAndMinute
+                    )
+                }
+
+                Toggle("Smart Nudges", isOn: $nudgeEnabled)
+                if nudgeEnabled {
+                    DatePicker(
+                        "Nudge Time",
+                        selection: $nudgeTime,
+                        displayedComponents: .hourAndMinute
+                    )
+                }
+            } header: {
+                Text("Notifications")
+            } footer: {
+                if nudgeEnabled {
+                    Text("A nudge fires if you haven't logged this habit by the nudge time. Streak-at-risk alerts appear when you have 3+ days in a row.")
+                } else {
+                    Text("Reminders fire at a fixed time each day. Smart nudges are context-aware and adapt to your streak.")
                 }
             }
-            .navigationTitle("New Habit")
-            #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
-            #endif
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+        }
+        .navigationTitle("New Habit")
+        #if os(iOS)
+        .navigationBarTitleDisplayMode(.inline)
+        #endif
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") { dismiss() }
+            }
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Add") {
+                    addHabit()
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
-                        addHabit()
-                    }
-                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    .fontWeight(.semibold)
-                }
+                .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .fontWeight(.semibold)
             }
         }
     }
@@ -214,5 +217,7 @@ struct ColorPickerView: View {
 }
 
 #Preview {
-    AddHabitView(habitStore: HabitStore(context: PersistenceController.preview.container.viewContext))
+    NavigationStack {
+        AddHabitView(habitStore: HabitStore(context: PersistenceController.preview.container.viewContext))
+    }
 }

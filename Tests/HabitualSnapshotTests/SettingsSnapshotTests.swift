@@ -8,10 +8,8 @@ final class SettingsSnapshotTests: SnapshotTestCase {
     // MARK: - Settings View
 
     func testSettingsView_Light() {
-        let view = SnapshotContainer(width: 390, height: 700) {
-            NavigationStack {
-                SettingsView()
-            }
+        let view = SnapshotContainer(width: 390) {
+            SettingsView()
         }
         .environment(\.colorScheme, .light)
 
@@ -19,10 +17,8 @@ final class SettingsSnapshotTests: SnapshotTestCase {
     }
 
     func testSettingsView_Dark() {
-        let view = SnapshotContainer(width: 390, height: 700) {
-            NavigationStack {
-                SettingsView()
-            }
+        let view = SnapshotContainer(width: 390) {
+            SettingsView()
         }
         .environment(\.colorScheme, .dark)
 
