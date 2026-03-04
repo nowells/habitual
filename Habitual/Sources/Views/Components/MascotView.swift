@@ -197,11 +197,11 @@ struct MascotFaceView: View {
             HStack(spacing: s * 0.45) {
                 Triangle()
                     .fill(bodyColor)
-                    .overlay(Triangle().strokeBorder(accentColor.opacity(0.5), lineWidth: 2))
+                    .overlay(Triangle().stroke(accentColor.opacity(0.5), lineWidth: 2))
                     .frame(width: s * 0.22, height: s * 0.22)
                 Triangle()
                     .fill(bodyColor)
-                    .overlay(Triangle().strokeBorder(accentColor.opacity(0.5), lineWidth: 2))
+                    .overlay(Triangle().stroke(accentColor.opacity(0.5), lineWidth: 2))
                     .frame(width: s * 0.22, height: s * 0.22)
             }
             .offset(y: -s * 0.36)
