@@ -109,7 +109,7 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
 
     func testCalendarDayCell_Completed() {
         let view = CalendarDayCell(
-            date: Date(),
+            date: TestData.referenceDate,
             isCompleted: true,
             isToday: true,
             isFuture: false,
@@ -124,7 +124,7 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
 
     func testCalendarDayCell_Today_Incomplete() {
         let view = CalendarDayCell(
-            date: Date(),
+            date: TestData.referenceDate,
             isCompleted: false,
             isToday: true,
             isFuture: false,
@@ -138,9 +138,8 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
     }
 
     func testCalendarDayCell_Past_Incomplete() {
-        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
         let view = CalendarDayCell(
-            date: yesterday,
+            date: TestData.date(daysAgo: 1),
             isCompleted: false,
             isToday: false,
             isFuture: false,
@@ -154,9 +153,8 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
     }
 
     func testCalendarDayCell_Future() {
-        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date())!
         let view = CalendarDayCell(
-            date: tomorrow,
+            date: TestData.date(daysAgo: -1),
             isCompleted: false,
             isToday: false,
             isFuture: true,
