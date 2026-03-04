@@ -12,7 +12,9 @@ final class AddHabitViewSnapshotTests: SnapshotTestCase {
         let store = HabitStore(context: controller.container.viewContext)
 
         let view = SnapshotContainer(width: 390, height: 900) {
-            AddHabitView(habitStore: store)
+            NavigationStack {
+                AddHabitView(habitStore: store)
+            }
         }
         .environment(\.colorScheme, .light)
 
@@ -24,7 +26,9 @@ final class AddHabitViewSnapshotTests: SnapshotTestCase {
         let store = HabitStore(context: controller.container.viewContext)
 
         let view = SnapshotContainer(width: 390, height: 900) {
-            AddHabitView(habitStore: store)
+            NavigationStack {
+                AddHabitView(habitStore: store)
+            }
         }
         .environment(\.colorScheme, .dark)
 
@@ -36,7 +40,9 @@ final class AddHabitViewSnapshotTests: SnapshotTestCase {
         let store = HabitStore(context: controller.container.viewContext)
 
         let view = SnapshotContainer(width: 390, height: 1100) {
-            AddHabitView(habitStore: store)
+            NavigationStack {
+                AddHabitView(habitStore: store)
+            }
         }
         .environment(\.sizeCategory, .extraExtraLarge)
 

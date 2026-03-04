@@ -27,13 +27,12 @@ struct EditHabitView: View {
         _goalFrequency = State(initialValue: habit.goalFrequency)
         _goalPeriod = State(initialValue: habit.goalPeriod)
         _reminderEnabled = State(initialValue: habit.reminderTime != nil)
-        _reminderTime = State(initialValue: habit.reminderTime ?? Date())
+        _reminderTime = State(initialValue: habit.reminderTime ?? Calendar.current.date(from: DateComponents(hour: 9, minute: 0)) ?? Date())
 
         let existingNudge = NudgeService.settings(for: habit)
         _nudgeEnabled = State(initialValue: existingNudge.isEnabled)
         _nudgeTime = State(initialValue: existingNudge.nudgeTime)
 
-        // Find matching preset color or use first
         let matchingColor = HabitColor.presets.first {
             abs($0.red - habit.colorComponents.red) < 0.01 &&
             abs($0.green - habit.colorComponents.green) < 0.01 &&
@@ -43,111 +42,147 @@ struct EditHabitView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section {
-                    TextField("Habit Name", text: $name)
-                        .font(.headline)
-                    TextField("Description (optional)", text: $description)
-                }
+        Form {
+            // MARK: Name & Description
 
-                Section("Icon") {
-                    IconPickerView(selectedIcon: $selectedIcon, color: selectedColor.color)
-                }
+            Section {
+                TextField("Habit Name", text: $name)
+                    .font(.headline)
+                TextField("Description (optional)", text: $description)
+            } header: {
+                Text("Habit")
+            }
 
-                Section("Color") {
-                    ColorPickerView(selectedColor: $selectedColor)
-                }
+            // MARK: Appearance — Icon + Color in one section
 
-                Section("Goal") {
-                    Stepper(value: $goalFrequency, in: 1...30) {
-                        HStack {
-                            Text("Frequency")
-                            Spacer()
-                            Text("\(goalFrequency)x")
+            Section("Appearance") {
+                IconPickerView(selectedIcon: $selectedIcon, color: selectedColor.color)
+                ColorPickerView(selectedColor: $selectedColor)
+            }
+
+            // MARK: Live Preview
+
+            Section("Preview") {
+                HStack(spacing: 12) {
+                    Image(systemName: selectedIcon)
+                        .font(.title2)
+                        .foregroundStyle(selectedColor.color)
+                        .frame(width: 44, height: 44)
+                        .background(selectedColor.color.opacity(0.15))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(name.isEmpty ? "Habit Name" : name)
+                            .font(.headline)
+                            .foregroundStyle(name.isEmpty ? .secondary : .primary)
+                        if !description.isEmpty {
+                            Text(description)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
-                    }
-
-                    Picker("Period", selection: $goalPeriod) {
-                        ForEach(Habit.GoalPeriod.allCases) { period in
-                            Text(period.displayName).tag(period)
-                        }
-                    }
-                }
-
-                Section("Reminder") {
-                    Toggle("Enable Reminder", isOn: $reminderEnabled)
-
-                    if reminderEnabled {
-                        DatePicker(
-                            "Time",
-                            selection: $reminderTime,
-                            displayedComponents: .hourAndMinute
-                        )
-                    }
-                }
-
-                Section {
-                    Toggle("Enable Smart Nudges", isOn: $nudgeEnabled)
-
-                    if nudgeEnabled {
-                        DatePicker(
-                            "Nudge Time",
-                            selection: $nudgeTime,
-                            displayedComponents: .hourAndMinute
-                        )
-                        Text("A gentle reminder fires if you haven't logged this habit by the nudge time. Streak-at-risk alerts appear automatically when you have 3+ days in a row.")
+                        Text("\(goalFrequency)x / \(goalPeriod.periodLabel)")
                             .font(.caption)
+                            .foregroundStyle(description.isEmpty ? .secondary : .tertiary)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+
+            // MARK: Goal
+
+            Section {
+                Stepper(value: $goalFrequency, in: 1...30) {
+                    HStack {
+                        Text("Frequency")
+                        Spacer()
+                        Text("\(goalFrequency)x")
                             .foregroundStyle(.secondary)
                     }
-                } header: {
-                    Text("Smart Nudges")
-                } footer: {
-                    if !nudgeEnabled {
-                        Text("Nudges are gentle, context-aware reminders that adapt to your streak.")
-                            .font(.caption)
-                    }
                 }
 
-                Section {
-                    Button("Archive Habit") {
-                        habitStore.archiveHabit(habit)
-                        dismiss()
+                Picker("Period", selection: $goalPeriod) {
+                    ForEach(Habit.GoalPeriod.allCases) { period in
+                        Text(period.displayName).tag(period)
                     }
-                    .foregroundStyle(.orange)
+                }
+            } header: {
+                Text("Goal")
+            } footer: {
+                Text("How often do you want to do this? Example: 3x / week means at least 3 times per week.")
+            }
 
-                    Button("Delete Habit", role: .destructive) {
-                        showDeleteConfirmation = true
-                    }
-                    .foregroundStyle(.red)
+            // MARK: Notifications — Reminders + Smart Nudges combined
+
+            Section {
+                Toggle("Daily Reminder", isOn: $reminderEnabled)
+                if reminderEnabled {
+                    DatePicker(
+                        "Time",
+                        selection: $reminderTime,
+                        displayedComponents: .hourAndMinute
+                    )
+                }
+
+                Toggle("Smart Nudges", isOn: $nudgeEnabled)
+                if nudgeEnabled {
+                    DatePicker(
+                        "Nudge Time",
+                        selection: $nudgeTime,
+                        displayedComponents: .hourAndMinute
+                    )
+                }
+            } header: {
+                Text("Notifications")
+            } footer: {
+                if nudgeEnabled {
+                    Text("A nudge fires if you haven't logged this habit by the nudge time. Streak-at-risk alerts appear when you have 3+ days in a row.")
+                } else {
+                    Text("Reminders fire at a fixed time each day. Smart nudges are context-aware and adapt to your streak.")
                 }
             }
-            .navigationTitle("Edit Habit")
-            #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
-            #endif
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        saveChanges()
-                    }
-                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    .fontWeight(.semibold)
-                }
-            }
-            .alert("Delete Habit", isPresented: $showDeleteConfirmation) {
-                Button("Delete", role: .destructive) {
-                    habitStore.deleteHabit(habit)
+
+            // MARK: Danger Zone
+
+            Section {
+                Button("Archive Habit") {
+                    habitStore.archiveHabit(habit)
                     dismiss()
                 }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Are you sure you want to delete \"\(habit.name)\"? This action cannot be undone.")
+                .foregroundStyle(.orange)
+
+                Button("Delete Habit", role: .destructive) {
+                    showDeleteConfirmation = true
+                }
+            } header: {
+                Text("Danger Zone")
+            } footer: {
+                Text("Archiving hides the habit without losing data. Deleting is permanent.")
             }
+        }
+        .navigationTitle("Edit Habit")
+        #if os(iOS)
+        .navigationBarTitleDisplayMode(.inline)
+        #endif
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") { dismiss() }
+            }
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Save") {
+                    saveChanges()
+                }
+                .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .fontWeight(.semibold)
+            }
+        }
+        .alert("Delete Habit", isPresented: $showDeleteConfirmation) {
+            Button("Delete", role: .destructive) {
+                habitStore.deleteHabit(habit)
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to delete \"\(habit.name)\"? This action cannot be undone.")
         }
     }
 
@@ -181,5 +216,7 @@ struct EditHabitView: View {
     let store = HabitStore(context: PersistenceController.preview.container.viewContext)
     let habit = store.habits.first ?? Habit(name: "Preview")
 
-    return EditHabitView(habit: habit, habitStore: store)
+    return NavigationStack {
+        EditHabitView(habit: habit, habitStore: store)
+    }
 }

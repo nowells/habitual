@@ -57,7 +57,9 @@ struct ContentView: View {
                 #endif
             }
             .sheet(isPresented: $showingAddHabit) {
-                AddHabitView(habitStore: habitStore)
+                NavigationStack {
+                    AddHabitView(habitStore: habitStore)
+                }
             }
             .sheet(isPresented: $showingSettings) {
                 #if os(iOS)
@@ -70,7 +72,9 @@ struct ContentView: View {
                 #endif
             }
             .sheet(isPresented: $showingArchive) {
-                ArchiveView(habitStore: habitStore)
+                NavigationStack {
+                    ArchiveView(habitStore: habitStore)
+                }
             }
         }
         .preferredColorScheme(colorScheme)
@@ -172,43 +176,41 @@ struct ArchiveView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if habitStore.archivedHabits.isEmpty {
-                    VStack(spacing: 16) {
-                        Spacer()
-                        Image(systemName: "archivebox")
-                            .font(.system(size: 48))
-                            .foregroundStyle(.secondary)
-                        Text("No Archived Habits")
-                            .font(.title3)
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                    }
-                } else {
-                    List {
-                        ForEach(habitStore.archivedHabits) { habit in
-                            HStack {
-                                Image(systemName: habit.icon)
-                                    .foregroundStyle(habit.color)
-                                    .frame(width: 30)
-                                Text(habit.name)
-                                Spacer()
-                                Button("Restore") {
-                                    habitStore.unarchiveHabit(habit)
-                                }
-                                .buttonStyle(.bordered)
-                                .tint(.blue)
+        Group {
+            if habitStore.archivedHabits.isEmpty {
+                VStack(spacing: 16) {
+                    Spacer()
+                    Image(systemName: "archivebox")
+                        .font(.system(size: 48))
+                        .foregroundStyle(.secondary)
+                    Text("No Archived Habits")
+                        .font(.title3)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+            } else {
+                List {
+                    ForEach(habitStore.archivedHabits) { habit in
+                        HStack {
+                            Image(systemName: habit.icon)
+                                .foregroundStyle(habit.color)
+                                .frame(width: 30)
+                            Text(habit.name)
+                            Spacer()
+                            Button("Restore") {
+                                habitStore.unarchiveHabit(habit)
                             }
+                            .buttonStyle(.bordered)
+                            .tint(.blue)
                         }
                     }
                 }
             }
-            .navigationTitle("Archive")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
-                }
+        }
+        .navigationTitle("Archive")
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Done") { dismiss() }
             }
         }
     }

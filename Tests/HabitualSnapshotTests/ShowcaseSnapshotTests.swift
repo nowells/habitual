@@ -548,7 +548,9 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
         let store = HabitStore(context: controller.container.viewContext)
 
         let view = SnapshotContainer(width: 390, height: 900) {
-            AddHabitView(habitStore: store)
+            NavigationStack {
+                AddHabitView(habitStore: store)
+            }
         }
         .environment(\.colorScheme, .light)
 
@@ -561,7 +563,9 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
         let store = HabitStore(context: controller.container.viewContext)
 
         let view = SnapshotContainer(width: 390, height: 900) {
-            AddHabitView(habitStore: store)
+            NavigationStack {
+                AddHabitView(habitStore: store)
+            }
         }
         .environment(\.colorScheme, .dark)
 
@@ -576,8 +580,10 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
         let controller = PersistenceController(inMemory: true)
         let store = HabitStore(context: controller.container.viewContext)
 
-        let view = SnapshotContainer(width: 390, height: 950) {
-            EditHabitView(habit: TestData.exerciseHabit, habitStore: store)
+        let view = SnapshotContainer(width: 390, height: 1000) {
+            NavigationStack {
+                EditHabitView(habit: TestData.exerciseHabit, habitStore: store)
+            }
         }
         .environment(\.colorScheme, .light)
 
@@ -624,7 +630,9 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
         }
 
         let view = SnapshotContainer(width: 390, height: 500) {
-            ArchiveView(habitStore: store)
+            NavigationStack {
+                ArchiveView(habitStore: store)
+            }
         }
         .environment(\.colorScheme, .light)
 

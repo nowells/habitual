@@ -41,7 +41,9 @@ final class ContentViewSnapshotTests: SnapshotTestCase {
         let store = HabitStore(context: controller.container.viewContext)
 
         let view = SnapshotContainer(width: 390, height: 400) {
-            ArchiveView(habitStore: store)
+            NavigationStack {
+                ArchiveView(habitStore: store)
+            }
         }
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
@@ -59,7 +61,9 @@ final class ContentViewSnapshotTests: SnapshotTestCase {
         }
 
         let view = SnapshotContainer(width: 390, height: 500) {
-            ArchiveView(habitStore: store)
+            NavigationStack {
+                ArchiveView(habitStore: store)
+            }
         }
         .environment(\.colorScheme, .light)
 
@@ -78,7 +82,9 @@ final class ContentViewSnapshotTests: SnapshotTestCase {
         }
 
         let view = SnapshotContainer(width: 390, height: 500) {
-            ArchiveView(habitStore: store)
+            NavigationStack {
+                ArchiveView(habitStore: store)
+            }
         }
         .environment(\.colorScheme, .dark)
 

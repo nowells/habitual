@@ -337,8 +337,7 @@ struct MascotBannerView: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 16)
-        .opacity(appeared ? 1 : 0)
-        .offset(y: appeared ? 0 : 10)
+        .offset(y: appeared ? 0 : 8)
         .animation(.spring(duration: 0.5, bounce: 0.4), value: appeared)
         .onAppear { appeared = true }
     }
