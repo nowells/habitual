@@ -103,32 +103,61 @@ struct ContentView: View {
 
 struct EmptyStateView: View {
     @Binding var showingAddHabit: Bool
+    @State private var mascotIndex = 0
+    private let welcomeMascots: [Mascot] = [.dog, .capybara, .cat]
 
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 0) {
             Spacer()
 
-            Image(systemName: "square.grid.3x3.fill")
-                .font(.system(size: 64))
-                .foregroundStyle(.secondary)
+            // Rotating mascot welcome
+            MascotFaceView(
+                mascot: welcomeMascots[mascotIndex],
+                mood: .encouraging,
+                size: 110
+            )
+            .padding(.bottom, 8)
+            .onTapGesture {
+                withAnimation(.spring(duration: 0.35, bounce: 0.5)) {
+                    mascotIndex = (mascotIndex + 1) % welcomeMascots.count
+                }
+            }
 
-            Text("No Habits Yet")
+            Text(welcomeMascots[mascotIndex].name)
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .foregroundStyle(.secondary)
+                .padding(.bottom, 20)
+
+            Text("はじめましょう！")
+                .font(.system(size: 20, weight: .black, design: .rounded))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [.orange, .red],
+                        startPoint: .leading, endPoint: .trailing
+                    )
+                )
+                .padding(.bottom, 4)
+
+            Text("Let's get started!")
                 .font(.title2)
                 .fontWeight(.semibold)
+                .padding(.bottom, 10)
 
-            Text("Start tracking your habits and build\nconsistency with visual progress grids.")
+            Text("Build great habits, one day at a time.\nTap a mascot to meet the crew.")
                 .font(.body)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+                .padding(.bottom, 28)
 
             Button(action: { showingAddHabit = true }) {
                 Label("Add Your First Habit", systemImage: "plus")
                     .font(.headline)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
+                    .padding(.horizontal, 28)
+                    .padding(.vertical, 14)
             }
             .buttonStyle(.borderedProminent)
-            .padding(.top, 8)
+            .tint(.orange)
 
             Spacer()
         }

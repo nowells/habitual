@@ -5,12 +5,19 @@ struct HabitDetailView: View {
     @ObservedObject var habitStore: HabitStore
     @State private var showingEditSheet = false
     @State private var selectedMonth = Date()
+    @State private var showingCelebration = false
+    @State private var lastKnownStreak = 0
 
     private let calendar = Calendar.current
+    private let milestoneDays: Set<Int> = [7, 14, 21, 30, 60, 100]
 
     // Refresh habit data from store
     private var currentHabit: Habit {
         habitStore.habits.first { $0.id == habit.id } ?? habit
+    }
+
+    private var mascot: Mascot {
+        Mascot.forStreak(currentHabit.currentStreak, completed: currentHabit.isCompletedOn(date: Date()))
     }
 
     var body: some View {
@@ -18,6 +25,9 @@ struct HabitDetailView: View {
             VStack(spacing: 24) {
                 // Header card
                 headerCard
+
+                // Mascot banner — contextual message
+                mascotBanner
 
                 // Heatmap
                 heatmapSection
@@ -44,6 +54,52 @@ struct HabitDetailView: View {
         .sheet(isPresented: $showingEditSheet) {
             EditHabitView(habit: currentHabit, habitStore: habitStore)
         }
+        .overlay {
+            if showingCelebration {
+                MascotCelebrationView(
+                    mascot: .dragon,
+                    streakCount: currentHabit.currentStreak
+                ) {
+                    showingCelebration = false
+                }
+                .transition(.opacity.combined(with: .scale))
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: showingCelebration)
+        .onAppear {
+            lastKnownStreak = currentHabit.currentStreak
+        }
+        .onChange(of: currentHabit.currentStreak) { _, newStreak in
+            if milestoneDays.contains(newStreak) && newStreak > lastKnownStreak {
+                showingCelebration = true
+            }
+            lastKnownStreak = newStreak
+        }
+    }
+
+    // MARK: - Mascot Banner
+
+    @ViewBuilder
+    private var mascotBanner: some View {
+        let streak = currentHabit.currentStreak
+        let isDone = currentHabit.isCompletedOn(date: Date())
+
+        let (mood, message): (MascotMood, String) = {
+            if isDone && streak >= 7 {
+                return (.excited, "\(streak) days! \(mascot.name) is absolutely fired up! 🔥")
+            } else if isDone && streak >= 3 {
+                return (.happy, "Nice work! \(streak) days in a row — you're building something real.")
+            } else if isDone {
+                return (.happy, "\(mascot.name) is proud! Every day you show up matters.")
+            } else if streak >= 3 {
+                return (.encouraging, "You have a \(streak)-day streak at stake! \(mascot.name) believes in you.")
+            } else {
+                return (.encouraging, "\(mascot.name) is cheering you on. There's still time today!")
+            }
+        }()
+
+        MascotBannerView(mascot: mascot, mood: mood, message: message, mascotSize: 64)
+            .padding(.horizontal, 4)
     }
 
     // MARK: - Header Card
