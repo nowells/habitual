@@ -1,0 +1,57 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and push a new beta build to TestFlight"
+  lane :beta do
+    # Set up App Store Connect API key
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
+      key_content: Base64.decode64(ENV["APP_STORE_CONNECT_API_KEY_BASE64"]),
+      is_key_content_base64: false,
+      in_house: false
+    )
+
+    # Increment build number based on latest TestFlight build
+    increment_build_number(
+      build_number: latest_testflight_build_number(api_key: api_key) + 1,
+      xcodeproj: "Habitual.xcodeproj"
+    )
+
+    # Build the app
+    build_app(
+      project: "Habitual.xcodeproj",
+      scheme: "Habitual",
+      destination: "generic/platform=iOS",
+      clean: true,
+      output_directory: "./build",
+      output_name: "Habitual.ipa",
+      export_options: {
+        method: "app-store",
+        provisioningProfiles: {
+          "com.habitual.app" => ENV["PROVISIONING_PROFILE_NAME"] || "Habitual AppStore"
+        }
+      }
+    )
+
+    # Upload to TestFlight
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true,
+      changelog: "Latest build from main branch"
+    )
+  end
+
+  desc "Build only (no upload) — for testing CI"
+  lane :build_only do
+    build_app(
+      project: "Habitual.xcodeproj",
+      scheme: "Habitual",
+      destination: "generic/platform=iOS",
+      clean: true,
+      skip_codesigning: true,
+      skip_archive: true,
+      derived_data_path: "./build/DerivedData"
+    )
+  end
+end

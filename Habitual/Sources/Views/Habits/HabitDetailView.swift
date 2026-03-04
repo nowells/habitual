@@ -73,7 +73,7 @@ struct HabitDetailView: View {
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Color(.systemGray6))
+                    .background(Color.systemGray6)
                     .clipShape(Capsule())
             }
 
@@ -88,7 +88,7 @@ struct HabitDetailView: View {
                 VStack(spacing: 4) {
                     Image(systemName: currentHabit.isCompletedOn(date: Date()) ? "checkmark.circle.fill" : "circle")
                         .font(.system(size: 36))
-                        .foregroundStyle(currentHabit.isCompletedOn(date: Date()) ? currentHabit.color : Color(.systemGray3))
+                        .foregroundStyle(currentHabit.isCompletedOn(date: Date()) ? currentHabit.color : Color.systemGray3)
                     Text("Today")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
@@ -99,7 +99,7 @@ struct HabitDetailView: View {
         .padding()
         .background {
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemBackground))
+                .fill(Color.systemBackground)
                 .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
         }
     }
@@ -127,7 +127,7 @@ struct HabitDetailView: View {
         .padding()
         .background {
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemBackground))
+                .fill(Color.systemBackground)
                 .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
         }
     }
@@ -179,7 +179,7 @@ struct HabitDetailView: View {
         .padding()
         .background {
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemBackground))
+                .fill(Color.systemBackground)
                 .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
         }
     }
@@ -225,7 +225,7 @@ struct HabitDetailView: View {
         .padding()
         .background {
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemBackground))
+                .fill(Color.systemBackground)
                 .shadow(color: .black.opacity(0.06), radius: 8, x: 0, y: 2)
         }
     }
@@ -277,7 +277,7 @@ struct StatCard: View {
         .padding()
         .background {
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemGray6))
+                .fill(Color.systemGray6)
         }
     }
 }
@@ -405,9 +405,9 @@ struct CalendarDayCell: View {
 
 #Preview {
     let store = HabitStore(context: PersistenceController.preview.container.viewContext)
-    if let habit = store.habits.first {
-        NavigationStack {
-            HabitDetailView(habit: habit, habitStore: store)
-        }
+    let habit = store.habits.first ?? Habit(name: "Preview")
+
+    return NavigationStack {
+        HabitDetailView(habit: habit, habitStore: store)
     }
 }

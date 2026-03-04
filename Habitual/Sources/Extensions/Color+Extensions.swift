@@ -20,19 +20,15 @@ extension Color {
     #endif
 }
 
-// Cross-platform Color init from system colors
+// Cross-platform system gray colors
 extension Color {
-    #if os(watchOS)
-    init(_ name: SystemColorName) {
-        switch name {
-        case .systemGray3: self = Color.gray.opacity(0.5)
-        case .systemGray5: self = Color.gray.opacity(0.3)
-        case .systemGray6: self = Color.gray.opacity(0.2)
-        }
-    }
-
-    enum SystemColorName {
-        case systemGray3, systemGray5, systemGray6
-    }
+    #if canImport(UIKit) && !os(watchOS)
+    static let systemGray3 = Color(UIColor.systemGray3)
+    static let systemGray5 = Color(UIColor.systemGray5)
+    static let systemGray6 = Color(UIColor.systemGray6)
+    #else
+    static let systemGray3 = Color.gray.opacity(0.5)
+    static let systemGray5 = Color.gray.opacity(0.3)
+    static let systemGray6 = Color.gray.opacity(0.2)
     #endif
 }

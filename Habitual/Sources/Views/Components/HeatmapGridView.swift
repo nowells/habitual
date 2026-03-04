@@ -155,7 +155,7 @@ struct HeatmapCell: View {
         if day.isCompleted {
             return color.opacity(min(1.0, 0.4 + day.value * 0.6))
         }
-        return Color(.systemGray5)
+        return Color.systemGray5
     }
 }
 
@@ -196,21 +196,18 @@ struct CompactHeatmapView: View {
         if day.isCompleted {
             return habit.color.opacity(min(1.0, 0.4 + day.value * 0.6))
         }
-        return Color(.systemGray5)
+        return Color.systemGray5
     }
 }
 
 #Preview {
-    let controller = PersistenceController.preview
-    let context = controller.container.viewContext
-    let store = HabitStore(context: context)
+    let store = HabitStore(context: PersistenceController.preview.container.viewContext)
+    let habit = store.habits.first ?? Habit(name: "Preview")
 
-    if let habit = store.habits.first {
-        VStack {
-            HeatmapGridView(habit: habit)
-                .padding()
-            CompactHeatmapView(habit: habit)
-                .padding()
-        }
+    return VStack {
+        HeatmapGridView(habit: habit)
+            .padding()
+        CompactHeatmapView(habit: habit)
+            .padding()
     }
 }

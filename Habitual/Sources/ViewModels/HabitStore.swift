@@ -42,7 +42,7 @@ class HabitStore: ObservableObject {
     }
 
     func fetchHabits() {
-        let request: NSFetchRequest<CDHabit> = CDHabit.fetchRequest() as! NSFetchRequest<CDHabit>
+        let request: NSFetchRequest<CDHabit> = CDHabit.fetchRequest()
         request.sortDescriptors = [
             NSSortDescriptor(keyPath: \CDHabit.sortOrder, ascending: true),
             NSSortDescriptor(keyPath: \CDHabit.createdAt, ascending: false),
@@ -148,7 +148,7 @@ class HabitStore: ObservableObject {
     // MARK: - Private Helpers
 
     private func fetchCDHabit(by id: UUID) -> CDHabit? {
-        let request: NSFetchRequest<CDHabit> = CDHabit.fetchRequest() as! NSFetchRequest<CDHabit>
+        let request: NSFetchRequest<CDHabit> = CDHabit.fetchRequest()
         request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
         request.fetchLimit = 1
         return try? viewContext.fetch(request).first

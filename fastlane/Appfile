@@ -1,0 +1,11 @@
+# App identifier (bundle ID)
+app_identifier("com.habitual.app")
+
+# Your Apple Developer account email
+# apple_id("your@email.com")
+
+# Your App Store Connect Team ID (if you belong to multiple teams)
+# team_id("YOUR_TEAM_ID")
+
+# Your Developer Portal Team ID (if you belong to multiple teams)
+# itc_team_id("YOUR_ITC_TEAM_ID")

@@ -37,6 +37,9 @@
 		A40002 /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10003; };
 		A40003 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10004; };
 		A40004 /* HabitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10005; };
+		A20006 /* Habitual.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B10015; };
+		A30005 /* Habitual.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B10015; };
+		A40005 /* Habitual.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B10015; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,7 +57,11 @@
 		B10012 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		B10013 /* Color+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extensions.swift"; sourceTree = "<group>"; };
 		B10014 /* WidgetUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetUpdateService.swift; sourceTree = "<group>"; };
-		B10015 /* Habitual.xcdatamodeld */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodeld; path = Habitual.xcdatamodeld; sourceTree = "<group>"; };
+		B10015V /* Habitual.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Habitual.xcdatamodel; sourceTree = "<group>"; };
+		B10019 /* CDHabit+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CDHabit+CoreDataClass.swift"; sourceTree = "<group>"; };
+		B10020 /* CDHabit+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CDHabit+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		B10021 /* CDCompletion+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CDCompletion+CoreDataClass.swift"; sourceTree = "<group>"; };
+		B10022 /* CDCompletion+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CDCompletion+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		B10016 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B10017 /* Habitual.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Habitual.entitlements; sourceTree = "<group>"; };
 		B10018 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -110,6 +117,10 @@
 				B10003 /* Habit.swift */,
 				B10004 /* Persistence.swift */,
 				B10015 /* Habitual.xcdatamodeld */,
+				B10019 /* CDHabit+CoreDataClass.swift */,
+				B10020 /* CDHabit+CoreDataProperties.swift */,
+				B10021 /* CDCompletion+CoreDataClass.swift */,
+				B10022 /* CDCompletion+CoreDataProperties.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -423,6 +434,7 @@
 				A20003 /* Habit.swift in Sources */,
 				A20004 /* Persistence.swift in Sources */,
 				A20005 /* HabitStore.swift in Sources */,
+				A20006 /* Habitual.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -434,6 +446,7 @@
 				A30002 /* Habit.swift in Sources */,
 				A30003 /* Persistence.swift in Sources */,
 				A30004 /* HabitStore.swift in Sources */,
+				A30005 /* Habitual.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -445,6 +458,7 @@
 				A40002 /* Habit.swift in Sources */,
 				A40003 /* Persistence.swift in Sources */,
 				A40004 /* HabitStore.swift in Sources */,
+				A40005 /* Habitual.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -750,6 +764,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		B10015 /* Habitual.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				B10015V /* Habitual.xcdatamodel */,
+			);
+			currentVersion = B10015V /* Habitual.xcdatamodel */;
+			path = Habitual.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = P00001 /* Project object */;
 }

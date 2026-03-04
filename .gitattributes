@@ -1,0 +1,10 @@
+# Snapshot reference images — stored in Git LFS
+Tests/HabitualSnapshotTests/__Snapshots__/**/*.png filter=lfs diff=lfs merge=lfs -text
+
+# Other images — binary attribute for correct diffing
+*.png binary
+*.jpg binary
+*.jpeg binary
+
+# Swift Package resolved file
+Package.resolved merge=union
