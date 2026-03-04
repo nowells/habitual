@@ -88,6 +88,9 @@ class HabitStore: ObservableObject {
         viewContext.delete(cdHabit)
         save()
         fetchHabits()
+        // Clean up associated notifications and nudge settings
+        NotificationService.shared.removeReminder(for: habit)
+        NudgeService.removeSettings(for: habit)
     }
 
     func archiveHabit(_ habit: Habit) {
@@ -129,6 +132,13 @@ class HabitStore: ObservableObject {
 
     func toggleTodayCompletion(for habit: Habit) {
         toggleCompletion(for: habit, on: Date())
+    }
+
+    /// Mark a habit complete today by ID — used by notification action handlers and App Intents.
+    func completeHabit(id: UUID) {
+        guard let habit = activeHabits.first(where: { $0.id == id }),
+              !habit.isCompletedOn(date: Date()) else { return }
+        toggleTodayCompletion(for: habit)
     }
 
     func moveHabits(from source: IndexSet, to destination: Int) {

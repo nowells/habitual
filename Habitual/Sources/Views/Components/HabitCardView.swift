@@ -5,7 +5,11 @@ struct HabitCardView: View {
     @ObservedObject var habitStore: HabitStore
 
     @State private var isPressed = false
+    @State private var showMascotReaction = false
+    @State private var reactionMascot: Mascot = .cat
     private let calendar = Calendar.current
+
+    private var isCompletedToday: Bool { habit.isCompletedOn(date: Date()) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -30,15 +34,35 @@ struct HabitCardView: View {
 
                 Spacer()
 
+                // Mini mascot reaction (shown briefly after completion)
+                if showMascotReaction {
+                    MascotFaceView(mascot: reactionMascot, mood: .excited, size: 36)
+                        .transition(.scale.combined(with: .opacity))
+                }
+
                 // Quick complete button for today
                 Button(action: {
-                    withAnimation(.spring(response: 0.3)) {
+                    withAnimation(.spring(duration: 0.3, bounce: 0.5)) {
                         habitStore.toggleTodayCompletion(for: habit)
                     }
+                    // Show mascot reaction when completing (not uncompleting)
+                    if !isCompletedToday {
+                        let streak = habit.currentStreak
+                        reactionMascot = Mascot.forStreak(streak + 1, completed: true)
+                        withAnimation(.spring(duration: 0.4, bounce: 0.5)) {
+                            showMascotReaction = true
+                        }
+                        Task {
+                            try? await Task.sleep(nanoseconds: 1_800_000_000)
+                            withAnimation { showMascotReaction = false }
+                        }
+                    }
                 }) {
-                    Image(systemName: habit.isCompletedOn(date: Date()) ? "checkmark.circle.fill" : "circle")
+                    Image(systemName: isCompletedToday ? "checkmark.circle.fill" : "circle")
                         .font(.title2)
-                        .foregroundStyle(habit.isCompletedOn(date: Date()) ? habit.color : Color.systemGray3)
+                        .foregroundStyle(isCompletedToday ? habit.color : Color.systemGray3)
+                        .scaleEffect(isCompletedToday ? 1.1 : 1.0)
+                        .animation(.spring(duration: 0.3, bounce: 0.6), value: isCompletedToday)
                 }
                 .buttonStyle(.plain)
             }
@@ -52,8 +76,8 @@ struct HabitCardView: View {
                 StatBadge(
                     label: "Streak",
                     value: "\(habit.currentStreak)",
-                    icon: "flame.fill",
-                    color: habit.color
+                    icon: habit.currentStreak >= 7 ? "flame.fill" : "flame",
+                    color: habit.currentStreak >= 3 ? .orange : habit.color
                 )
 
                 StatBadge(
@@ -90,7 +114,10 @@ struct HabitCardView: View {
         }
         .overlay {
             RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(Color.systemGray5, lineWidth: 0.5)
+                .strokeBorder(
+                    isCompletedToday ? habit.color.opacity(0.4) : Color.systemGray5,
+                    lineWidth: isCompletedToday ? 1.5 : 0.5
+                )
         }
         .contextMenu {
             Button(action: { habitStore.toggleTodayCompletion(for: habit) }) {

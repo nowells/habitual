@@ -12,6 +12,8 @@ struct AddHabitView: View {
     @State private var goalPeriod: Habit.GoalPeriod = .daily
     @State private var reminderEnabled = false
     @State private var reminderTime = Calendar.current.date(from: DateComponents(hour: 9, minute: 0)) ?? Date()
+    @State private var nudgeEnabled = false
+    @State private var nudgeTime = NudgeSettings.defaultNudgeTime
 
     var body: some View {
         NavigationStack {
@@ -61,6 +63,29 @@ struct AddHabitView: View {
                             selection: $reminderTime,
                             displayedComponents: .hourAndMinute
                         )
+                    }
+                }
+
+                // Smart Nudges
+                Section {
+                    Toggle("Enable Smart Nudges", isOn: $nudgeEnabled)
+
+                    if nudgeEnabled {
+                        DatePicker(
+                            "Nudge Time",
+                            selection: $nudgeTime,
+                            displayedComponents: .hourAndMinute
+                        )
+                        Text("A gentle reminder fires if you haven't logged this habit by the nudge time. Streak-at-risk alerts appear automatically when you have 3+ days in a row.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } header: {
+                    Text("Smart Nudges")
+                } footer: {
+                    if !nudgeEnabled {
+                        Text("Nudges are gentle, context-aware reminders that adapt to your streak.")
+                            .font(.caption)
                     }
                 }
 
@@ -122,6 +147,9 @@ struct AddHabitView: View {
         if reminderEnabled {
             NotificationService.shared.scheduleReminder(for: habit)
         }
+
+        let nudgeSettings = NudgeSettings(isEnabled: nudgeEnabled, nudgeTime: nudgeTime)
+        NudgeService.apply(nudgeSettings, for: habit)
 
         dismiss()
     }

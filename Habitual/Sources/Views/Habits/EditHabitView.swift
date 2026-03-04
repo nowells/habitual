@@ -14,6 +14,8 @@ struct EditHabitView: View {
     @State private var goalPeriod: Habit.GoalPeriod
     @State private var reminderEnabled: Bool
     @State private var reminderTime: Date
+    @State private var nudgeEnabled: Bool
+    @State private var nudgeTime: Date
     @State private var showDeleteConfirmation = false
 
     init(habit: Habit, habitStore: HabitStore) {
@@ -26,6 +28,10 @@ struct EditHabitView: View {
         _goalPeriod = State(initialValue: habit.goalPeriod)
         _reminderEnabled = State(initialValue: habit.reminderTime != nil)
         _reminderTime = State(initialValue: habit.reminderTime ?? Date())
+
+        let existingNudge = NudgeService.settings(for: habit)
+        _nudgeEnabled = State(initialValue: existingNudge.isEnabled)
+        _nudgeTime = State(initialValue: existingNudge.nudgeTime)
 
         // Find matching preset color or use first
         let matchingColor = HabitColor.presets.first {
@@ -79,6 +85,28 @@ struct EditHabitView: View {
                             selection: $reminderTime,
                             displayedComponents: .hourAndMinute
                         )
+                    }
+                }
+
+                Section {
+                    Toggle("Enable Smart Nudges", isOn: $nudgeEnabled)
+
+                    if nudgeEnabled {
+                        DatePicker(
+                            "Nudge Time",
+                            selection: $nudgeTime,
+                            displayedComponents: .hourAndMinute
+                        )
+                        Text("A gentle reminder fires if you haven't logged this habit by the nudge time. Streak-at-risk alerts appear automatically when you have 3+ days in a row.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } header: {
+                    Text("Smart Nudges")
+                } footer: {
+                    if !nudgeEnabled {
+                        Text("Nudges are gentle, context-aware reminders that adapt to your streak.")
+                            .font(.caption)
                     }
                 }
 
@@ -141,6 +169,9 @@ struct EditHabitView: View {
         } else {
             NotificationService.shared.removeReminder(for: updated)
         }
+
+        let nudgeSettings = NudgeSettings(isEnabled: nudgeEnabled, nudgeTime: nudgeTime)
+        NudgeService.apply(nudgeSettings, for: updated)
 
         dismiss()
     }
