@@ -63,6 +63,106 @@ Since Xcode auto-generates classes with `codeGenerationType="class"` but SPM doe
 3. **Remove** the manual files from Xcode's "Compile Sources" build phase to avoid duplicate symbols
 4. SPM picks up the manual files via the target's `path` directive
 
+## Adding New Swift Files to the Xcode Project
+
+The Xcode project does **NOT** automatically pick up new `.swift` files placed on disk. Every new file must be manually registered in `Habitual.xcodeproj/project.pbxproj`. Forgetting this causes "cannot find type in scope" errors in every file that imports the new type, even though `swift test` (SPM) works fine.
+
+### GUID Naming Convention
+
+This project uses short, human-readable GUIDs:
+
+| Prefix | Section | Example |
+|--------|---------|---------|
+| `A1xxxx` | PBXBuildFile (main Habitual target) | `A10023` |
+| `B1xxxx` | PBXFileReference (shared files) | `B10023` |
+| `D11xxx` | PBXGroup | `D11011` |
+
+When picking new GUIDs, increment the last existing number in each section (e.g. after `A10022`, use `A10023`).
+
+### Three Sections to Update
+
+For each new Swift source file, add entries to **three** sections of `project.pbxproj`:
+
+#### 1. PBXFileReference — declare the file exists
+
+```
+B10023 /* NudgeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NudgeService.swift; sourceTree = "<group>"; };
+```
+
+- `path` is just the **filename**, not the full path (the group provides directory context)
+- `sourceTree = "<group>"` is always correct for project-relative source files
+
+#### 2. PBXBuildFile — wire it into a target's compile step
+
+```
+A10023 /* NudgeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10023; };
+```
+
+#### 3a. PBXGroup — add it to the correct folder group
+
+Find the group whose `path` matches the directory the file lives in and add the fileRef to its `children`:
+
+```
+D11005 /* Services */ = {
+    isa = PBXGroup;
+    children = (
+        B10012 /* NotificationService.swift */,
+        B10023 /* NudgeService.swift */,   ← add here
+    );
+    path = Services;
+    sourceTree = "<group>";
+};
+```
+
+If the file lives in a **new directory** with no existing group, create a new `PBXGroup` entry and add it as a child of its parent group:
+
+```
+D11011 /* AppIntents */ = {
+    isa = PBXGroup;
+    children = (
+        B10024 /* HabitIntents.swift */,
+    );
+    path = AppIntents;
+    sourceTree = "<group>";
+};
+```
+
+Then add `D11011 /* AppIntents */,` to the parent group's `children` list.
+
+#### 3b. PBXSourcesBuildPhase — add it to the target's compile sources list
+
+```
+F10001 /* Sources */ = {
+    isa = PBXSourcesBuildPhase;
+    ...
+    files = (
+        ...
+        A10023 /* NudgeService.swift in Sources */,   ← add here
+    );
+};
+```
+
+The main Habitual target's build phase is `F10001`. Other targets (`F20001` watch, `F30001` widgets, `F40001` complications) have their own build phases.
+
+### Checklist for adding a new file
+
+- [ ] `PBXFileReference` entry added (`B1xxxx`)
+- [ ] `PBXBuildFile` entry added (`A1xxxx`) for each target that needs it
+- [ ] File's `fileRef` added to the correct `PBXGroup` children list
+- [ ] New directory → new `PBXGroup` created and added to parent group children
+- [ ] `PBXBuildFile` added to the correct target's `PBXSourcesBuildPhase`
+- [ ] If shared across watch/widget targets, add corresponding `A2xxxx`/`A3xxxx` build files and update those targets' build phases too
+
+### System Frameworks (no explicit linking needed)
+
+System frameworks imported via `import FrameworkName` in Swift are auto-linked by the linker — no `PBXFrameworksBuildPhase` entry required for:
+
+- `UserNotifications`
+- `AppIntents`
+- `WidgetKit`
+- `CoreData`
+- `CloudKit`
+
 ## Common Pitfalls
 
 1. **Widget/watch targets missing data model** — Linker errors for `CDHabit`/`CDCompletion` symbols
@@ -70,3 +170,4 @@ Since Xcode auto-generates classes with `codeGenerationType="class"` but SPM doe
 3. **Missing `.xccurrentversion`** — `DataModelCompile` silently fails; no `.momd` produced
 4. **Plain `PBXFileReference` for `.xcdatamodeld`** — Must be `XCVersionGroup` for versioned models
 5. **Manual CoreData files in Xcode compile sources + auto code-gen** — Duplicate symbol errors
+6. **New `.swift` file on disk but not in `project.pbxproj`** — SPM (`swift test`) builds fine but `xcodebuild` fails with "cannot find type in scope" in every file that imports the missing type; fix by adding PBXFileReference + PBXBuildFile + PBXGroup + PBXSourcesBuildPhase entries
