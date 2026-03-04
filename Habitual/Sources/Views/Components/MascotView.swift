@@ -221,34 +221,26 @@ struct SpeechBubbleView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(mood.exclamation)
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .foregroundStyle(borderColor)
-                Text(text)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(.primary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(bubbleColor)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .strokeBorder(borderColor.opacity(0.5), lineWidth: 2)
-                    )
-            )
-
-            // Tail pointing left toward mascot
-            BubbleTail()
-                .fill(bubbleColor)
-                .overlay(BubbleTail().stroke(borderColor.opacity(0.5), lineWidth: 1.5))
-                .frame(width: 14, height: 10)
-                .offset(x: -6, y: 0)
+        VStack(alignment: .leading, spacing: 4) {
+            Text(mood.exclamation)
+                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .foregroundStyle(borderColor)
+            Text(text)
+                .font(.system(size: 14, weight: .medium, design: .rounded))
+                .foregroundStyle(.primary)
+                .fixedSize(horizontal: false, vertical: true)
         }
+        .padding(.leading, 22)
+        .padding(.trailing, 14)
+        .padding(.vertical, 10)
+        .background(
+            SpeechBubbleShape()
+                .fill(bubbleColor)
+                .overlay(
+                    SpeechBubbleShape()
+                        .stroke(borderColor.opacity(0.5), lineWidth: 2)
+                )
+        )
     }
 }
 
@@ -398,14 +390,41 @@ struct SparkleParticle: Identifiable {
 
 // MARK: - Helper Shapes
 
-struct BubbleTail: Shape {
+/// Speech bubble with an integrated left-pointing tail — drawn as a single path
+/// so the fill and stroke are seamless (no visible joint between body and tail).
+struct SpeechBubbleShape: Shape {
+    var cornerRadius: CGFloat = 16
+    var tailOutset: CGFloat = 8   // how far the tail tip extends left of the body
+    var tailHeight: CGFloat = 10  // vertical height of the tail triangle
+
     func path(in rect: CGRect) -> Path {
-        Path { p in
-            p.move(to: CGPoint(x: rect.maxX, y: rect.minY))
-            p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-            p.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
-            p.closeSubpath()
-        }
+        let r = min(cornerRadius, rect.height / 2)
+        let left = tailOutset
+
+        var p = Path()
+        // Top edge (after top-left arc)
+        p.move(to: CGPoint(x: left + r, y: 0))
+        p.addLine(to: CGPoint(x: rect.maxX - r, y: 0))
+        // Top-right arc
+        p.addArc(center: CGPoint(x: rect.maxX - r, y: r),
+                 radius: r, startAngle: .degrees(-90), endAngle: .degrees(0), clockwise: false)
+        // Right edge
+        p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - r))
+        // Bottom-right arc
+        p.addArc(center: CGPoint(x: rect.maxX - r, y: rect.maxY - r),
+                 radius: r, startAngle: .degrees(0), endAngle: .degrees(90), clockwise: false)
+        // Bottom edge — no bottom-left arc; tail starts here
+        p.addLine(to: CGPoint(x: left, y: rect.maxY))
+        // Tail: tip → reconnect
+        p.addLine(to: CGPoint(x: 0, y: rect.maxY))
+        p.addLine(to: CGPoint(x: left, y: rect.maxY - tailHeight))
+        // Left edge up
+        p.addLine(to: CGPoint(x: left, y: r))
+        // Top-left arc
+        p.addArc(center: CGPoint(x: left + r, y: r),
+                 radius: r, startAngle: .degrees(180), endAngle: .degrees(-90), clockwise: false)
+        p.closeSubpath()
+        return p
     }
 }
 

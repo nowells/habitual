@@ -11,7 +11,7 @@ final class EditHabitViewSnapshotTests: SnapshotTestCase {
         let controller = PersistenceController(inMemory: true)
         let store = HabitStore(context: controller.container.viewContext)
 
-        let view = SnapshotContainer(width: 390, height: 1000) {
+        let view = SnapshotContainer(width: 390, height: 1600) {
             NavigationStack {
                 EditHabitView(habit: TestData.exerciseHabit, habitStore: store)
             }
@@ -25,7 +25,7 @@ final class EditHabitViewSnapshotTests: SnapshotTestCase {
         let controller = PersistenceController(inMemory: true)
         let store = HabitStore(context: controller.container.viewContext)
 
-        let view = SnapshotContainer(width: 390, height: 1000) {
+        let view = SnapshotContainer(width: 390, height: 1600) {
             NavigationStack {
                 EditHabitView(habit: TestData.exerciseHabit, habitStore: store)
             }
@@ -39,7 +39,7 @@ final class EditHabitViewSnapshotTests: SnapshotTestCase {
         let controller = PersistenceController(inMemory: true)
         let store = HabitStore(context: controller.container.viewContext)
 
-        let view = SnapshotContainer(width: 390, height: 1000) {
+        let view = SnapshotContainer(width: 390, height: 1600) {
             NavigationStack {
                 EditHabitView(habit: TestData.readHabit, habitStore: store)
             }
