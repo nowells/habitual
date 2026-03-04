@@ -8,24 +8,110 @@ struct PersistenceController {
 
     let container: NSPersistentCloudKitContainer
 
-    /// Loads the NSManagedObjectModel from the correct bundle.
-    /// SPM places compiled resources in Bundle.module; Xcode uses Bundle.main.
     static let managedObjectModel: NSManagedObjectModel = {
-        let modelName = containerName
+        // Try loading the compiled .momd from the appropriate bundle.
+        let bundles: [Bundle] = {
+            #if SWIFT_PACKAGE
+            return [Bundle.module, Bundle.main]
+            #else
+            return [Bundle.main]
+            #endif
+        }()
 
-        #if SWIFT_PACKAGE
-        let bundle = Bundle.module
-        #else
-        let bundle = Bundle.main
-        #endif
-
-        guard let url = bundle.url(forResource: modelName, withExtension: "momd")
-                ?? bundle.url(forResource: modelName, withExtension: "mom"),
-              let model = NSManagedObjectModel(contentsOf: url) else {
-            fatalError("Failed to load CoreData model '\(modelName)' from \(bundle.bundlePath)")
+        for bundle in bundles {
+            if let url = bundle.url(forResource: containerName, withExtension: "momd")
+                ?? bundle.url(forResource: containerName, withExtension: "mom"),
+               let model = NSManagedObjectModel(contentsOf: url) {
+                return model
+            }
+            if let model = NSManagedObjectModel.mergedModel(from: [bundle]),
+               !model.entities.isEmpty {
+                return model
+            }
         }
-        return model
+
+        // SPM does not always compile .xcdatamodeld via momc.
+        // Build the model programmatically so `swift test` works reliably.
+        return buildManagedObjectModel()
     }()
+
+    // MARK: - Programmatic model (SPM fallback)
+
+    private static func buildManagedObjectModel() -> NSManagedObjectModel {
+        let model = NSManagedObjectModel()
+
+        // — CDHabit —
+        let habit = NSEntityDescription()
+        habit.name = "CDHabit"
+        habit.managedObjectClassName = "CDHabit"
+
+        let hColorBlue    = attr("colorBlue",    .doubleAttributeType,    default: 0.5)
+        let hColorGreen   = attr("colorGreen",   .doubleAttributeType,    default: 0.5)
+        let hColorRed     = attr("colorRed",     .doubleAttributeType,    default: 0.3)
+        let hCreatedAt    = attr("createdAt",    .dateAttributeType,      optional: true)
+        let hGoalFreq     = attr("goalFrequency",.integer16AttributeType, default: Int16(1))
+        let hGoalPeriod   = attr("goalPeriod",   .stringAttributeType,    default: "daily")
+        let hDesc         = attr("habitDescription", .stringAttributeType, optional: true)
+        let hIcon         = attr("icon",         .stringAttributeType,    default: "star.fill")
+        let hId           = attr("id",           .UUIDAttributeType,      optional: true)
+        let hIsArchived   = attr("isArchived",   .booleanAttributeType,   default: false)
+        let hName         = attr("name",         .stringAttributeType,    default: "")
+        let hReminder     = attr("reminderTime", .dateAttributeType,      optional: true)
+        let hSortOrder    = attr("sortOrder",    .integer16AttributeType, default: Int16(0))
+
+        // — CDCompletion —
+        let completion = NSEntityDescription()
+        completion.name = "CDCompletion"
+        completion.managedObjectClassName = "CDCompletion"
+
+        let cDate  = attr("date",  .dateAttributeType,   optional: true)
+        let cId    = attr("id",    .UUIDAttributeType,    optional: true)
+        let cNote  = attr("note",  .stringAttributeType,  optional: true)
+        let cValue = attr("value", .doubleAttributeType,  default: 1.0)
+
+        // — Relationships —
+        let completionsRel = NSRelationshipDescription()
+        completionsRel.name = "completions"
+        completionsRel.destinationEntity = completion
+        completionsRel.isOptional = true
+        completionsRel.deleteRule = .cascadeDeleteRule
+        completionsRel.maxCount = 0 // to-many
+
+        let habitRel = NSRelationshipDescription()
+        habitRel.name = "habit"
+        habitRel.destinationEntity = habit
+        habitRel.isOptional = true
+        habitRel.deleteRule = .nullifyDeleteRule
+        habitRel.maxCount = 1 // to-one
+
+        completionsRel.inverseRelationship = habitRel
+        habitRel.inverseRelationship = completionsRel
+
+        habit.properties = [
+            hColorBlue, hColorGreen, hColorRed, hCreatedAt,
+            hGoalFreq, hGoalPeriod, hDesc, hIcon,
+            hId, hIsArchived, hName, hReminder, hSortOrder,
+            completionsRel,
+        ]
+        completion.properties = [cDate, cId, cNote, cValue, habitRel]
+
+        model.entities = [habit, completion]
+        return model
+    }
+
+    private static func attr(
+        _ name: String,
+        _ type: NSAttributeDescription.AttributeType,
+        optional: Bool = false,
+        default defaultValue: Any? = nil
+    ) -> NSAttributeDescription {
+        let a = NSAttributeDescription()
+        a.name = name
+        a.attributeType = type
+        a.isOptional = optional
+        if let v = defaultValue { a.defaultValue = v }
+        return a
+    }
 
     static var preview: PersistenceController = {
         let controller = PersistenceController(inMemory: true)
