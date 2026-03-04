@@ -11,10 +11,8 @@ final class EditHabitViewSnapshotTests: SnapshotTestCase {
         let controller = PersistenceController(inMemory: true)
         let store = HabitStore(context: controller.container.viewContext)
 
-        let view = SnapshotContainer(width: 390, height: 1600) {
-            NavigationStack {
-                EditHabitView(habit: TestData.exerciseHabit, habitStore: store)
-            }
+        let view = SnapshotContainer(width: 390) {
+            EditHabitView(habit: TestData.exerciseHabit, habitStore: store)
         }
         .environment(\.colorScheme, .light)
 
@@ -25,10 +23,8 @@ final class EditHabitViewSnapshotTests: SnapshotTestCase {
         let controller = PersistenceController(inMemory: true)
         let store = HabitStore(context: controller.container.viewContext)
 
-        let view = SnapshotContainer(width: 390, height: 1600) {
-            NavigationStack {
-                EditHabitView(habit: TestData.exerciseHabit, habitStore: store)
-            }
+        let view = SnapshotContainer(width: 390) {
+            EditHabitView(habit: TestData.exerciseHabit, habitStore: store)
         }
         .environment(\.colorScheme, .dark)
 
@@ -39,10 +35,8 @@ final class EditHabitViewSnapshotTests: SnapshotTestCase {
         let controller = PersistenceController(inMemory: true)
         let store = HabitStore(context: controller.container.viewContext)
 
-        let view = SnapshotContainer(width: 390, height: 1600) {
-            NavigationStack {
-                EditHabitView(habit: TestData.readHabit, habitStore: store)
-            }
+        let view = SnapshotContainer(width: 390) {
+            EditHabitView(habit: TestData.readHabit, habitStore: store)
         }
 
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
