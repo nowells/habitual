@@ -47,6 +47,44 @@ final class ContentViewSnapshotTests: SnapshotTestCase {
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
 
+    func testArchiveView_WithHabits_Light() {
+        let controller = PersistenceController(inMemory: true)
+        let store = HabitStore(context: controller.container.viewContext)
+
+        store.addHabit(TestData.exerciseHabit)
+        store.addHabit(TestData.readHabit)
+        store.addHabit(TestData.meditateHabit)
+        for habit in store.habits {
+            store.archiveHabit(habit)
+        }
+
+        let view = SnapshotContainer(width: 390, height: 500) {
+            ArchiveView(habitStore: store)
+        }
+        .environment(\.colorScheme, .light)
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
+    func testArchiveView_WithHabits_Dark() {
+        let controller = PersistenceController(inMemory: true)
+        let store = HabitStore(context: controller.container.viewContext)
+
+        store.addHabit(TestData.exerciseHabit)
+        store.addHabit(TestData.readHabit)
+        store.addHabit(TestData.meditateHabit)
+        for habit in store.habits {
+            store.archiveHabit(habit)
+        }
+
+        let view = SnapshotContainer(width: 390, height: 500) {
+            ArchiveView(habitStore: store)
+        }
+        .environment(\.colorScheme, .dark)
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
     // MARK: - Form Components
 
     func testIconPickerView() {

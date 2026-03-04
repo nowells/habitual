@@ -539,6 +539,98 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
 
+    // MARK: - Add Habit Form
+
+    /// The full "New Habit" form — name, icon picker, color picker, goal stepper and period,
+    /// reminder toggle, smart nudges section, and live preview card.
+    func testShowcase_AddHabitForm_Light() {
+        let controller = PersistenceController(inMemory: true)
+        let store = HabitStore(context: controller.container.viewContext)
+
+        let view = SnapshotContainer(width: 390, height: 900) {
+            AddHabitView(habitStore: store)
+        }
+        .environment(\.colorScheme, .light)
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
+    /// Dark mode variant of the Add Habit form.
+    func testShowcase_AddHabitForm_Dark() {
+        let controller = PersistenceController(inMemory: true)
+        let store = HabitStore(context: controller.container.viewContext)
+
+        let view = SnapshotContainer(width: 390, height: 900) {
+            AddHabitView(habitStore: store)
+        }
+        .environment(\.colorScheme, .dark)
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
+    // MARK: - Edit Habit Form
+
+    /// Edit Habit form pre-populated with an existing habit's data —
+    /// shows icon/color selection, goal configuration, and danger zone (archive/delete).
+    func testShowcase_EditHabitForm_Light() {
+        let controller = PersistenceController(inMemory: true)
+        let store = HabitStore(context: controller.container.viewContext)
+
+        let view = SnapshotContainer(width: 390, height: 950) {
+            EditHabitView(habit: TestData.exerciseHabit, habitStore: store)
+        }
+        .environment(\.colorScheme, .light)
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
+    // MARK: - Mascot System
+
+    /// All four mascots in one banner column — dragon (high streak), cat (daily win),
+    /// capybara (rest day), dog (new habit). Each with a distinct mood and speech bubble.
+    func testShowcase_MascotBanners() {
+        let banners: [(Mascot, MascotMood, String)] = [
+            (.dragon, .excited, "7 days! Ryū is absolutely fired up! 🔥"),
+            (.cat, .happy, "Nice work! 3 days in a row — you're building something real."),
+            (.capybara, .encouraging, "Kapiiko is cheering you on. There's still time today!"),
+            (.dog, .relaxed, "Wanko says: every journey starts with one step. No rush!"),
+        ]
+
+        let view = SnapshotContainer(width: 390) {
+            VStack(spacing: 12) {
+                ForEach(banners, id: \.0.name) { mascot, mood, message in
+                    MascotBannerView(mascot: mascot, mood: mood, message: message)
+                }
+            }
+            .padding()
+        }
+        .environment(\.colorScheme, .light)
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
+    // MARK: - Archive
+
+    /// Archive list showing multiple habits that have been archived.
+    func testShowcase_Archive() {
+        let controller = PersistenceController(inMemory: true)
+        let store = HabitStore(context: controller.container.viewContext)
+
+        store.addHabit(TestData.exerciseHabit)
+        store.addHabit(TestData.readHabit)
+        store.addHabit(TestData.meditateHabit)
+        for habit in store.habits {
+            store.archiveHabit(habit)
+        }
+
+        let view = SnapshotContainer(width: 390, height: 500) {
+            ArchiveView(habitStore: store)
+        }
+        .environment(\.colorScheme, .light)
+
+        assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
+    }
+
     // MARK: - Settings
 
     /// Full settings screen showing all configuration options.

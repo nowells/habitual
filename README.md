@@ -37,9 +37,31 @@ A beautiful habit tracking app inspired by [HabitKit](https://www.habitkit.app/)
 
 ### Create Habit
 
+| Add Habit Form (Light) | Add Habit Form (Dark) |
+|:---:|:---:|
+| ![Add Habit Light](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_AddHabitForm_Light.1.png) | ![Add Habit Dark](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_AddHabitForm_Dark.1.png) |
+
 | Icon Picker | Color Picker | Preview Card |
 |:---:|:---:|:---:|
 | ![Icons](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_IconPicker.1.png) | ![Colors](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_ColorPicker.1.png) | ![Preview](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_HabitPreviewCard.1.png) |
+
+### Edit Habit
+
+| Edit Habit Form |
+|:---:|
+| ![Edit Habit](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_EditHabitForm_Light.1.png) |
+
+### Mascots
+
+| Mascot Banners |
+|:---:|
+| ![Mascot Banners](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_MascotBanners.1.png) |
+
+### Archive
+
+| Archived Habits |
+|:---:|
+| ![Archive](Tests/HabitualSnapshotTests/__Snapshots__/ShowcaseSnapshotTests/testShowcase_Archive.1.png) |
 
 ### Settings & States
 
