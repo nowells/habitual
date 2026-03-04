@@ -5,10 +5,10 @@ class NotificationService {
     static let shared = NotificationService()
     private init() {}
 
-    /// UNUserNotificationCenter.current() crashes when there is no app bundle
-    /// (e.g. SPM unit-test runner). Guard every call with this check.
+    /// UNUserNotificationCenter.current() crashes in xctest / SPM test runners
+    /// because the host process is not an .app bundle. Guard every call with this.
     private var notificationCenter: UNUserNotificationCenter? {
-        guard Bundle.main.bundleIdentifier != nil else { return nil }
+        guard Bundle.main.bundleURL.pathExtension == "app" else { return nil }
         return UNUserNotificationCenter.current()
     }
 
