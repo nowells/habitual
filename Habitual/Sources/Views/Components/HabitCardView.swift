@@ -42,7 +42,7 @@ struct HabitCardView: View {
 
                 // Quick complete button for today
                 Button(action: {
-                    withAnimation(.spring(response: 0.3, bounce: 0.5)) {
+                    withAnimation(.spring(duration: 0.3, bounce: 0.5)) {
                         habitStore.toggleTodayCompletion(for: habit)
                     }
                     // Show mascot reaction when completing (not uncompleting)
