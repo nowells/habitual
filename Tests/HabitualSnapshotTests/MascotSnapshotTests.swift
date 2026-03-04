@@ -5,14 +5,14 @@ import SnapshotTesting
 
 final class MascotSnapshotTests: SnapshotTestCase {
 
-    // MARK: - MascotFaceView — All Mascots per Mood
+    // MARK: - MascotEmojiView — All Mascots per Mood
 
-    func testMascotFaceView_AllMascots_Encouraging() {
+    func testMascotEmojiView_AllMascots_Encouraging() {
         let view = SnapshotContainer(width: 390) {
             HStack(spacing: 20) {
                 ForEach(Mascot.allCases, id: \.name) { mascot in
                     VStack(spacing: 8) {
-                        MascotFaceView(mascot: mascot, mood: .encouraging, size: 80)
+                        MascotEmojiView(mascot: mascot, mood: .encouraging, size: 80)
                         Text(mascot.name)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
@@ -26,12 +26,12 @@ final class MascotSnapshotTests: SnapshotTestCase {
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
 
-    func testMascotFaceView_AllMascots_Excited() {
+    func testMascotEmojiView_AllMascots_Excited() {
         let view = SnapshotContainer(width: 390) {
             HStack(spacing: 20) {
                 ForEach(Mascot.allCases, id: \.name) { mascot in
                     VStack(spacing: 8) {
-                        MascotFaceView(mascot: mascot, mood: .excited, size: 80)
+                        MascotEmojiView(mascot: mascot, mood: .excited, size: 80)
                         Text(mascot.name)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
@@ -44,12 +44,12 @@ final class MascotSnapshotTests: SnapshotTestCase {
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
 
-    func testMascotFaceView_AllMascots_Relaxed() {
+    func testMascotEmojiView_AllMascots_Relaxed() {
         let view = SnapshotContainer(width: 390) {
             HStack(spacing: 20) {
                 ForEach(Mascot.allCases, id: \.name) { mascot in
                     VStack(spacing: 8) {
-                        MascotFaceView(mascot: mascot, mood: .relaxed, size: 80)
+                        MascotEmojiView(mascot: mascot, mood: .relaxed, size: 80)
                         Text(mascot.name)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
@@ -62,12 +62,12 @@ final class MascotSnapshotTests: SnapshotTestCase {
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
 
-    func testMascotFaceView_AllMascots_Happy() {
+    func testMascotEmojiView_AllMascots_Happy() {
         let view = SnapshotContainer(width: 390) {
             HStack(spacing: 20) {
                 ForEach(Mascot.allCases, id: \.name) { mascot in
                     VStack(spacing: 8) {
-                        MascotFaceView(mascot: mascot, mood: .happy, size: 80)
+                        MascotEmojiView(mascot: mascot, mood: .happy, size: 80)
                         Text(mascot.name)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
@@ -145,7 +145,7 @@ final class MascotSnapshotTests: SnapshotTestCase {
         assertSnapshot(of: view, as: .image(layout: .sizeThatFits))
     }
 
-    // MARK: - MascotCelebrationView (card only — no random sparkle particles)
+    // MARK: - Celebration Card (static — no random sparkle particles)
 
     /// Renders the milestone card content without sparkle particles,
     /// which use CGFloat.random and would produce non-deterministic snapshots.
@@ -156,7 +156,7 @@ final class MascotSnapshotTests: SnapshotTestCase {
                     .frame(width: 260, height: 260)
                     .opacity(0.25)
 
-                MascotFaceView(mascot: .dragon, mood: .celebrating, size: 110)
+                MascotEmojiView(mascot: .dragon, mood: .celebrating, size: 110)
 
                 VStack(spacing: 6) {
                     Text(MascotMood.celebrating.exclamation)
@@ -206,7 +206,7 @@ final class MascotSnapshotTests: SnapshotTestCase {
                     .frame(width: 260, height: 260)
                     .opacity(0.25)
 
-                MascotFaceView(mascot: .dragon, mood: .celebrating, size: 110)
+                MascotEmojiView(mascot: .dragon, mood: .celebrating, size: 110)
 
                 VStack(spacing: 6) {
                     Text(MascotMood.celebrating.exclamation)

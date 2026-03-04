@@ -115,7 +115,7 @@ struct EmptyStateView: View {
             Spacer()
 
             // Rotating mascot welcome
-            MascotFaceView(
+            MascotEmojiView(
                 mascot: welcomeMascots[mascotIndex],
                 mood: .encouraging,
                 size: 110

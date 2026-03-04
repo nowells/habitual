@@ -36,7 +36,7 @@ struct HabitCardView: View {
 
                 // Mini mascot reaction (shown briefly after completion)
                 if showMascotReaction {
-                    MascotFaceView(mascot: reactionMascot, mood: .excited, size: 36)
+                    MascotEmojiView(mascot: reactionMascot, mood: .excited, size: 36)
                         .transition(.scale.combined(with: .opacity))
                 }
 

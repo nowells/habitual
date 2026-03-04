@@ -65,262 +65,115 @@ enum MascotMood {
     }
 }
 
-// MARK: - Mascot Face View
+// MARK: - Mascot Emoji View
 
-/// A kawaii chibi mascot face drawn entirely in SwiftUI shapes — no images needed.
-struct MascotFaceView: View {
+/// A large, animated emoji mascot — expressive, mood-driven, and delightful.
+/// Shows the system emoji character with a continuous idle float plus
+/// mood-triggered bounce and wiggle animations on state changes.
+struct MascotEmojiView: View {
     let mascot: Mascot
     let mood: MascotMood
     var size: CGFloat = 80
 
-    @State private var bouncing = false
-    @State private var blinking = false
-
-    private var bodyColor: Color {
-        switch mascot {
-        case .dragon:   return Color(red: 0.25, green: 0.72, blue: 0.42)
-        case .cat:      return Color(red: 0.95, green: 0.75, blue: 0.50)
-        case .capybara: return Color(red: 0.65, green: 0.52, blue: 0.38)
-        case .dog:      return Color(red: 0.92, green: 0.82, blue: 0.62)
-        }
-    }
-
-    private var accentColor: Color {
-        switch mascot {
-        case .dragon:   return Color(red: 0.15, green: 0.55, blue: 0.30)
-        case .cat:      return Color(red: 0.75, green: 0.50, blue: 0.28)
-        case .capybara: return Color(red: 0.48, green: 0.36, blue: 0.22)
-        case .dog:      return Color(red: 0.70, green: 0.58, blue: 0.38)
-        }
-    }
+    @State private var floating = false
+    @State private var scale: CGFloat = 1.0
+    @State private var rotation: Double = 0
 
     var body: some View {
         ZStack {
-            // Drop shadow
+            // Soft ground shadow — contracts when mascot floats up
             Ellipse()
-                .fill(Color.black.opacity(0.12))
-                .frame(width: size * 0.9, height: size * 0.18)
-                .offset(y: size * 0.52)
+                .fill(Color.black.opacity(0.10))
+                .frame(width: size * 0.65, height: size * 0.10)
                 .blur(radius: 4)
+                .offset(y: size * 0.52)
+                .scaleEffect(x: floating ? 0.82 : 1.0)
+                .animation(
+                    .easeInOut(duration: 1.4).repeatForever(autoreverses: true),
+                    value: floating
+                )
 
-            GeometryReader { _ in
-                ZStack {
-                    faceLayer
-                }
-                .frame(width: size, height: size)
-            }
-            .frame(width: size, height: size)
+            // Emoji character
+            Text(mascot.emoji)
+                .font(.system(size: size * 0.82))
+                .scaleEffect(scale)
+                .rotationEffect(.degrees(rotation))
+                .offset(y: floating ? -6 : 0)
+                .animation(
+                    .easeInOut(duration: 1.4).repeatForever(autoreverses: true),
+                    value: floating
+                )
         }
-        .offset(y: bouncing ? -6 : 0)
-        .animation(
-            .easeInOut(duration: 0.55).repeatForever(autoreverses: true),
-            value: bouncing
-        )
+        .frame(width: size, height: size)
         .onAppear {
-            bouncing = true
-            // Blink every few seconds
-            Timer.scheduledTimer(withTimeInterval: 3.5, repeats: true) { _ in
-                Task { @MainActor in
-                    blinking = true
-                    try? await Task.sleep(nanoseconds: 120_000_000)
-                    blinking = false
-                }
-            }
+            floating = true
+            triggerMoodAnimation()
+        }
+        .onChange(of: mood) { _, _ in
+            triggerMoodAnimation()
         }
     }
 
-    @ViewBuilder
-    private var faceLayer: some View {
-        let s = size
-        ZStack {
-            // Ears / special features (behind head)
-            earLayer(s: s)
-
-            // Head
-            Circle()
-                .fill(bodyColor)
-                .overlay(Circle().strokeBorder(accentColor.opacity(0.6), lineWidth: s * 0.035))
-                .frame(width: s * 0.88, height: s * 0.88)
-
-            // Face features
-            VStack(spacing: 0) {
-                Spacer(minLength: s * 0.08)
-
-                // Eyes row
-                HStack(spacing: s * 0.16) {
-                    eyeView(s: s)
-                    eyeView(s: s)
+    private func triggerMoodAnimation() {
+        Task { @MainActor in
+            switch mood {
+            case .excited, .celebrating:
+                // Big pop, double left-right wiggle, spring settle
+                withAnimation(.spring(response: 0.20, dampingFraction: 0.35)) {
+                    scale = 1.30; rotation = 14
+                }
+                try? await Task.sleep(nanoseconds: 190_000_000)
+                withAnimation(.spring(response: 0.18, dampingFraction: 0.40)) {
+                    rotation = -14
+                }
+                try? await Task.sleep(nanoseconds: 170_000_000)
+                withAnimation(.spring(response: 0.18, dampingFraction: 0.40)) {
+                    rotation = 7
+                }
+                try? await Task.sleep(nanoseconds: 150_000_000)
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.60)) {
+                    scale = 1.0; rotation = 0
                 }
 
-                Spacer(minLength: s * 0.03)
-
-                // Nose
-                Ellipse()
-                    .fill(Color.pink.opacity(0.7))
-                    .frame(width: s * 0.1, height: s * 0.07)
-
-                Spacer(minLength: s * 0.02)
-
-                // Mouth
-                mouthShape(s: s)
-
-                Spacer(minLength: s * 0.1)
-            }
-            .frame(width: s * 0.88, height: s * 0.88)
-
-            // Blush
-            HStack(spacing: s * 0.38) {
-                blushCircle(s: s)
-                blushCircle(s: s)
-            }
-            .offset(y: s * 0.12)
-
-            // Dragon horns / dog ears overlay
-            specialFeatureOverlay(s: s)
-
-            // Mood exclamation bubble
-            if mood == .excited || mood == .celebrating {
-                Text("!")
-                    .font(.system(size: s * 0.3, weight: .black, design: .rounded))
-                    .foregroundStyle(.yellow)
-                    .shadow(color: .orange.opacity(0.6), radius: 2, x: 1, y: 1)
-                    .offset(x: s * 0.42, y: -s * 0.38)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func earLayer(s: CGFloat) -> some View {
-        switch mascot {
-        case .cat:
-            // Cat pointy ears
-            HStack(spacing: s * 0.45) {
-                Triangle()
-                    .fill(bodyColor)
-                    .overlay(Triangle().stroke(accentColor.opacity(0.5), lineWidth: 2))
-                    .frame(width: s * 0.22, height: s * 0.22)
-                Triangle()
-                    .fill(bodyColor)
-                    .overlay(Triangle().stroke(accentColor.opacity(0.5), lineWidth: 2))
-                    .frame(width: s * 0.22, height: s * 0.22)
-            }
-            .offset(y: -s * 0.36)
-        case .dog:
-            // Floppy dog ears
-            HStack(spacing: s * 0.52) {
-                Ellipse()
-                    .fill(accentColor.opacity(0.8))
-                    .frame(width: s * 0.25, height: s * 0.35)
-                    .rotationEffect(.degrees(-15))
-                    .offset(y: s * 0.05)
-                Ellipse()
-                    .fill(accentColor.opacity(0.8))
-                    .frame(width: s * 0.25, height: s * 0.35)
-                    .rotationEffect(.degrees(15))
-                    .offset(y: s * 0.05)
-            }
-            .offset(y: -s * 0.28)
-        case .capybara:
-            // Round capybara ears
-            HStack(spacing: s * 0.5) {
-                Circle()
-                    .fill(bodyColor)
-                    .overlay(Circle().strokeBorder(accentColor.opacity(0.4), lineWidth: 2))
-                    .frame(width: s * 0.2, height: s * 0.2)
-                Circle()
-                    .fill(bodyColor)
-                    .overlay(Circle().strokeBorder(accentColor.opacity(0.4), lineWidth: 2))
-                    .frame(width: s * 0.2, height: s * 0.2)
-            }
-            .offset(y: -s * 0.38)
-        case .dragon:
-            EmptyView() // horns handled in overlay
-        }
-    }
-
-    @ViewBuilder
-    private func specialFeatureOverlay(s: CGFloat) -> some View {
-        if mascot == .dragon {
-            // Dragon horns (on top)
-            HStack(spacing: s * 0.3) {
-                Triangle()
-                    .fill(Color(red: 0.15, green: 0.55, blue: 0.30))
-                    .frame(width: s * 0.15, height: s * 0.28)
-                    .rotationEffect(.degrees(-10))
-                Triangle()
-                    .fill(Color(red: 0.15, green: 0.55, blue: 0.30))
-                    .frame(width: s * 0.15, height: s * 0.28)
-                    .rotationEffect(.degrees(10))
-            }
-            .offset(y: -s * 0.42)
-        }
-    }
-
-    @ViewBuilder
-    private func eyeView(s: CGFloat) -> some View {
-        ZStack {
-            if blinking {
-                // Closed eye: arc line
-                Capsule()
-                    .fill(accentColor)
-                    .frame(width: s * 0.17, height: s * 0.04)
-            } else {
-                // Open eye
-                Circle()
-                    .fill(Color.white)
-                    .frame(width: s * 0.22, height: s * 0.22)
-                // Iris
-                Circle()
-                    .fill(mood == .relaxed ? Color(red: 0.3, green: 0.6, blue: 0.9) : Color(red: 0.1, green: 0.1, blue: 0.15))
-                    .frame(width: s * 0.14, height: s * 0.14)
-                    .offset(y: 1)
-                // Shine
-                Circle()
-                    .fill(Color.white)
-                    .frame(width: s * 0.07, height: s * 0.07)
-                    .offset(x: -s * 0.04, y: -s * 0.04)
-                // Happy squint when excited
-                if mood == .excited || mood == .celebrating {
-                    Arc(startAngle: .degrees(200), endAngle: .degrees(340), clockwise: false)
-                        .stroke(Color.white, lineWidth: s * 0.025)
-                        .frame(width: s * 0.18, height: s * 0.14)
+            case .happy:
+                // Bouncy pop, settle
+                withAnimation(.spring(response: 0.22, dampingFraction: 0.38)) {
+                    scale = 1.18
                 }
+                try? await Task.sleep(nanoseconds: 230_000_000)
+                withAnimation(.spring(response: 0.38, dampingFraction: 0.62)) {
+                    scale = 1.0
+                }
+
+            case .encouraging:
+                // Left-right nod: "come on, you can do it"
+                withAnimation(.spring(response: 0.16, dampingFraction: 0.50)) {
+                    rotation = 12
+                }
+                try? await Task.sleep(nanoseconds: 155_000_000)
+                withAnimation(.spring(response: 0.16, dampingFraction: 0.50)) {
+                    rotation = -12
+                }
+                try? await Task.sleep(nanoseconds: 155_000_000)
+                withAnimation(.spring(response: 0.16, dampingFraction: 0.50)) {
+                    rotation = 6
+                }
+                try? await Task.sleep(nanoseconds: 130_000_000)
+                withAnimation(.spring(response: 0.28, dampingFraction: 0.70)) {
+                    rotation = 0
+                }
+
+            case .relaxed:
+                // Just the idle float — no extra trigger
+                break
             }
         }
-    }
-
-    @ViewBuilder
-    private func mouthShape(s: CGFloat) -> some View {
-        switch mood {
-        case .excited, .celebrating, .happy:
-            // Big smile
-            Arc(startAngle: .degrees(10), endAngle: .degrees(170), clockwise: false)
-                .stroke(accentColor, lineWidth: s * 0.045)
-                .frame(width: s * 0.3, height: s * 0.18)
-        case .encouraging:
-            // Neutral-positive small smile
-            Arc(startAngle: .degrees(20), endAngle: .degrees(160), clockwise: false)
-                .stroke(accentColor, lineWidth: s * 0.04)
-                .frame(width: s * 0.22, height: s * 0.12)
-        case .relaxed:
-            // Tiny content curve
-            Arc(startAngle: .degrees(15), endAngle: .degrees(165), clockwise: false)
-                .stroke(accentColor, lineWidth: s * 0.035)
-                .frame(width: s * 0.18, height: s * 0.08)
-        }
-    }
-
-    private func blushCircle(s: CGFloat) -> some View {
-        Ellipse()
-            .fill(Color.pink.opacity(0.35))
-            .frame(width: s * 0.2, height: s * 0.12)
-            .blur(radius: 3)
     }
 }
 
 // MARK: - Mascot Banner
 
-/// Full mascot banner with speech bubble — used in empty states, streak milestones, celebrations.
+/// Full mascot banner with speech bubble — used in detail view and empty state.
 struct MascotBannerView: View {
     let mascot: Mascot
     let mood: MascotMood
@@ -331,7 +184,7 @@ struct MascotBannerView: View {
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 12) {
-            MascotFaceView(mascot: mascot, mood: mood, size: mascotSize)
+            MascotEmojiView(mascot: mascot, mood: mood, size: mascotSize)
 
             SpeechBubbleView(text: message, mood: mood)
                 .fixedSize(horizontal: false, vertical: true)
@@ -401,7 +254,7 @@ struct SpeechBubbleView: View {
 
 // MARK: - Mascot Celebration Overlay
 
-/// Full-screen celebration overlay with sparkles and bouncing mascot.
+/// Full-screen celebration overlay with sparkles and bouncing mascot emoji.
 /// Show this on milestone streak hits (7, 14, 21, 30 days).
 struct MascotCelebrationView: View {
     let mascot: Mascot
@@ -434,12 +287,11 @@ struct MascotCelebrationView: View {
 
             // Center card
             VStack(spacing: 20) {
-                // Manga speed lines
                 MangaSpeedLinesView()
                     .frame(width: 260, height: 260)
                     .opacity(0.25)
 
-                MascotFaceView(mascot: mascot, mood: .celebrating, size: 110)
+                MascotEmojiView(mascot: mascot, mood: .celebrating, size: 110)
 
                 VStack(spacing: 6) {
                     Text(MascotMood.celebrating.exclamation)
@@ -546,35 +398,6 @@ struct SparkleParticle: Identifiable {
 
 // MARK: - Helper Shapes
 
-struct Triangle: Shape {
-    func path(in rect: CGRect) -> Path {
-        Path { p in
-            p.move(to: CGPoint(x: rect.midX, y: rect.minY))
-            p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-            p.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
-            p.closeSubpath()
-        }
-    }
-}
-
-struct Arc: Shape {
-    let startAngle: Angle
-    let endAngle: Angle
-    let clockwise: Bool
-
-    func path(in rect: CGRect) -> Path {
-        Path { p in
-            p.addArc(
-                center: CGPoint(x: rect.midX, y: rect.midY),
-                radius: rect.width / 2,
-                startAngle: startAngle,
-                endAngle: endAngle,
-                clockwise: clockwise
-            )
-        }
-    }
-}
-
 struct BubbleTail: Shape {
     func path(in rect: CGRect) -> Path {
         Path { p in
@@ -589,18 +412,21 @@ struct BubbleTail: Shape {
 // MARK: - Preview
 
 #if !os(macOS)
-#Preview("Dragon - Celebrating") {
+#Preview("Mascot Emoji — All Characters") {
     VStack(spacing: 24) {
-        MascotFaceView(mascot: .dragon, mood: .celebrating, size: 100)
-        MascotFaceView(mascot: .cat, mood: .happy, size: 100)
-        MascotFaceView(mascot: .capybara, mood: .relaxed, size: 100)
-        MascotFaceView(mascot: .dog, mood: .encouraging, size: 100)
-    }
-    .padding()
-}
+        HStack(spacing: 20) {
+            ForEach(Mascot.allCases, id: \.name) { mascot in
+                VStack(spacing: 6) {
+                    MascotEmojiView(mascot: mascot, mood: .excited, size: 80)
+                    Text(mascot.name)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
 
-#Preview("Banner") {
-    VStack(spacing: 16) {
+        Divider()
+
         MascotBannerView(
             mascot: .dragon,
             mood: .excited,
