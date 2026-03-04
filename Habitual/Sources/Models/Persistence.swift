@@ -101,7 +101,7 @@ struct PersistenceController {
 
     private static func attr(
         _ name: String,
-        _ type: NSAttributeDescription.AttributeType,
+        _ type: NSAttributeType,
         optional: Bool = false,
         default defaultValue: Any? = nil
     ) -> NSAttributeDescription {
