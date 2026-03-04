@@ -40,6 +40,9 @@
 		A20006 /* Habitual.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B10015; };
 		A30005 /* Habitual.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B10015; };
 		A40005 /* Habitual.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B10015; };
+		A10023 /* NudgeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10023; };
+		A10024 /* HabitIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10024; };
+		A10025 /* MascotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10025; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -57,6 +60,9 @@
 		B10012 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		B10013 /* Color+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extensions.swift"; sourceTree = "<group>"; };
 		B10014 /* WidgetUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetUpdateService.swift; sourceTree = "<group>"; };
+		B10023 /* NudgeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NudgeService.swift; sourceTree = "<group>"; };
+		B10024 /* HabitIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitIntents.swift; sourceTree = "<group>"; };
+		B10025 /* MascotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MascotView.swift; sourceTree = "<group>"; };
 		B10015V /* Habitual.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Habitual.xcdatamodel; sourceTree = "<group>"; };
 		B10019 /* CDHabit+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CDHabit+CoreDataClass.swift"; sourceTree = "<group>"; };
 		B10020 /* CDHabit+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CDHabit+CoreDataProperties.swift"; sourceTree = "<group>"; };
@@ -107,6 +113,7 @@
 				D11005 /* Services */,
 				D11006 /* Extensions */,
 				D11007 /* Utilities */,
+				D11011 /* AppIntents */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -148,8 +155,17 @@
 			isa = PBXGroup;
 			children = (
 				B10012 /* NotificationService.swift */,
+				B10023 /* NudgeService.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		D11011 /* AppIntents */ = {
+			isa = PBXGroup;
+			children = (
+				B10024 /* HabitIntents.swift */,
+			);
+			path = AppIntents;
 			sourceTree = "<group>";
 		};
 		D11006 /* Extensions */ = {
@@ -173,6 +189,7 @@
 			children = (
 				B10006 /* HeatmapGridView.swift */,
 				B10007 /* HabitCardView.swift */,
+				B10025 /* MascotView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -419,9 +436,12 @@
 				A10010 /* HabitDetailView.swift in Sources */,
 				A10011 /* SettingsView.swift in Sources */,
 				A10012 /* NotificationService.swift in Sources */,
+				A10023 /* NudgeService.swift in Sources */,
+				A10024 /* HabitIntents.swift in Sources */,
 				A10013 /* Color+Extensions.swift in Sources */,
 				A10014 /* WidgetUpdateService.swift in Sources */,
 				A10015 /* Habitual.xcdatamodeld in Sources */,
+				A10025 /* MascotView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
