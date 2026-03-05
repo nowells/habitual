@@ -198,9 +198,19 @@ struct SnapshotContainer<Content: View>: View {
     }
 
     var body: some View {
+        #if os(macOS)
+        // On macOS, Form defaults to a two-column label+control layout.
+        // .formStyle(.grouped) forces iOS-style full-width rows so snapshots
+        // look consistent with the intended mobile UI.
+        content
+            .formStyle(.grouped)
+            .frame(width: width, height: height)
+            .background(Color.systemBackground)
+        #else
         content
             .frame(width: width)
             .frame(height: height)
             .background(Color.systemBackground)
+        #endif
     }
 }
