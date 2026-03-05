@@ -189,19 +189,24 @@ struct ArchiveView: View {
                     Spacer()
                 }
             } else {
-                List {
-                    ForEach(habitStore.archivedHabits) { habit in
-                        HStack {
-                            Image(systemName: habit.icon)
-                                .foregroundStyle(habit.color)
-                                .frame(width: 30)
-                            Text(habit.name)
-                            Spacer()
-                            Button("Restore") {
-                                habitStore.unarchiveHabit(habit)
+                ScrollView {
+                    VStack(spacing: 0) {
+                        ForEach(habitStore.archivedHabits) { habit in
+                            HStack {
+                                Image(systemName: habit.icon)
+                                    .foregroundStyle(habit.color)
+                                    .frame(width: 30)
+                                Text(habit.name)
+                                Spacer()
+                                Button("Restore") {
+                                    habitStore.unarchiveHabit(habit)
+                                }
+                                .buttonStyle(.bordered)
+                                .tint(.blue)
                             }
-                            .buttonStyle(.bordered)
-                            .tint(.blue)
+                            .padding(.horizontal)
+                            .padding(.vertical, 12)
+                            Divider()
                         }
                     }
                 }
