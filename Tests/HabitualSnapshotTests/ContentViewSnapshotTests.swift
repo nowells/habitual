@@ -40,7 +40,7 @@ final class ContentViewSnapshotTests: SnapshotTestCase {
         let controller = PersistenceController(inMemory: true)
         let store = HabitStore(context: controller.container.viewContext)
 
-        let view = SnapshotContainer(width: 390) {
+        let view = SnapshotContainer(width: 390, height: 200) {
             ArchiveView(habitStore: store)
         }
 
@@ -58,7 +58,7 @@ final class ContentViewSnapshotTests: SnapshotTestCase {
             store.archiveHabit(habit)
         }
 
-        let view = SnapshotContainer(width: 390) {
+        let view = SnapshotContainer(width: 390, height: 300) {
             ArchiveView(habitStore: store)
         }
         .environment(\.colorScheme, .light)
@@ -77,7 +77,7 @@ final class ContentViewSnapshotTests: SnapshotTestCase {
             store.archiveHabit(habit)
         }
 
-        let view = SnapshotContainer(width: 390) {
+        let view = SnapshotContainer(width: 390, height: 300) {
             ArchiveView(habitStore: store)
         }
         .environment(\.colorScheme, .dark)
