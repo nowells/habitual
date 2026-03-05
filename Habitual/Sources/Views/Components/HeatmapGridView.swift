@@ -10,6 +10,8 @@ struct HeatmapGridView: View {
     let showMonthLabels: Bool
     var onTapDate: ((Date) -> Void)?
 
+    @Environment(\.today) private var today
+
     init(
         habit: Habit,
         months: Int = 4,
@@ -27,7 +29,7 @@ struct HeatmapGridView: View {
     }
 
     private var weeks: [[DayData]] {
-        habit.heatmapData(months: months)
+        habit.heatmapData(months: months, today: today)
     }
 
     var body: some View {
@@ -166,6 +168,8 @@ struct CompactHeatmapView: View {
     let cellSize: CGFloat
     let cellSpacing: CGFloat
 
+    @Environment(\.today) private var today
+
     init(habit: Habit, cellSize: CGFloat = 10, cellSpacing: CGFloat = 2) {
         self.habit = habit
         self.cellSize = cellSize
@@ -173,7 +177,7 @@ struct CompactHeatmapView: View {
     }
 
     private var weeks: [[DayData]] {
-        habit.heatmapData(months: 3)
+        habit.heatmapData(months: 3, today: today)
     }
 
     var body: some View {

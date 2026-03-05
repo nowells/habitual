@@ -185,7 +185,7 @@ enum TestData {
 
     /// Pre-built heatmap data for deterministic snapshot rendering
     static func deterministicHeatmapWeeks(months: Int = 3) -> [[DayData]] {
-        exerciseHabit.heatmapData(months: months)
+        exerciseHabit.heatmapData(months: months, today: referenceDate)
     }
 }
 
@@ -207,11 +207,13 @@ struct SnapshotContainer<Content: View>: View {
         // .formStyle(.grouped) forces iOS-style full-width rows so snapshots
         // look consistent with the intended mobile UI.
         content
+            .environment(\.today, TestData.referenceDate)
             .formStyle(.grouped)
             .frame(width: width, height: height)
             .background(Color.systemBackground)
         #else
         content
+            .environment(\.today, TestData.referenceDate)
             .frame(width: width)
             .frame(height: height)
             .background(Color.systemBackground)

@@ -4,12 +4,14 @@ struct HabitCardView: View {
     let habit: Habit
     @ObservedObject var habitStore: HabitStore
 
+    @Environment(\.today) private var today
+
     @State private var isPressed = false
     @State private var showMascotReaction = false
     @State private var reactionMascot: Mascot = .cat
     private let calendar = Calendar.current
 
-    private var isCompletedToday: Bool { habit.isCompletedOn(date: Date()) }
+    private var isCompletedToday: Bool { habit.isCompletedOn(date: today) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -47,7 +49,7 @@ struct HabitCardView: View {
                     }
                     // Show mascot reaction when completing (not uncompleting)
                     if !isCompletedToday {
-                        let streak = habit.currentStreak
+                        let streak = habit.currentStreak(asOf: today)
                         reactionMascot = Mascot.forStreak(streak + 1, completed: true)
                         withAnimation(.spring(duration: 0.4, bounce: 0.5)) {
                             showMascotReaction = true
@@ -75,9 +77,9 @@ struct HabitCardView: View {
             HStack(spacing: 16) {
                 StatBadge(
                     label: "Streak",
-                    value: "\(habit.currentStreak)",
-                    icon: habit.currentStreak >= 7 ? "flame.fill" : "flame",
-                    color: habit.currentStreak >= 3 ? .orange : habit.color
+                    value: "\(habit.currentStreak(asOf: today))",
+                    icon: habit.currentStreak(asOf: today) >= 7 ? "flame.fill" : "flame",
+                    color: habit.currentStreak(asOf: today) >= 3 ? .orange : habit.color
                 )
 
                 StatBadge(
@@ -89,7 +91,7 @@ struct HabitCardView: View {
 
                 StatBadge(
                     label: "Rate",
-                    value: "\(Int(habit.completionRate * 100))%",
+                    value: "\(Int(habit.completionRate(asOf: today) * 100))%",
                     icon: "chart.line.uptrend.xyaxis",
                     color: habit.color
                 )
@@ -122,8 +124,8 @@ struct HabitCardView: View {
         .contextMenu {
             Button(action: { habitStore.toggleTodayCompletion(for: habit) }) {
                 Label(
-                    habit.isCompletedOn(date: Date()) ? "Unmark Today" : "Complete Today",
-                    systemImage: habit.isCompletedOn(date: Date()) ? "xmark.circle" : "checkmark.circle"
+                    isCompletedToday ? "Unmark Today" : "Complete Today",
+                    systemImage: isCompletedToday ? "xmark.circle" : "checkmark.circle"
                 )
             }
 
