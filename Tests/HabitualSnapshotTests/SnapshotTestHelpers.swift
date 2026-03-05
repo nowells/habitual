@@ -28,6 +28,10 @@ extension Snapshotting where Value: SwiftUI.View, Format == NSImage {
                     hostingView.frame.size = hostingView.fittingSize
                 }
                 hostingView.layoutSubtreeIfNeeded()
+                // NSTableView-backed views (List) populate cells asynchronously.
+                // A brief runloop drain ensures rows are rendered before capture.
+                RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.05))
+                hostingView.layoutSubtreeIfNeeded()
                 return hostingView
             }
     }
