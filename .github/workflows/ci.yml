@@ -5,6 +5,9 @@ on:
     branches: [main]
   push:
     branches: [main]
+  # Allows triggering a run programmatically (e.g. after auto-committing new
+  # golden images) so stability can be verified without auto-recording.
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -134,6 +137,7 @@ jobs:
             2>&1 | tee snapshot-record-output.txt || true
 
       - name: Commit updated snapshots
+        id: commit-snapshots
         if: github.event_name == 'pull_request' && steps.compare.outcome == 'failure'
         run: |
           # Track any new/changed snapshot images (directory may not exist yet)
@@ -154,15 +158,35 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git commit -m "chore: update VRT golden images [ci]
+          git commit -m "chore: update VRT golden images
 
           Automatically recorded by CI after snapshot comparison failed.
           Review the image diffs in this PR to verify the visual changes."
 
           git push
+          echo "committed=true" >> $GITHUB_OUTPUT
+          echo "::notice::Updated golden images committed. Triggering stability check…"
 
-          echo "::notice::Updated golden images have been committed to this PR."
-          echo "A new CI run will start automatically to verify the updated snapshots."
+      # Pushes made with GITHUB_TOKEN/GITEA_TOKEN do not automatically re-trigger
+      # workflow runs (by design, to prevent loops). Fire a workflow_dispatch
+      # explicitly so the new golden images are verified in compare-only mode.
+      # workflow_dispatch events never match 'github.event_name == pull_request'
+      # so the re-record steps below will not run — this is inherently loop-safe.
+      - name: Trigger stability check on updated snapshots
+        if: steps.commit-snapshots.outputs.committed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Content-Type: application/json" \
+            "${{ github.api_url }}/repos/${{ github.repository }}/actions/workflows/ci.yml/dispatches" \
+            -d "{\"ref\": \"${{ github.head_ref }}\"}")
+          if [ "$STATUS" = "204" ] || [ "$STATUS" = "200" ]; then
+            echo "::notice::Stability-check CI run dispatched on ${{ github.head_ref }}."
+          else
+            echo "::warning::Could not dispatch stability check (HTTP $STATUS). Please trigger manually via 'Run workflow' on this branch."
+          fi
 
       - name: Upload snapshot failures
         if: failure()
