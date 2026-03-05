@@ -28,6 +28,10 @@ extension Snapshotting where Value: SwiftUI.View, Format == NSImage {
                     hostingView.frame.size = hostingView.fittingSize
                 }
                 hostingView.layoutSubtreeIfNeeded()
+                // NSTableView-backed views (List) populate cells asynchronously.
+                // A brief runloop drain ensures rows are rendered before capture.
+                RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.05))
+                hostingView.layoutSubtreeIfNeeded()
                 return hostingView
             }
     }
@@ -181,7 +185,7 @@ enum TestData {
 
     /// Pre-built heatmap data for deterministic snapshot rendering
     static func deterministicHeatmapWeeks(months: Int = 3) -> [[DayData]] {
-        exerciseHabit.heatmapData(months: months)
+        exerciseHabit.heatmapData(months: months, today: referenceDate)
     }
 }
 
@@ -198,9 +202,21 @@ struct SnapshotContainer<Content: View>: View {
     }
 
     var body: some View {
+        #if os(macOS)
+        // On macOS, Form defaults to a two-column label+control layout.
+        // .formStyle(.grouped) forces iOS-style full-width rows so snapshots
+        // look consistent with the intended mobile UI.
         content
+            .environment(\.today, TestData.referenceDate)
+            .formStyle(.grouped)
+            .frame(width: width, height: height)
+            .background(Color.systemBackground)
+        #else
+        content
+            .environment(\.today, TestData.referenceDate)
             .frame(width: width)
             .frame(height: height)
             .background(Color.systemBackground)
+        #endif
     }
 }

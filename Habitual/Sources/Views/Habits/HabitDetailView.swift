@@ -3,6 +3,7 @@ import SwiftUI
 struct HabitDetailView: View {
     let habit: Habit
     @ObservedObject var habitStore: HabitStore
+    @Environment(\.today) private var today
     @State private var showingEditSheet = false
     @State private var selectedMonth = Date()
     @State private var showingCelebration = false
@@ -17,7 +18,7 @@ struct HabitDetailView: View {
     }
 
     private var mascot: Mascot {
-        Mascot.forStreak(currentHabit.currentStreak, completed: currentHabit.isCompletedOn(date: Date()))
+        Mascot.forStreak(currentHabit.currentStreak(asOf: today), completed: currentHabit.isCompletedOn(date: today))
     }
 
     var body: some View {
@@ -60,7 +61,7 @@ struct HabitDetailView: View {
             if showingCelebration {
                 MascotCelebrationView(
                     mascot: .dragon,
-                    streakCount: currentHabit.currentStreak
+                    streakCount: currentHabit.currentStreak(asOf: today)
                 ) {
                     showingCelebration = false
                 }
@@ -69,9 +70,9 @@ struct HabitDetailView: View {
         }
         .animation(.easeInOut(duration: 0.3), value: showingCelebration)
         .onAppear {
-            lastKnownStreak = currentHabit.currentStreak
+            lastKnownStreak = currentHabit.currentStreak(asOf: today)
         }
-        .onChange(of: currentHabit.currentStreak) { _, newStreak in
+        .onChange(of: currentHabit.currentStreak(asOf: today)) { _, newStreak in
             if milestoneDays.contains(newStreak) && newStreak > lastKnownStreak {
                 showingCelebration = true
             }
@@ -83,8 +84,8 @@ struct HabitDetailView: View {
 
     @ViewBuilder
     private var mascotBanner: some View {
-        let streak = currentHabit.currentStreak
-        let isDone = currentHabit.isCompletedOn(date: Date())
+        let streak = currentHabit.currentStreak(asOf: today)
+        let isDone = currentHabit.isCompletedOn(date: today)
 
         let (mood, message): (MascotMood, String) = {
             if isDone && streak >= 7 {
@@ -144,9 +145,9 @@ struct HabitDetailView: View {
                 }
             }) {
                 VStack(spacing: 4) {
-                    Image(systemName: currentHabit.isCompletedOn(date: Date()) ? "checkmark.circle.fill" : "circle")
+                    Image(systemName: currentHabit.isCompletedOn(date: today) ? "checkmark.circle.fill" : "circle")
                         .font(.system(size: 36))
-                        .foregroundStyle(currentHabit.isCompletedOn(date: Date()) ? currentHabit.color : Color.systemGray3)
+                        .foregroundStyle(currentHabit.isCompletedOn(date: today) ? currentHabit.color : Color.systemGray3)
                     Text("Today")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
@@ -203,7 +204,7 @@ struct HabitDetailView: View {
             ], spacing: 12) {
                 StatCard(
                     title: "Current Streak",
-                    value: "\(currentHabit.currentStreak)",
+                    value: "\(currentHabit.currentStreak(asOf: today))",
                     subtitle: "days",
                     icon: "flame.fill",
                     color: .orange
@@ -227,7 +228,7 @@ struct HabitDetailView: View {
 
                 StatCard(
                     title: "Success Rate",
-                    value: "\(Int(currentHabit.completionRate * 100))%",
+                    value: "\(Int(currentHabit.completionRate(asOf: today) * 100))%",
                     subtitle: "overall",
                     icon: "chart.line.uptrend.xyaxis",
                     color: .green

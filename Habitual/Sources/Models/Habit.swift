@@ -152,13 +152,15 @@ extension CDCompletion {
 // MARK: - Habit Computed Properties
 
 extension Habit {
-    var currentStreak: Int {
+    var currentStreak: Int { currentStreak(asOf: Date()) }
+
+    func currentStreak(asOf today: Date) -> Int {
         let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
+        let todayStart = calendar.startOfDay(for: today)
         let completionDates = Set(completions.map { calendar.startOfDay(for: $0.date) })
 
         var streak = 0
-        var checkDate = today
+        var checkDate = todayStart
 
         // Check if today is completed, if not start from yesterday
         if !completionDates.contains(checkDate) {
@@ -202,11 +204,13 @@ extension Habit {
         completions.count
     }
 
-    var completionRate: Double {
+    var completionRate: Double { completionRate(asOf: Date()) }
+
+    func completionRate(asOf today: Date) -> Double {
         let calendar = Calendar.current
         let startDate = calendar.startOfDay(for: createdAt)
-        let today = calendar.startOfDay(for: Date())
-        let totalDays = max(1, (calendar.dateComponents([.day], from: startDate, to: today).day ?? 0) + 1)
+        let todayStart = calendar.startOfDay(for: today)
+        let totalDays = max(1, (calendar.dateComponents([.day], from: startDate, to: todayStart).day ?? 0) + 1)
         return Double(totalCompletions) / Double(totalDays)
     }
 
@@ -225,9 +229,9 @@ extension Habit {
     }
 
     /// Returns a grid of completion data for the heatmap, organized by weeks
-    func heatmapData(months: Int = 4) -> [[DayData]] {
+    func heatmapData(months: Int = 4, today: Date = Date()) -> [[DayData]] {
         let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
+        let today = calendar.startOfDay(for: today)
         guard let startDate = calendar.date(byAdding: .month, value: -months, to: today) else { return [] }
 
         // Align to start of week
