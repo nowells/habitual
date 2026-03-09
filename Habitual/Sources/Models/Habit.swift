@@ -311,7 +311,7 @@ struct HabitColor: Identifiable {
 struct HabitIcon {
     static let presets: [String] = [
         "star.fill", "heart.fill", "flame.fill", "bolt.fill",
-        "figure.run", "figure.walk", "figure.yoga", "figure.swimming",
+        "figure.run", "figure.walk", "figure.yoga", "figure.pool.swim",
         "book.fill", "pencil", "brain.head.profile", "lightbulb.fill",
         "drop.fill", "leaf.fill", "moon.fill", "sun.max.fill",
         "cup.and.saucer.fill", "fork.knife", "pills.fill", "cross.fill",
