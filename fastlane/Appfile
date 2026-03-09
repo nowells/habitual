@@ -1,5 +1,5 @@
 # App identifier (bundle ID)
-app_identifier("com.habitual.app")
+app_identifier("com.habitual-helper.app")
 
 # Your Apple Developer account email
 # apple_id("your@email.com")

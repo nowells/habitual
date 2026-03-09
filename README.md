@@ -165,16 +165,16 @@ HabitualWidgets/
 
 1. Open `Habitual.xcodeproj` in Xcode
 2. Set your Development Team in each target's Signing & Capabilities
-3. Ensure iCloud capability is enabled with your CloudKit container (`iCloud.com.habitual.app`)
-4. Ensure App Groups is enabled (`group.com.habitual.app`)
+3. Ensure iCloud capability is enabled with your CloudKit container (`iCloud.com.habitual-helper.app`)
+4. Ensure App Groups is enabled (`group.com.habitual-helper.app`)
 5. Build and run on your target device
 
 ## iCloud Configuration
 
 The app uses `NSPersistentCloudKitContainer` for seamless sync:
 
-- **CloudKit Container**: `iCloud.com.habitual.app`
-- **App Group**: `group.com.habitual.app` (shared between app and widgets)
+- **CloudKit Container**: `iCloud.com.habitual-helper.app`
+- **App Group**: `group.com.habitual-helper.app` (shared between app and widgets)
 - **Merge Policy**: `NSMergeByPropertyObjectTrumpMergePolicy` (latest write wins)
 - **History Tracking**: Enabled for remote change notifications
 

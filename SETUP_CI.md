@@ -14,7 +14,7 @@ uploads to TestFlight on every push to `main`. Here's how to set it up.
 
 1. Go to https://appstoreconnect.apple.com
 2. My Apps → "+" → New App
-3. Fill in: Name: "Habitual", Bundle ID: `com.habitual.app`, SKU: `habitual`
+3. Fill in: Name: "Habitual", Bundle ID: `com.habitual-helper.app`, SKU: `habitual`
 
 ### 2. Create an App Store Connect API Key
 
@@ -38,7 +38,7 @@ base64 -i Certificates.p12 | pbcopy
 ### 4. Download Your Provisioning Profile
 
 1. Go to https://developer.apple.com/account/resources/profiles/list
-2. Create an "App Store" provisioning profile for `com.habitual.app`
+2. Create an "App Store" provisioning profile for `com.habitual-helper.app`
 3. Download the `.mobileprovision` file
 
 ```bash
@@ -68,8 +68,8 @@ base64 -i AuthKey_XXXXXXXXXX.p8 | pbcopy
 ### 6. Enable iCloud Entitlements
 
 Before CI can build successfully, ensure:
-1. The CloudKit container `iCloud.com.habitual.app` exists in your developer portal
-2. App Group `group.com.habitual.app` is registered
+1. The CloudKit container `iCloud.com.habitual-helper.app` exists in your developer portal
+2. App Group `group.com.habitual-helper.app` is registered
 3. Both are included in your provisioning profile
 
 ## How It Works

@@ -29,7 +29,7 @@ platform :ios do
       export_options: {
         method: "app-store",
         provisioningProfiles: {
-          "com.habitual.app" => ENV["PROVISIONING_PROFILE_NAME"] || "Habitual AppStore"
+          "com.habitual-helper.app" => ENV["PROVISIONING_PROFILE_NAME"] || "Habitual AppStore"
         }
       }
     )
