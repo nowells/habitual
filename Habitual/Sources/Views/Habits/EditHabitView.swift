@@ -160,7 +160,9 @@ struct EditHabitView: View {
             }
         }
         .navigationTitle("Edit Habit")
-        #if os(iOS)
+        #if os(macOS)
+        .formStyle(.grouped)
+        #elseif os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
         .toolbar {
