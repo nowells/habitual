@@ -227,7 +227,7 @@ struct SpeechBubbleView: View {
                 .foregroundStyle(borderColor)
             Text(text)
                 .font(.system(size: 14, weight: .medium, design: .rounded))
-                .foregroundStyle(.primary)
+                .foregroundStyle(Color.black.opacity(0.8))
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.leading, 22)
