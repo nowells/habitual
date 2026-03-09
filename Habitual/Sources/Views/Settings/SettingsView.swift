@@ -76,7 +76,9 @@ struct SettingsView: View {
             }
         }
         .navigationTitle("Settings")
-        #if os(iOS)
+        #if os(macOS)
+        .formStyle(.grouped)
+        #elseif os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
