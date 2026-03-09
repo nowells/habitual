@@ -135,7 +135,7 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
                             StatCard(title: "Current Streak", value: "\(habit.currentStreak)", subtitle: "days", icon: "flame.fill", color: .orange)
                             StatCard(title: "Longest Streak", value: "\(habit.longestStreak)", subtitle: "days", icon: "trophy.fill", color: .yellow)
                             StatCard(title: "Total", value: "\(habit.totalCompletions)", subtitle: "completions", icon: "checkmark.circle.fill", color: habit.color)
-                            StatCard(title: "Success Rate", value: "\(Int(habit.completionRate * 100))%", subtitle: "overall", icon: "chart.line.uptrend.xyaxis", color: .green)
+                            StatCard(title: "Success Rate", value: "\(Int(habit.completionRate(asOf: TestData.referenceDate) * 100))%", subtitle: "overall", icon: "chart.line.uptrend.xyaxis", color: .green)
                         }
                     }
                     .padding()
@@ -242,7 +242,7 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
                             StatCard(title: "Current Streak", value: "\(habit.currentStreak)", subtitle: "days", icon: "flame.fill", color: .orange)
                             StatCard(title: "Longest Streak", value: "\(habit.longestStreak)", subtitle: "days", icon: "trophy.fill", color: .yellow)
                             StatCard(title: "Total", value: "\(habit.totalCompletions)", subtitle: "completions", icon: "checkmark.circle.fill", color: habit.color)
-                            StatCard(title: "Success Rate", value: "\(Int(habit.completionRate * 100))%", subtitle: "overall", icon: "chart.line.uptrend.xyaxis", color: .green)
+                            StatCard(title: "Success Rate", value: "\(Int(habit.completionRate(asOf: TestData.referenceDate) * 100))%", subtitle: "overall", icon: "chart.line.uptrend.xyaxis", color: .green)
                         }
                     }
                     .padding()
@@ -308,7 +308,7 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
                         StatCard(title: "Current Streak", value: "\(habit.currentStreak)", subtitle: "days", icon: "flame.fill", color: .orange)
                         StatCard(title: "Longest Streak", value: "\(habit.longestStreak)", subtitle: "days", icon: "trophy.fill", color: .yellow)
                         StatCard(title: "Total", value: "\(habit.totalCompletions)", subtitle: "completions", icon: "checkmark.circle.fill", color: habit.color)
-                        StatCard(title: "Success Rate", value: "\(Int(habit.completionRate * 100))%", subtitle: "overall", icon: "chart.line.uptrend.xyaxis", color: .green)
+                        StatCard(title: "Success Rate", value: "\(Int(habit.completionRate(asOf: TestData.referenceDate) * 100))%", subtitle: "overall", icon: "chart.line.uptrend.xyaxis", color: .green)
                     }
                 }
                 .padding()
@@ -452,7 +452,7 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
                 StatCard(title: "Current Streak", value: "\(habit.currentStreak)", subtitle: "days", icon: "flame.fill", color: .orange)
                 StatCard(title: "Longest Streak", value: "\(habit.longestStreak)", subtitle: "days", icon: "trophy.fill", color: .yellow)
                 StatCard(title: "Total", value: "\(habit.totalCompletions)", subtitle: "completions", icon: "checkmark.circle.fill", color: habit.color)
-                StatCard(title: "Success Rate", value: "\(Int(habit.completionRate * 100))%", subtitle: "overall", icon: "chart.line.uptrend.xyaxis", color: .green)
+                StatCard(title: "Success Rate", value: "\(Int(habit.completionRate(asOf: TestData.referenceDate) * 100))%", subtitle: "overall", icon: "chart.line.uptrend.xyaxis", color: .green)
             }
             .padding()
         }
