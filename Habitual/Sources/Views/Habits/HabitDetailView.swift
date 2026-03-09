@@ -364,7 +364,7 @@ struct CalendarGridView: View {
         VStack(spacing: 8) {
             // Day of week headers
             HStack {
-                ForEach(weekdaySymbols, id: \.self) { symbol in
+                ForEach(Array(weekdaySymbols.enumerated()), id: \.offset) { _, symbol in
                     Text(symbol)
                         .font(.caption2)
                         .fontWeight(.medium)
