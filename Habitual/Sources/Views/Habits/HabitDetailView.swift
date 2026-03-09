@@ -56,6 +56,9 @@ struct HabitDetailView: View {
             NavigationStack {
                 EditHabitView(habit: currentHabit, habitStore: habitStore)
             }
+            #if os(macOS)
+            .frame(minWidth: 520, minHeight: 620)
+            #endif
         }
         .overlay {
             if showingCelebration {

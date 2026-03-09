@@ -60,6 +60,9 @@ struct ContentView: View {
                 NavigationStack {
                     AddHabitView(habitStore: habitStore)
                 }
+                #if os(macOS)
+                .frame(minWidth: 520, minHeight: 620)
+                #endif
             }
             .sheet(isPresented: $showingSettings) {
                 #if os(iOS)
@@ -75,6 +78,9 @@ struct ContentView: View {
                 NavigationStack {
                     ArchiveView(habitStore: habitStore)
                 }
+                #if os(macOS)
+                .frame(minWidth: 400, minHeight: 300)
+                #endif
             }
         }
         .preferredColorScheme(colorScheme)
