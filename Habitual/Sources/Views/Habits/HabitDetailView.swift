@@ -408,7 +408,7 @@ struct CalendarGridView: View {
 
     private var calendarDays: [Date?] {
         guard let monthInterval = calendar.dateInterval(of: .month, for: month),
-              let monthFirstWeek = calendar.dateInterval(of: .weekOfMonth, for: monthInterval.start) else {
+              let _ = calendar.dateInterval(of: .weekOfMonth, for: monthInterval.start) else {
             return []
         }
 
