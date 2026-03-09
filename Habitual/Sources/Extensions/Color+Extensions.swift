@@ -28,7 +28,7 @@ extension Color {
     static let systemGray6 = Color(UIColor.systemGray6)
     #elseif canImport(AppKit)
     static let systemGray3 = Color(NSColor.tertiaryLabelColor)
-    static let systemGray5 = Color(NSColor.tertiarySystemFillColor)
+    static let systemGray5 = Color(NSColor.tertiarySystemFill)
     static let systemGray6 = Color(NSColor.controlBackgroundColor)
     #else
     static let systemGray3 = Color.gray.opacity(0.5)
