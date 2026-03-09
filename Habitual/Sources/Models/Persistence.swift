@@ -181,7 +181,7 @@ struct PersistenceController {
         // Enable CloudKit sync
         if !inMemory {
             description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
-                containerIdentifier: "iCloud.com.habitual.app"
+                containerIdentifier: "iCloud.com.habitual-helper.app"
             )
         }
 
@@ -206,7 +206,7 @@ struct PersistenceController {
     }
 
     static var appGroupStoreURL: URL {
-        let appGroupID = "group.com.habitual.app"
+        let appGroupID = "group.com.habitual-helper.app"
         if let url = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) {
             return url.appendingPathComponent("Habitual.sqlite")
         }
