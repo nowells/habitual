@@ -130,13 +130,19 @@ struct HabitDetailView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                Text("\(currentHabit.goalFrequency)x / \(currentHabit.goalPeriod.periodLabel)")
+                Button(action: { showingEditSheet = true }) {
+                    HStack(spacing: 4) {
+                        Text("\(currentHabit.goalFrequency)x / \(currentHabit.goalPeriod.periodLabel)")
+                        Image(systemName: "pencil")
+                    }
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
                     .background(Color.systemGray6)
                     .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
             }
 
             Spacer()
