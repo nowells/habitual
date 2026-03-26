@@ -325,13 +325,15 @@ struct PeriodHeatmapGridView: View {
 
 struct CompactPeriodHeatmapView: View {
     let habit: Habit
+    let months: Int
     let cellSize: CGFloat
     let cellSpacing: CGFloat
 
     @Environment(\.today) private var today
 
-    init(habit: Habit, cellSize: CGFloat = 10, cellSpacing: CGFloat = 2) {
+    init(habit: Habit, months: Int = 3, cellSize: CGFloat = 10, cellSpacing: CGFloat = 2) {
         self.habit = habit
+        self.months = months
         self.cellSize = cellSize
         self.cellSpacing = cellSpacing
     }
@@ -347,9 +349,8 @@ struct CompactPeriodHeatmapView: View {
         }
     }
 
-    // 12 months back + 1 week forward
     private var compactDaily: some View {
-        let weeks = habit.heatmapData(months: 12, forwardDays: 7, today: today)
+        let weeks = habit.heatmapData(months: months, forwardDays: 7, today: today)
         return HStack(spacing: cellSpacing) {
             ForEach(weeks.indices, id: \.self) { weekIndex in
                 VStack(spacing: cellSpacing) {
@@ -399,9 +400,8 @@ struct CompactPeriodHeatmapView: View {
         }
     }
 
-    // 12 months back + 5 weeks forward (~1 month)
     private var compactWeekly: some View {
-        let periods = habit.periodHeatmapData(months: 12, forwardPeriods: 5, today: today)
+        let periods = habit.periodHeatmapData(months: months, forwardPeriods: 5, today: today)
         return ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: cellSpacing) {
                 ForEach(periods) { period in
@@ -411,9 +411,8 @@ struct CompactPeriodHeatmapView: View {
         }
     }
 
-    // 24 months back + 12 months forward
     private var compactMonthly: some View {
-        let periods = habit.periodHeatmapData(months: 24, forwardPeriods: 12, today: today)
+        let periods = habit.periodHeatmapData(months: months * 2, forwardPeriods: months, today: today)
         return ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: cellSpacing + 1) {
                 ForEach(periods) { period in
