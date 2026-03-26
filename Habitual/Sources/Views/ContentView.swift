@@ -5,6 +5,7 @@ struct ContentView: View {
     @State private var showingAddHabit = false
     @State private var showingSettings = false
     @State private var showingArchive = false
+    @State private var selectedHabit: Habit?
     @State private var isSyncing = false
     @State private var lastSuccessfulSync: Date?
     @State private var syncErrorMessage: String?
@@ -105,6 +106,14 @@ struct ContentView: View {
                 .frame(minWidth: 400, minHeight: 300)
                 #endif
             }
+            .navigationDestination(isPresented: Binding(
+                get: { selectedHabit != nil },
+                set: { if !$0 { selectedHabit = nil } }
+            )) {
+                if let habit = selectedHabit {
+                    HabitDetailView(habit: habit, habitStore: habitStore)
+                }
+            }
         }
         .preferredColorScheme(colorScheme)
         .alert(
@@ -124,7 +133,9 @@ struct ContentView: View {
                 syncStatusView
 
                 ForEach(habitStore.filteredHabits) { habit in
-                    HabitCardRow(habit: habit, habitStore: habitStore)
+                    HabitCardView(habit: habit, habitStore: habitStore)
+                        .contentShape(Rectangle())
+                        .onTapGesture { selectedHabit = habit }
                 }
             }
             .padding()
@@ -179,27 +190,6 @@ struct ContentView: View {
             NotificationService.shared.notifySyncFailure(message: message)
         }
         isSyncing = false
-    }
-}
-
-// MARK: - Habit Card Row
-
-/// Wraps HabitCardView with tap-to-navigate behaviour.
-/// Using onTapGesture instead of NavigationLink-as-container ensures that
-/// Button subviews (like the check-in button) correctly intercept their own taps
-/// without also triggering navigation.
-private struct HabitCardRow: View {
-    let habit: Habit
-    @ObservedObject var habitStore: HabitStore
-    @State private var showDetail = false
-
-    var body: some View {
-        HabitCardView(habit: habit, habitStore: habitStore)
-            .contentShape(Rectangle())
-            .onTapGesture { showDetail = true }
-            .navigationDestination(isPresented: $showDetail) {
-                HabitDetailView(habit: habit, habitStore: habitStore)
-            }
     }
 }
 
