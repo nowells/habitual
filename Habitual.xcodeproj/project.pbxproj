@@ -49,7 +49,26 @@
 		A40004 /* HabitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10005 /* HabitStore.swift */; };
 		A40005 /* Habitual.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B10015 /* Habitual.xcdatamodeld */; };
 		A40006 /* EnvironmentValues+Today.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10026 /* EnvironmentValues+Today.swift */; };
+		A10030 /* Habitual Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C20001 /* Habitual Watch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		P20001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = P00001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = T20001;
+			remoteInfo = "Habitual Watch";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXTargetDependency section */
+		TD20001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = T20001 /* Habitual Watch */;
+			targetProxy = P20001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXFileReference section */
 		B10001 /* HabitualApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitualApp.swift; sourceTree = "<group>"; };
@@ -328,10 +347,12 @@
 			buildPhases = (
 				F10001 /* Sources */,
 				F10002 /* Resources */,
+				F10003 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				TD20001 /* PBXTargetDependency */,
 			);
 			name = Habitual;
 			productName = Habitual;
@@ -447,6 +468,20 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F10003 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				A10030 /* Habitual Watch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		F10001 /* Sources */ = {
