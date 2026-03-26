@@ -1,4 +1,4 @@
-.PHONY: lint lint-fix format format-check test test-snapshot test-snapshot-record test-all build help
+.PHONY: lint lint-fix format format-check test test-snapshot test-snapshot-record test-all build bump release release-ios release-mac help
 
 # ── Linting ──────────────────────────────────────────────────────────────────
 
@@ -51,6 +51,20 @@ build:
 		ONLY_ACTIVE_ARCH=YES \
 		| xcpretty
 
+# ── Release ──────────────────────────────────────────────────────────────────
+
+bump:
+	@./scripts/release.sh --bump-only
+
+release:
+	@./scripts/release.sh
+
+release-ios:
+	@./scripts/release.sh --ios-only
+
+release-mac:
+	@./scripts/release.sh --mac-only
+
 # ── Help ─────────────────────────────────────────────────────────────────────
 
 help:
@@ -72,3 +86,9 @@ help:
 	@echo ""
 	@echo "Building:"
 	@echo "  build                Build for iOS Simulator (requires xcpretty)"
+	@echo ""
+	@echo "Release:"
+	@echo "  bump                 Bump build number only"
+	@echo "  release              Bump + archive + upload iOS & Mac to App Store Connect"
+	@echo "  release-ios          Bump + archive + upload iOS only"
+	@echo "  release-mac          Bump + archive + upload Mac Catalyst only"
