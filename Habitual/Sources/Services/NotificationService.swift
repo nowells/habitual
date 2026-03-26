@@ -43,6 +43,15 @@ class NotificationService {
         }
     }
 
+    func authorizationStatus() async -> UNAuthorizationStatus {
+        guard let center = notificationCenter else { return .notDetermined }
+        return await withCheckedContinuation { continuation in
+            center.getNotificationSettings { settings in
+                continuation.resume(returning: settings.authorizationStatus)
+            }
+        }
+    }
+
     // MARK: - Category Setup
 
     func setupCategories() {
@@ -348,6 +357,22 @@ class NotificationService {
 
     func removeAllReminders() {
         notificationCenter?.removeAllPendingNotificationRequests()
+    }
+
+    func notifySyncFailure(message: String) {
+        guard let center = notificationCenter else { return }
+        let content = UNMutableNotificationContent()
+        content.title = "iCloud Sync Failed"
+        content.body = message
+        content.sound = .default
+        let request = UNNotificationRequest(
+            identifier: "sync-failure-\(UUID().uuidString)",
+            content: content,
+            trigger: nil
+        )
+        center.add(request) { error in
+            if let error { print("Error scheduling sync failure notification: \(error)") }
+        }
     }
 
     // MARK: - Private helpers

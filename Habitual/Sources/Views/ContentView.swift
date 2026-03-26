@@ -1,12 +1,20 @@
 import SwiftUI
 
 struct ContentView: View {
-    @Environment(\.managedObjectContext) private var viewContext
     @StateObject private var habitStore: HabitStore
     @State private var showingAddHabit = false
     @State private var showingSettings = false
     @State private var showingArchive = false
+    @State private var isSyncing = false
+    @State private var lastSuccessfulSync: Date?
+    @State private var syncErrorMessage: String?
+    @State private var showSyncErrorAlert = false
     @AppStorage("appTheme") private var appTheme: String = "system"
+    private let relativeSyncFormatter: RelativeDateTimeFormatter = {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return formatter
+    }()
 
     init() {
         let context = PersistenceController.shared.container.viewContext
@@ -28,6 +36,13 @@ struct ContentView: View {
                 #if os(iOS)
                 ToolbarItem(placement: .navigationBarLeading) {
                     Menu {
+                        Button {
+                            Task { await triggerManualSync() }
+                        } label: {
+                            Label("Sync Now", systemImage: "arrow.clockwise")
+                        }
+                        .disabled(isSyncing)
+
                         Button(action: { showingSettings = true }) {
                             Label("Settings", systemImage: "gear")
                         }
@@ -44,6 +59,14 @@ struct ContentView: View {
                     }
                 }
                 #else
+                ToolbarItem {
+                    Button(action: {
+                        Task { await triggerManualSync() }
+                    }) {
+                        Label("Sync", systemImage: "arrow.clockwise")
+                    }
+                    .disabled(isSyncing)
+                }
                 ToolbarItem {
                     Button(action: { showingAddHabit = true }) {
                         Image(systemName: "plus")
@@ -84,11 +107,22 @@ struct ContentView: View {
             }
         }
         .preferredColorScheme(colorScheme)
+        .alert(
+            "Sync Failed",
+            isPresented: $showSyncErrorAlert,
+            presenting: syncErrorMessage
+        ) { _ in
+            Button("OK", role: .cancel) { }
+        } message: { message in
+            Text(message)
+        }
     }
 
     private var habitListView: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
+                syncStatusView
+
                 ForEach(habitStore.filteredHabits) { habit in
                     NavigationLink(destination: HabitDetailView(habit: habit, habitStore: habitStore)) {
                         HabitCardView(habit: habit, habitStore: habitStore)
@@ -98,6 +132,11 @@ struct ContentView: View {
             }
             .padding()
         }
+        #if os(iOS)
+        .refreshable {
+            await triggerManualSync()
+        }
+        #endif
     }
 
     private var colorScheme: ColorScheme? {
@@ -106,6 +145,43 @@ struct ContentView: View {
         case "dark": return .dark
         default: return nil
         }
+    }
+
+    @ViewBuilder
+    private var syncStatusView: some View {
+        if isSyncing {
+            Label("Syncing with iCloud…", systemImage: "arrow.clockwise")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 4)
+        } else if let lastSuccessfulSync {
+            Label(
+                "Last synced \(relativeSyncFormatter.localizedString(for: lastSuccessfulSync, relativeTo: Date()))",
+                systemImage: "checkmark.icloud"
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 4)
+        }
+    }
+
+    @MainActor
+    private func triggerManualSync() async {
+        if isSyncing { return }
+        isSyncing = true
+        do {
+            try await CloudSyncService.shared.forceSync()
+            habitStore.fetchHabits()
+            lastSuccessfulSync = Date()
+        } catch {
+            let message = error.localizedDescription
+            syncErrorMessage = message
+            showSyncErrorAlert = true
+            NotificationService.shared.notifySyncFailure(message: message)
+        }
+        isSyncing = false
     }
 }
 

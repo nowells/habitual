@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
@@ -6,6 +7,7 @@ struct SettingsView: View {
     @AppStorage("heatmapMonths") private var heatmapMonths: Int = 4
     @AppStorage("showCompletionAnimations") private var showCompletionAnimations: Bool = true
     @AppStorage("startOfWeek") private var startOfWeek: Int = 1 // 1 = Sunday (Calendar default)
+    @State private var notificationStatus: UNAuthorizationStatus = .notDetermined
 
     var body: some View {
         Form {
@@ -37,9 +39,13 @@ struct SettingsView: View {
             }
 
             // Notifications
-            Section("Notifications") {
-                Button("Request Notification Permission") {
-                    NotificationService.shared.requestPermission()
+            if shouldShowNotificationPrompt {
+                Section("Notifications") {
+                    Button("Allow Notifications") {
+                        NotificationService.shared.requestPermission { _ in
+                            Task { await refreshNotificationStatus() }
+                        }
+                    }
                 }
             }
 
@@ -86,6 +92,25 @@ struct SettingsView: View {
             }
         }
         #endif
+        .task {
+            await refreshNotificationStatus()
+        }
+    }
+
+    private var shouldShowNotificationPrompt: Bool {
+        switch notificationStatus {
+        case .authorized, .provisional, .ephemeral:
+            return false
+        default:
+            return true
+        }
+    }
+
+    private func refreshNotificationStatus() async {
+        let status = await NotificationService.shared.authorizationStatus()
+        await MainActor.run {
+            notificationStatus = status
+        }
     }
 }
 
