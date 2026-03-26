@@ -510,7 +510,7 @@ struct HabitColor: Identifiable {
         HabitColor(name: "Indigo", red: 0.35, green: 0.35, blue: 0.85),
         HabitColor(name: "Mint", red: 0.40, green: 0.85, blue: 0.70),
         HabitColor(name: "Brown", red: 0.65, green: 0.45, blue: 0.30),
-        HabitColor(name: "Cyan", red: 0.30, green: 0.75, blue: 0.95),
+        HabitColor(name: "Cyan", red: 0.30, green: 0.75, blue: 0.95)
     ]
 }
 
@@ -527,7 +527,7 @@ struct HabitIcon {
         "bed.double.fill", "alarm.fill", "clock.fill", "calendar",
         "banknote.fill", "cart.fill", "house.fill", "car.fill",
         "airplane", "graduationcap.fill", "dumbbell.fill", "trophy.fill",
-        "hand.thumbsup.fill", "face.smiling.fill", "sparkles", "target",
+        "hand.thumbsup.fill", "face.smiling.fill", "sparkles", "target"
     ]
 
     static var availablePresets: [String] {

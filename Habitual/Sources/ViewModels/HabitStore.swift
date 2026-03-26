@@ -50,7 +50,7 @@ class HabitStore: ObservableObject {
         let request: NSFetchRequest<CDHabit> = CDHabit.fetchRequest()
         request.sortDescriptors = [
             NSSortDescriptor(keyPath: \CDHabit.sortOrder, ascending: true),
-            NSSortDescriptor(keyPath: \CDHabit.createdAt, ascending: false),
+            NSSortDescriptor(keyPath: \CDHabit.createdAt, ascending: false)
         ]
 
         do {

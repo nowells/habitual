@@ -257,7 +257,7 @@ struct RadialCheckInButton: View {
 
 #Preview("Radial Check-In Button") {
     HStack(spacing: 24) {
-        ForEach([0, 1, 2, 3, 5], id: \.self) { count in
+        ForEach([0, 1, 2, 3, 5], id: \.self) { _ in
             let habit = Habit(name: "Test", goalFrequency: 3, goalPeriod: .daily)
             RadialCheckInButton(habit: habit, today: Date(), size: 44, onTap: {})
         }

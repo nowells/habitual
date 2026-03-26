@@ -113,7 +113,7 @@ class NotificationService {
         )
 
         notificationCenter?.setNotificationCategories([
-            reminderCategory, nudgeCategory, streakCategory,
+            reminderCategory, nudgeCategory, streakCategory
         ])
     }
 
@@ -131,7 +131,7 @@ class NotificationService {
         content.categoryIdentifier = Category.habitReminder
         content.userInfo = [
             UserInfoKey.habitID: habit.id.uuidString,
-            UserInfoKey.habitName: habit.name,
+            UserInfoKey.habitName: habit.name
         ]
 
         let cal = Calendar.current
@@ -187,7 +187,7 @@ class NotificationService {
             content.sound = .default
             content.userInfo = [
                 UserInfoKey.habitID: habit.id.uuidString,
-                UserInfoKey.habitName: habit.name,
+                UserInfoKey.habitName: habit.name
             ]
 
             let triggerComponents = cal.dateComponents(
@@ -218,7 +218,7 @@ class NotificationService {
         content.categoryIdentifier = Category.nudge
         content.userInfo = [
             UserInfoKey.habitID: habitID.uuidString,
-            UserInfoKey.habitName: habitName,
+            UserInfoKey.habitName: habitName
         ]
         let trigger = UNTimeIntervalNotificationTrigger(
             timeInterval: hoursFromNow * 3600,
@@ -262,8 +262,7 @@ class NotificationService {
                 let startMinute = cal.component(.minute, from: settings.startReminderTime)
 
                 if let fireDate = cal.date(bySettingHour: startHour, minute: startMinute, second: 0, of: periodStart),
-                    fireDate > Date()
-                {
+                    fireDate > Date() {
                     let content = periodReminderContent(
                         for: habit,
                         phase: .start,
@@ -290,8 +289,7 @@ class NotificationService {
                 let midMinute = cal.component(.minute, from: settings.midReminderTime)
 
                 if let fireDate = cal.date(bySettingHour: midHour, minute: midMinute, second: 0, of: midDate),
-                    fireDate > Date()
-                {
+                    fireDate > Date() {
                     // Only fire if goal not yet met
                     let completionsSoFar = habit.completionsInPeriod(containing: periodStart)
                     if completionsSoFar < habit.goalFrequency || periodOffset > 0 {
@@ -322,8 +320,7 @@ class NotificationService {
                 let endMinute = cal.component(.minute, from: settings.endReminderTime)
 
                 if let fireDate = cal.date(bySettingHour: endHour, minute: endMinute, second: 0, of: endDate),
-                    fireDate > Date()
-                {
+                    fireDate > Date() {
                     let completionsSoFar = habit.completionsInPeriod(containing: periodStart)
                     if completionsSoFar < habit.goalFrequency || periodOffset > 0 {
                         let content = periodReminderContent(
@@ -436,8 +433,7 @@ class NotificationService {
         }
     }
 
-    private func midPeriodDate(period: Habit.GoalPeriod, periodStart: Date, periodEnd: Date, calendar: Calendar) -> Date
-    {
+    private func midPeriodDate(period: Habit.GoalPeriod, periodStart: Date, periodEnd: Date, calendar: Calendar) -> Date {
         switch period {
         case .daily:
             // Noon
@@ -451,8 +447,7 @@ class NotificationService {
         }
     }
 
-    private func endPeriodDate(period: Habit.GoalPeriod, periodStart: Date, periodEnd: Date, calendar: Calendar) -> Date
-    {
+    private func endPeriodDate(period: Habit.GoalPeriod, periodStart: Date, periodEnd: Date, calendar: Calendar) -> Date {
         switch period {
         case .daily:
             // Evening of the same day
@@ -476,7 +471,7 @@ class NotificationService {
         content.sound = .default
         content.userInfo = [
             UserInfoKey.habitID: habit.id.uuidString,
-            UserInfoKey.habitName: habit.name,
+            UserInfoKey.habitName: habit.name
         ]
 
         let periodName = habit.goalPeriod.periodLabel
@@ -526,7 +521,7 @@ class NotificationService {
         "Small steps, big results.",
         "You've got this!",
         "Consistency is the key.",
-        "One step closer to your goal.",
+        "One step closer to your goal."
     ]
 
     private let gentleNudgeMessages = [
@@ -534,6 +529,6 @@ class NotificationService {
         "A little progress is still progress.",
         "You can do this — one small step at a time.",
         "Building habits takes time. You're doing great.",
-        "Still time today. No pressure.",
+        "Still time today. No pressure."
     ]
 }

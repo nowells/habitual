@@ -75,7 +75,7 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
             LazyVGrid(
                 columns: [
                     GridItem(.flexible()),
-                    GridItem(.flexible()),
+                    GridItem(.flexible())
                 ], spacing: 12
             ) {
                 StatCard(title: "Current Streak", value: "7", subtitle: "days", icon: "flame.fill", color: .orange)
@@ -98,7 +98,7 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
             LazyVGrid(
                 columns: [
                     GridItem(.flexible()),
-                    GridItem(.flexible()),
+                    GridItem(.flexible())
                 ], spacing: 12
             ) {
                 StatCard(title: "Current Streak", value: "7", subtitle: "days", icon: "flame.fill", color: .orange)

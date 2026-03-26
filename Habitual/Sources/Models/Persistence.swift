@@ -21,13 +21,11 @@ struct PersistenceController {
         for bundle in bundles {
             if let url = bundle.url(forResource: containerName, withExtension: "momd")
                 ?? bundle.url(forResource: containerName, withExtension: "mom"),
-                let model = NSManagedObjectModel(contentsOf: url)
-            {
+                let model = NSManagedObjectModel(contentsOf: url) {
                 return model
             }
             if let model = NSManagedObjectModel.mergedModel(from: [bundle]),
-                !model.entities.isEmpty
-            {
+                !model.entities.isEmpty {
                 return model
             }
         }
@@ -93,7 +91,7 @@ struct PersistenceController {
             hColorBlue, hColorGreen, hColorRed, hCreatedAt,
             hGoalFreq, hGoalPeriod, hDesc, hIcon,
             hId, hIsArchived, hName, hReminder, hSortOrder,
-            completionsRel,
+            completionsRel
         ]
         completion.properties = [cDate, cId, cNote, cValue, habitRel]
 
@@ -124,7 +122,7 @@ struct PersistenceController {
             ("Exercise", "Daily workout routine", "figure.run", 0.35, 0.65, 0.85),
             ("Read", "Read for 30 minutes", "book.fill", 0.95, 0.55, 0.20),
             ("Meditate", "Morning meditation", "brain.head.profile", 0.55, 0.40, 0.80),
-            ("Water", "Drink 8 glasses of water", "drop.fill", 0.20, 0.70, 0.90),
+            ("Water", "Drink 8 glasses of water", "drop.fill", 0.20, 0.70, 0.90)
         ]
 
         for (name, desc, icon, r, g, b) in sampleHabits {

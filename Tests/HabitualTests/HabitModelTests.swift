@@ -129,7 +129,7 @@ final class HabitModelTests: XCTestCase {
         let habit = makeHabit(completions: [
             makeCompletion(daysAgo: 0),
             makeCompletion(daysAgo: 1),
-            makeCompletion(daysAgo: 2),
+            makeCompletion(daysAgo: 2)
         ])
         XCTAssertEqual(habit.currentStreak, 3)
     }
@@ -139,7 +139,7 @@ final class HabitModelTests: XCTestCase {
         let habit = makeHabit(completions: [
             makeCompletion(daysAgo: 1),
             makeCompletion(daysAgo: 2),
-            makeCompletion(daysAgo: 3),
+            makeCompletion(daysAgo: 3)
         ])
         XCTAssertEqual(habit.currentStreak, 3)
     }
@@ -151,7 +151,7 @@ final class HabitModelTests: XCTestCase {
             makeCompletion(daysAgo: 1),
             // gap on day 2
             makeCompletion(daysAgo: 3),
-            makeCompletion(daysAgo: 4),
+            makeCompletion(daysAgo: 4)
         ])
         XCTAssertEqual(habit.currentStreak, 2)
     }
@@ -160,7 +160,7 @@ final class HabitModelTests: XCTestCase {
         // Only completed 2+ days ago — streak should be 0
         let habit = makeHabit(completions: [
             makeCompletion(daysAgo: 2),
-            makeCompletion(daysAgo: 3),
+            makeCompletion(daysAgo: 3)
         ])
         XCTAssertEqual(habit.currentStreak, 0)
     }
@@ -177,7 +177,7 @@ final class HabitModelTests: XCTestCase {
         let habit = makeHabit(completions: [
             makeCompletion(daysAgo: 0),
             Completion(date: makeDate(daysAgo: 0), value: 0.5),
-            makeCompletion(daysAgo: 1),
+            makeCompletion(daysAgo: 1)
         ])
         XCTAssertEqual(habit.currentStreak, 2)
     }
@@ -201,7 +201,7 @@ final class HabitModelTests: XCTestCase {
             makeCompletion(daysAgo: 3),
             makeCompletion(daysAgo: 4),
             makeCompletion(daysAgo: 5),
-            makeCompletion(daysAgo: 6),
+            makeCompletion(daysAgo: 6)
         ])
         XCTAssertEqual(habit.longestStreak, 4)
     }
@@ -219,7 +219,7 @@ final class HabitModelTests: XCTestCase {
             makeCompletion(daysAgo: 11),
             makeCompletion(daysAgo: 12),
             makeCompletion(daysAgo: 13),
-            makeCompletion(daysAgo: 14),
+            makeCompletion(daysAgo: 14)
         ])
         XCTAssertEqual(habit.longestStreak, 5)
     }
@@ -234,7 +234,7 @@ final class HabitModelTests: XCTestCase {
             makeCompletion(daysAgo: 4),
             // gap
             makeCompletion(daysAgo: 10),
-            makeCompletion(daysAgo: 11),
+            makeCompletion(daysAgo: 11)
         ])
         XCTAssertEqual(habit.longestStreak, 5)
     }
@@ -244,7 +244,7 @@ final class HabitModelTests: XCTestCase {
             makeCompletion(daysAgo: 0),
             Completion(date: makeDate(daysAgo: 0), value: 0.5),
             makeCompletion(daysAgo: 1),
-            makeCompletion(daysAgo: 2),
+            makeCompletion(daysAgo: 2)
         ])
         XCTAssertEqual(habit.longestStreak, 3)
     }
@@ -260,7 +260,7 @@ final class HabitModelTests: XCTestCase {
         let habit = makeHabit(completions: [
             makeCompletion(daysAgo: 0),
             makeCompletion(daysAgo: 1),
-            makeCompletion(daysAgo: 5),
+            makeCompletion(daysAgo: 5)
         ])
         XCTAssertEqual(habit.totalCompletions, 3)
     }
@@ -280,7 +280,7 @@ final class HabitModelTests: XCTestCase {
                 makeCompletion(daysAgo: 1),
                 makeCompletion(daysAgo: 2),
                 makeCompletion(daysAgo: 3),
-                makeCompletion(daysAgo: 4),
+                makeCompletion(daysAgo: 4)
             ], createdAt: createdAt)
         XCTAssertEqual(habit.completionRate, 1.0, accuracy: 0.001)
     }
@@ -291,7 +291,7 @@ final class HabitModelTests: XCTestCase {
             completions: [
                 makeCompletion(daysAgo: 0),
                 makeCompletion(daysAgo: 2),
-                makeCompletion(daysAgo: 5),
+                makeCompletion(daysAgo: 5)
             ], createdAt: createdAt)
         XCTAssertEqual(habit.completionRate, 0.3, accuracy: 0.001)
     }
@@ -310,7 +310,7 @@ final class HabitModelTests: XCTestCase {
     func testIsCompletedOnTrue() {
         let habit = makeHabit(completions: [
             makeCompletion(daysAgo: 0),
-            makeCompletion(daysAgo: 3),
+            makeCompletion(daysAgo: 3)
         ])
         XCTAssertTrue(habit.isCompletedOn(date: Date()))
         XCTAssertTrue(habit.isCompletedOn(date: makeDate(daysAgo: 3)))
@@ -353,7 +353,7 @@ final class HabitModelTests: XCTestCase {
         let today = calendar.startOfDay(for: Date())
         let habit = makeHabit(completions: [
             Completion(date: today, value: 0.5),
-            Completion(date: today, value: 0.3),
+            Completion(date: today, value: 0.3)
         ])
         XCTAssertEqual(habit.completionValue(for: Date()), 0.8, accuracy: 0.001)
     }
@@ -370,7 +370,7 @@ final class HabitModelTests: XCTestCase {
     func testHeatmapDataReturnsWeeks() {
         let habit = makeHabit(completions: [
             makeCompletion(daysAgo: 0),
-            makeCompletion(daysAgo: 5),
+            makeCompletion(daysAgo: 5)
         ])
         let data = habit.heatmapData(months: 1)
 
