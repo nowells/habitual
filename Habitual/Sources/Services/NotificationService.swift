@@ -173,11 +173,11 @@ class NotificationService {
             let content = UNMutableNotificationContent()
             if streakAtRisk {
                 content.title = "🔥 Don't break your streak!"
-                content.body = "\(habit.name) — \(streak) days in a row. You're so close!"
+                content.body = "\(habit.name) — \(streak) \(habit.goalPeriod.periodLabelPlural) in a row. You're so close!"
                 content.categoryIdentifier = Category.streakAtRisk
             } else {
                 content.title = nudgeTitle(for: habit, dayOffset: dayOffset)
-                content.body = nudgeBody(streak: streak)
+                content.body = nudgeBody(streak: streak, habit: habit)
                 content.categoryIdentifier = Category.nudge
             }
             content.sound = .default
@@ -387,10 +387,11 @@ class NotificationService {
 
     private func scheduledReminderBody(for habit: Habit) -> String {
         let streak = habit.currentStreak
+        let unit = habit.goalPeriod.periodLabelPlural
         if streak >= 7 {
-            return "🔥 \(streak)-day streak! Keep the momentum going."
+            return "🔥 \(streak)-\(habit.goalPeriod.periodLabel) streak! Keep the momentum going."
         } else if streak >= 3 {
-            return "You're on a roll — \(streak) days in a row!"
+            return "You're on a roll — \(streak) \(unit) in a row!"
         }
         return encouragingMessages.randomElement() ?? "Time to make it happen."
     }
@@ -399,9 +400,9 @@ class NotificationService {
         dayOffset == 0 ? "Still time today" : habit.name
     }
 
-    private func nudgeBody(streak: Int) -> String {
+    private func nudgeBody(streak: Int, habit: Habit) -> String {
         if streak > 0 {
-            return "You're on a \(streak)-day streak. Keep it going!"
+            return "You're on a \(streak)-\(habit.goalPeriod.periodLabel) streak. Keep it going!"
         }
         return gentleNudgeMessages.randomElement() ?? "Every day counts."
     }

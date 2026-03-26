@@ -81,7 +81,8 @@ struct LogHabitIntent: AppIntent {
         // Re-fetch to get updated streak
         let updated = store.activeHabits.first(where: { $0.id == match.id })
         let streak = updated?.currentStreak ?? 0
-        let streakMsg = streak > 1 ? " That's \(streak) days in a row!" : ""
+        let unit = match.goalPeriod.periodLabelPlural
+        let streakMsg = streak > 1 ? " That's \(streak) \(unit) in a row!" : ""
         return .result(dialog: "Logged \(match.name)!\(streakMsg)")
     }
 }
@@ -113,10 +114,10 @@ struct CheckHabitStatusIntent: AppIntent {
         if isDone {
             return .result(
                 value: true,
-                dialog: "\(match.name) is done today! You're on a \(streak)-day streak."
+                dialog: "\(match.name) is done today! You're on a \(streak)-\(match.goalPeriod.periodLabel) streak."
             )
         } else {
-            let nudge = streak >= 3 ? " You have a \(streak)-day streak — don't break it!" : ""
+            let nudge = streak >= 3 ? " You have a \(streak)-\(match.goalPeriod.periodLabel) streak — don't break it!" : ""
             return .result(
                 value: false,
                 dialog: "\(match.name) isn't logged yet today.\(nudge)"

@@ -46,6 +46,14 @@ struct Habit: Identifiable, Equatable {
             }
         }
 
+        var periodLabelPlural: String {
+            switch self {
+            case .daily: return "days"
+            case .weekly: return "weeks"
+            case .monthly: return "months"
+            }
+        }
+
         /// Returns the start date of the period containing the given date
         func periodStart(for date: Date, calendar: Calendar = .current) -> Date {
             switch self {
@@ -210,47 +218,54 @@ extension CDCompletion {
 extension Habit {
     var currentStreak: Int { currentStreak(asOf: Date()) }
 
+    /// Streak of consecutive periods where the goal was met.
+    /// For daily habits this counts days; for weekly/monthly it counts weeks/months.
     func currentStreak(asOf today: Date) -> Int {
         let calendar = Calendar.current
-        let todayStart = calendar.startOfDay(for: today)
-        let completionDates = Set(completions.map { calendar.startOfDay(for: $0.date) })
 
         var streak = 0
-        var checkDate = todayStart
+        var periodStart = goalPeriod.periodStart(for: today, calendar: calendar)
 
-        // Check if today is completed, if not start from yesterday
-        if !completionDates.contains(checkDate) {
-            guard let yesterday = calendar.date(byAdding: .day, value: -1, to: checkDate) else { return 0 }
-            checkDate = yesterday
+        // If the current period's goal isn't met yet, start checking from the previous period
+        if !isPeriodComplete(for: periodStart, calendar: calendar) {
+            guard let prev = calendar.date(byAdding: goalPeriod.calendarComponent, value: -1, to: periodStart) else { return 0 }
+            periodStart = goalPeriod.periodStart(for: prev, calendar: calendar)
         }
 
-        while completionDates.contains(checkDate) {
+        while isPeriodComplete(for: periodStart, calendar: calendar) {
             streak += 1
-            guard let previousDay = calendar.date(byAdding: .day, value: -1, to: checkDate) else { break }
-            checkDate = previousDay
+            guard let prev = calendar.date(byAdding: goalPeriod.calendarComponent, value: -1, to: periodStart) else { break }
+            periodStart = goalPeriod.periodStart(for: prev, calendar: calendar)
         }
 
         return streak
     }
 
-    var longestStreak: Int {
+    /// Longest run of consecutive periods where the goal was met.
+    var longestStreak: Int { longestStreak(asOf: Date()) }
+
+    func longestStreak(asOf today: Date) -> Int {
         let calendar = Calendar.current
-        let sortedDates = completions.map { calendar.startOfDay(for: $0.date) }.sorted()
-        let uniqueDates = Array(Set(sortedDates)).sorted()
+        guard !completions.isEmpty else { return 0 }
 
-        guard !uniqueDates.isEmpty else { return 0 }
+        // Find the range of periods to check: from createdAt to today
+        let startDate = calendar.startOfDay(for: createdAt)
+        let todayStart = calendar.startOfDay(for: today)
+        var periodStart = goalPeriod.periodStart(for: startDate, calendar: calendar)
+        let endPeriod = goalPeriod.periodEnd(for: todayStart, calendar: calendar)
 
-        var longest = 1
-        var current = 1
+        var longest = 0
+        var current = 0
 
-        for i in 1..<uniqueDates.count {
-            let daysBetween = calendar.dateComponents([.day], from: uniqueDates[i - 1], to: uniqueDates[i]).day ?? 0
-            if daysBetween == 1 {
+        while periodStart < endPeriod {
+            if isPeriodComplete(for: periodStart, calendar: calendar) {
                 current += 1
                 longest = max(longest, current)
-            } else if daysBetween > 1 {
-                current = 1
+            } else {
+                current = 0
             }
+            guard let next = calendar.date(byAdding: goalPeriod.calendarComponent, value: 1, to: periodStart) else { break }
+            periodStart = goalPeriod.periodStart(for: next, calendar: calendar)
         }
 
         return longest
@@ -262,12 +277,29 @@ extension Habit {
 
     var completionRate: Double { completionRate(asOf: Date()) }
 
+    /// Fraction of elapsed periods where the goal was met (0.0–1.0).
     func completionRate(asOf today: Date) -> Double {
         let calendar = Calendar.current
         let startDate = calendar.startOfDay(for: createdAt)
         let todayStart = calendar.startOfDay(for: today)
-        let totalDays = max(1, (calendar.dateComponents([.day], from: startDate, to: todayStart).day ?? 0) + 1)
-        return Double(totalCompletions) / Double(totalDays)
+
+        var periodStart = goalPeriod.periodStart(for: startDate, calendar: calendar)
+        let endPeriod = goalPeriod.periodEnd(for: todayStart, calendar: calendar)
+
+        var totalPeriods = 0
+        var completedPeriods = 0
+
+        while periodStart < endPeriod {
+            totalPeriods += 1
+            if isPeriodComplete(for: periodStart, calendar: calendar) {
+                completedPeriods += 1
+            }
+            guard let next = calendar.date(byAdding: goalPeriod.calendarComponent, value: 1, to: periodStart) else { break }
+            periodStart = goalPeriod.periodStart(for: next, calendar: calendar)
+        }
+
+        guard totalPeriods > 0 else { return 0 }
+        return Double(completedPeriods) / Double(totalPeriods)
     }
 
     func isCompletedOn(date: Date) -> Bool {

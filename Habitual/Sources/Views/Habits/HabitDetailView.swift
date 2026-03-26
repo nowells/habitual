@@ -90,15 +90,16 @@ struct HabitDetailView: View {
         let streak = currentHabit.currentStreak(asOf: today)
         let isDone = currentHabit.isCompletedOn(date: today)
 
+        let unit = currentHabit.goalPeriod.periodLabelPlural
         let (mood, message): (MascotMood, String) = {
             if isDone && streak >= 7 {
-                return (.excited, "\(streak) days! \(mascot.name) is absolutely fired up! 🔥")
+                return (.excited, "\(streak) \(unit)! \(mascot.name) is absolutely fired up! 🔥")
             } else if isDone && streak >= 3 {
-                return (.happy, "Nice work! \(streak) days in a row — you're building something real.")
+                return (.happy, "Nice work! \(streak) \(unit) in a row — you're building something real.")
             } else if isDone {
-                return (.happy, "\(mascot.name) is proud! Every day you show up matters.")
+                return (.happy, "\(mascot.name) is proud! Every \(currentHabit.goalPeriod.periodLabel) you show up matters.")
             } else if streak >= 3 {
-                return (.encouraging, "You have a \(streak)-day streak at stake! \(mascot.name) believes in you.")
+                return (.encouraging, "You have a \(streak)-\(currentHabit.goalPeriod.periodLabel) streak at stake! \(mascot.name) believes in you.")
             } else {
                 return (.encouraging, "\(mascot.name) is cheering you on. There's still time today!")
             }
@@ -247,15 +248,15 @@ struct HabitDetailView: View {
                 StatCard(
                     title: "Current Streak",
                     value: "\(currentHabit.currentStreak(asOf: today))",
-                    subtitle: "days",
+                    subtitle: currentHabit.goalPeriod.periodLabelPlural,
                     icon: "flame.fill",
                     color: .orange
                 )
 
                 StatCard(
                     title: "Longest Streak",
-                    value: "\(currentHabit.longestStreak)",
-                    subtitle: "days",
+                    value: "\(currentHabit.longestStreak(asOf: today))",
+                    subtitle: currentHabit.goalPeriod.periodLabelPlural,
                     icon: "trophy.fill",
                     color: .yellow
                 )

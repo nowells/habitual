@@ -132,8 +132,8 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
                         Text("Statistics")
                             .font(.headline)
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                            StatCard(title: "Current Streak", value: "\(habit.currentStreak)", subtitle: "days", icon: "flame.fill", color: .orange)
-                            StatCard(title: "Longest Streak", value: "\(habit.longestStreak)", subtitle: "days", icon: "trophy.fill", color: .yellow)
+                            StatCard(title: "Current Streak", value: "\(habit.currentStreak)", subtitle: habit.goalPeriod.periodLabelPlural, icon: "flame.fill", color: .orange)
+                            StatCard(title: "Longest Streak", value: "\(habit.longestStreak)", subtitle: habit.goalPeriod.periodLabelPlural, icon: "trophy.fill", color: .yellow)
                             StatCard(title: "Total", value: "\(habit.totalCompletions)", subtitle: "completions", icon: "checkmark.circle.fill", color: habit.color)
                             StatCard(title: "Success Rate", value: "\(Int(habit.completionRate(asOf: TestData.referenceDate) * 100))%", subtitle: "overall", icon: "chart.line.uptrend.xyaxis", color: .green)
                         }
@@ -239,8 +239,8 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
                         Text("Statistics")
                             .font(.headline)
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                            StatCard(title: "Current Streak", value: "\(habit.currentStreak)", subtitle: "days", icon: "flame.fill", color: .orange)
-                            StatCard(title: "Longest Streak", value: "\(habit.longestStreak)", subtitle: "days", icon: "trophy.fill", color: .yellow)
+                            StatCard(title: "Current Streak", value: "\(habit.currentStreak)", subtitle: habit.goalPeriod.periodLabelPlural, icon: "flame.fill", color: .orange)
+                            StatCard(title: "Longest Streak", value: "\(habit.longestStreak)", subtitle: habit.goalPeriod.periodLabelPlural, icon: "trophy.fill", color: .yellow)
                             StatCard(title: "Total", value: "\(habit.totalCompletions)", subtitle: "completions", icon: "checkmark.circle.fill", color: habit.color)
                             StatCard(title: "Success Rate", value: "\(Int(habit.completionRate(asOf: TestData.referenceDate) * 100))%", subtitle: "overall", icon: "chart.line.uptrend.xyaxis", color: .green)
                         }
@@ -305,8 +305,8 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
                     Text("Statistics")
                         .font(.headline)
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                        StatCard(title: "Current Streak", value: "\(habit.currentStreak)", subtitle: "days", icon: "flame.fill", color: .orange)
-                        StatCard(title: "Longest Streak", value: "\(habit.longestStreak)", subtitle: "days", icon: "trophy.fill", color: .yellow)
+                        StatCard(title: "Current Streak", value: "\(habit.currentStreak)", subtitle: habit.goalPeriod.periodLabelPlural, icon: "flame.fill", color: .orange)
+                        StatCard(title: "Longest Streak", value: "\(habit.longestStreak)", subtitle: habit.goalPeriod.periodLabelPlural, icon: "trophy.fill", color: .yellow)
                         StatCard(title: "Total", value: "\(habit.totalCompletions)", subtitle: "completions", icon: "checkmark.circle.fill", color: habit.color)
                         StatCard(title: "Success Rate", value: "\(Int(habit.completionRate(asOf: TestData.referenceDate) * 100))%", subtitle: "overall", icon: "chart.line.uptrend.xyaxis", color: .green)
                     }
@@ -449,8 +449,8 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
         let habit = TestData.exerciseHabit
         let view = SnapshotContainer(width: 390) {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                StatCard(title: "Current Streak", value: "\(habit.currentStreak)", subtitle: "days", icon: "flame.fill", color: .orange)
-                StatCard(title: "Longest Streak", value: "\(habit.longestStreak)", subtitle: "days", icon: "trophy.fill", color: .yellow)
+                StatCard(title: "Current Streak", value: "\(habit.currentStreak)", subtitle: habit.goalPeriod.periodLabelPlural, icon: "flame.fill", color: .orange)
+                StatCard(title: "Longest Streak", value: "\(habit.longestStreak)", subtitle: habit.goalPeriod.periodLabelPlural, icon: "trophy.fill", color: .yellow)
                 StatCard(title: "Total", value: "\(habit.totalCompletions)", subtitle: "completions", icon: "checkmark.circle.fill", color: habit.color)
                 StatCard(title: "Success Rate", value: "\(Int(habit.completionRate(asOf: TestData.referenceDate) * 100))%", subtitle: "overall", icon: "chart.line.uptrend.xyaxis", color: .green)
             }
