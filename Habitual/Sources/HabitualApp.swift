@@ -100,12 +100,6 @@ struct HabitualApp: App {
                     #endif
                 }
         }
-        #if targetEnvironment(macCatalyst)
-        Settings {
-            SettingsView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
-        }
-        #endif
     }
 
     /// Refresh the 7-day nudge windows for all active habits every time the app comes to foreground.
