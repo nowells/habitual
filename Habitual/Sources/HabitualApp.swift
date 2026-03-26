@@ -38,14 +38,14 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
         switch response.actionIdentifier {
         case NotificationService.Action.completeBackground:
-            // Mark complete without opening the app
+            // Add one completion without opening the app
             Task { @MainActor in
                 let store = HabitStore(context: PersistenceController.shared.container.viewContext)
-                if let habit = store.activeHabits.first(where: { $0.id == habitID }),
-                   !habit.isCompletedOn(date: Date()) {
-                    store.toggleTodayCompletion(for: habit)
+                if let habit = store.activeHabits.first(where: { $0.id == habitID }) {
+                    store.addCompletion(for: habit)
                     // Reschedule nudges so today's windows are cleared
                     NudgeService.refresh(for: habit)
+                    NudgeService.refreshPeriod(for: habit)
                 }
                 completionHandler()
             }
@@ -102,11 +102,12 @@ struct HabitualApp: App {
         }
     }
 
-    /// Refresh the 7-day nudge windows for all active habits every time the app comes to foreground.
+    /// Refresh the 7-day nudge and period reminder windows for all active habits on launch.
     private func refreshNudgesOnLaunch() {
         Task { @MainActor in
             let store = HabitStore(context: persistenceController.container.viewContext)
             NudgeService.refreshAll(for: store.activeHabits)
+            NudgeService.refreshAllPeriod(for: store.activeHabits)
         }
     }
 }

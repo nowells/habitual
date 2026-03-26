@@ -92,6 +92,7 @@ class HabitStore: ObservableObject {
         // Clean up associated notifications and nudge settings
         NotificationService.shared.removeReminder(for: habit)
         NudgeService.removeSettings(for: habit)
+        NudgeService.removePeriodSettings(for: habit)
     }
 
     func archiveHabit(_ habit: Habit) {
@@ -135,11 +136,67 @@ class HabitStore: ObservableObject {
         toggleCompletion(for: habit, on: Date())
     }
 
+    /// Add one completion for the given date (incremental, does not toggle/remove)
+    func addCompletion(for habit: Habit, on date: Date = Date()) {
+        let calendar = Calendar.current
+        let targetDay = calendar.startOfDay(for: date)
+
+        guard let cdHabit = fetchCDHabit(by: habit.id) else { return }
+
+        let completion = CDCompletion(context: viewContext)
+        completion.id = UUID()
+        completion.date = targetDay
+        completion.value = 1.0
+        completion.habit = cdHabit
+
+        save()
+        fetchHabits()
+    }
+
+    /// Remove the most recent completion for the given date
+    func removeLastCompletion(for habit: Habit, on date: Date = Date()) {
+        let calendar = Calendar.current
+        let targetDay = calendar.startOfDay(for: date)
+
+        guard let cdHabit = fetchCDHabit(by: habit.id) else { return }
+        let completionSet = (cdHabit.completions as? Set<CDCompletion>) ?? []
+
+        let dayCompletions = completionSet
+            .filter { calendar.startOfDay(for: $0.date ?? Date()) == targetDay }
+            .sorted { ($0.date ?? Date()) > ($1.date ?? Date()) }
+
+        if let last = dayCompletions.first {
+            viewContext.delete(last)
+            save()
+            fetchHabits()
+        }
+    }
+
+    /// Remove all completions within a given period for a habit
+    func removeAllCompletionsInPeriod(for habit: Habit, periodStart: Date, periodEnd: Date) {
+        let calendar = Calendar.current
+        guard let cdHabit = fetchCDHabit(by: habit.id) else { return }
+        let completionSet = (cdHabit.completions as? Set<CDCompletion>) ?? []
+
+        let periodCompletions = completionSet.filter { completion in
+            let d = calendar.startOfDay(for: completion.date ?? Date())
+            return d >= periodStart && d < periodEnd
+        }
+
+        for completion in periodCompletions {
+            viewContext.delete(completion)
+        }
+
+        if !periodCompletions.isEmpty {
+            save()
+            fetchHabits()
+        }
+    }
+
     /// Mark a habit complete today by ID — used by notification action handlers and App Intents.
     func completeHabit(id: UUID) {
-        guard let habit = activeHabits.first(where: { $0.id == id }),
-              !habit.isCompletedOn(date: Date()) else { return }
-        toggleTodayCompletion(for: habit)
+        guard let habit = activeHabits.first(where: { $0.id == id }) else { return }
+        addCompletion(for: habit)
     }
 
     func moveHabits(from source: IndexSet, to destination: Int) {

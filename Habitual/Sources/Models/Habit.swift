@@ -45,6 +45,57 @@ struct Habit: Identifiable, Equatable {
             case .monthly: return "month"
             }
         }
+
+        /// Returns the start date of the period containing the given date
+        func periodStart(for date: Date, calendar: Calendar = .current) -> Date {
+            switch self {
+            case .daily:
+                return calendar.startOfDay(for: date)
+            case .weekly:
+                var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
+                components.weekday = calendar.firstWeekday
+                return calendar.date(from: components) ?? calendar.startOfDay(for: date)
+            case .monthly:
+                let components = calendar.dateComponents([.year, .month], from: date)
+                return calendar.date(from: components) ?? calendar.startOfDay(for: date)
+            }
+        }
+
+        /// Returns the end date (exclusive) of the period containing the given date
+        func periodEnd(for date: Date, calendar: Calendar = .current) -> Date {
+            let start = periodStart(for: date, calendar: calendar)
+            switch self {
+            case .daily:
+                return calendar.date(byAdding: .day, value: 1, to: start) ?? start
+            case .weekly:
+                return calendar.date(byAdding: .weekOfYear, value: 1, to: start) ?? start
+            case .monthly:
+                return calendar.date(byAdding: .month, value: 1, to: start) ?? start
+            }
+        }
+
+        /// Calendar component for stepping through periods
+        var calendarComponent: Calendar.Component {
+            switch self {
+            case .daily: return .day
+            case .weekly: return .weekOfYear
+            case .monthly: return .month
+            }
+        }
+
+        /// Short label for period legends in heatmaps
+        func legendLabel(for date: Date, calendar: Calendar = .current) -> String {
+            let formatter = DateFormatter()
+            switch self {
+            case .daily:
+                formatter.dateFormat = "MMM d"
+            case .weekly:
+                formatter.dateFormat = "MMM d"
+            case .monthly:
+                formatter.dateFormat = "MMM"
+            }
+            return formatter.string(from: date)
+        }
     }
 
     init(
@@ -233,6 +284,60 @@ extension Habit {
             .reduce(0) { $0 + $1.value }
     }
 
+    /// Number of completions within the period containing the given date
+    func completionsInPeriod(containing date: Date, calendar: Calendar = .current) -> Int {
+        let start = goalPeriod.periodStart(for: date, calendar: calendar)
+        let end = goalPeriod.periodEnd(for: date, calendar: calendar)
+        return completions.filter { completion in
+            let d = calendar.startOfDay(for: completion.date)
+            return d >= start && d < end
+        }.count
+    }
+
+    /// Progress ratio for the period containing the given date (can exceed 1.0)
+    func periodProgress(for date: Date, calendar: Calendar = .current) -> Double {
+        guard goalFrequency > 0 else { return 0 }
+        return Double(completionsInPeriod(containing: date, calendar: calendar)) / Double(goalFrequency)
+    }
+
+    /// Whether the goal is fully met for the period containing the given date
+    func isPeriodComplete(for date: Date, calendar: Calendar = .current) -> Bool {
+        completionsInPeriod(containing: date, calendar: calendar) >= goalFrequency
+    }
+
+    /// Returns period-based heatmap data: one entry per period going back N months
+    func periodHeatmapData(months: Int = 4, today: Date = Date()) -> [PeriodData] {
+        let calendar = Calendar.current
+        let todayStart = calendar.startOfDay(for: today)
+        guard let startDate = calendar.date(byAdding: .month, value: -months, to: todayStart) else { return [] }
+
+        let periodStart = goalPeriod.periodStart(for: startDate, calendar: calendar)
+
+        var periods: [PeriodData] = []
+        var current = periodStart
+
+        while current <= todayStart {
+            let end = goalPeriod.periodEnd(for: current, calendar: calendar)
+            let count = completions.filter { completion in
+                let d = calendar.startOfDay(for: completion.date)
+                return d >= current && d < end
+            }.count
+            let isFuture = current > todayStart
+            let isCurrentPeriod = current <= todayStart && end > todayStart
+            periods.append(PeriodData(
+                periodStart: current,
+                periodEnd: end,
+                completionCount: count,
+                goalFrequency: goalFrequency,
+                isFuture: isFuture,
+                isCurrentPeriod: isCurrentPeriod
+            ))
+            current = end
+        }
+
+        return periods
+    }
+
     /// Returns a grid of completion data for the heatmap, organized by weeks
     func heatmapData(months: Int = 4, today: Date = Date()) -> [[DayData]] {
         let calendar = Calendar.current
@@ -280,6 +385,37 @@ struct DayData: Identifiable {
     let isFuture: Bool
 
     var isCompleted: Bool { value > 0 }
+}
+
+// MARK: - Period Data for Period Heatmap
+
+struct PeriodData: Identifiable {
+    let id = UUID()
+    let periodStart: Date
+    let periodEnd: Date
+    let completionCount: Int
+    let goalFrequency: Int
+    let isFuture: Bool
+    let isCurrentPeriod: Bool
+
+    /// Progress ratio (can exceed 1.0 for over-completion)
+    var progress: Double {
+        guard goalFrequency > 0 else { return 0 }
+        return Double(completionCount) / Double(goalFrequency)
+    }
+
+    var isComplete: Bool { completionCount >= goalFrequency }
+
+    /// Number of full rotations (0 = incomplete first ring, 1 = one full ring, etc.)
+    var fullRotations: Int { goalFrequency > 0 ? completionCount / goalFrequency : 0 }
+
+    /// Fractional progress within the current rotation (0.0 to 1.0)
+    var currentRotationProgress: Double {
+        guard goalFrequency > 0 else { return 0 }
+        let remainder = completionCount % goalFrequency
+        if remainder == 0 && completionCount > 0 { return 1.0 }
+        return Double(remainder) / Double(goalFrequency)
+    }
 }
 
 // MARK: - Preset Colors

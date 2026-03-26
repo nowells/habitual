@@ -147,22 +147,37 @@ struct HabitDetailView: View {
 
             Spacer()
 
-            // Today toggle
-            Button(action: {
-                withAnimation(.spring(response: 0.3)) {
-                    habitStore.toggleTodayCompletion(for: currentHabit)
+            // Period check-in with radial progress
+            RadialCheckInButton(
+                habit: currentHabit,
+                today: today,
+                size: 48,
+                onTap: {
+                    withAnimation(.spring(response: 0.3)) {
+                        habitStore.addCompletion(for: currentHabit, on: today)
+                    }
                 }
-            }) {
-                VStack(spacing: 4) {
-                    Image(systemName: currentHabit.isCompletedOn(date: today) ? "checkmark.circle.fill" : "circle")
-                        .font(.system(size: 36))
-                        .foregroundStyle(currentHabit.isCompletedOn(date: today) ? currentHabit.color : Color.systemGray3)
-                    Text("Today")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+            )
+            .contextMenu {
+                let count = currentHabit.completionsInPeriod(containing: today)
+                Button(action: {
+                    withAnimation(.spring(response: 0.3)) {
+                        habitStore.addCompletion(for: currentHabit, on: today)
+                    }
+                }) {
+                    Label("Add Completion", systemImage: "plus.circle")
+                }
+
+                if count > 0 {
+                    Button(action: {
+                        withAnimation(.spring(response: 0.3)) {
+                            habitStore.removeLastCompletion(for: currentHabit, on: today)
+                        }
+                    }) {
+                        Label("Remove Last", systemImage: "minus.circle")
+                    }
                 }
             }
-            .buttonStyle(.plain)
         }
         .padding()
         .background {
@@ -176,18 +191,36 @@ struct HabitDetailView: View {
 
     private var heatmapSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Activity")
-                .font(.headline)
+            HStack {
+                Text("Activity")
+                    .font(.headline)
+                Spacer()
+                Text("\(currentHabit.goalFrequency)x / \(currentHabit.goalPeriod.periodLabel)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color.systemGray6)
+                    .clipShape(Capsule())
+            }
 
-            HeatmapGridView(
+            PeriodHeatmapGridView(
                 habit: currentHabit,
                 months: 6,
                 cellSize: 14,
                 cellSpacing: 3,
-                showMonthLabels: true,
-                onTapDate: { date in
-                    withAnimation(.spring(response: 0.3)) {
-                        habitStore.toggleCompletion(for: currentHabit, on: date)
+                showLabels: true,
+                onTapPeriod: { period in
+                    // For daily habits, toggle on the period start date
+                    // For weekly/monthly, add a completion on today if period is current
+                    if period.isCurrentPeriod {
+                        withAnimation(.spring(response: 0.3)) {
+                            habitStore.addCompletion(for: currentHabit, on: today)
+                        }
+                    } else {
+                        withAnimation(.spring(response: 0.3)) {
+                            habitStore.addCompletion(for: currentHabit, on: period.periodStart)
+                        }
                     }
                 }
             )
@@ -285,7 +318,7 @@ struct HabitDetailView: View {
                 month: selectedMonth,
                 onTapDate: { date in
                     withAnimation(.spring(response: 0.3)) {
-                        habitStore.toggleCompletion(for: currentHabit, on: date)
+                        habitStore.addCompletion(for: currentHabit, on: date)
                     }
                 }
             )
@@ -387,7 +420,9 @@ struct CalendarGridView: View {
                                 if date <= Date() {
                                     onTapDate?(date)
                                 }
-                            }
+                            },
+                            completionCount: habit.completionsInPeriod(containing: date),
+                            goalFrequency: habit.goalFrequency
                         )
                     } else {
                         Text("")
@@ -440,31 +475,46 @@ struct CalendarDayCell: View {
     let isFuture: Bool
     let color: Color
     let onTap: () -> Void
+    var completionCount: Int = 0
+    var goalFrequency: Int = 1
 
     private let calendar = Calendar.current
 
     var body: some View {
-        Text("\(calendar.component(.day, from: date))")
-            .font(.caption)
-            .fontWeight(isToday ? .bold : .regular)
-            .foregroundStyle(foregroundColor)
-            .frame(width: 36, height: 36)
-            .background {
-                if isCompleted {
-                    Circle()
-                        .fill(color)
-                } else if isToday {
-                    Circle()
-                        .strokeBorder(color, lineWidth: 1.5)
-                }
+        ZStack {
+            if goalFrequency > 1 && completionCount > 0 {
+                // Multi-frequency: show radial ring behind the day number
+                RadialProgressView(
+                    completionCount: completionCount,
+                    goalFrequency: goalFrequency,
+                    baseColor: color,
+                    lineWidth: 2.5,
+                    size: 32
+                )
+            } else if isCompleted {
+                Circle()
+                    .fill(color)
+                    .frame(width: 36, height: 36)
+            } else if isToday {
+                Circle()
+                    .strokeBorder(color, lineWidth: 1.5)
+                    .frame(width: 36, height: 36)
             }
-            .opacity(isFuture ? 0.3 : 1.0)
-            .onTapGesture {
-                onTap()
-            }
+
+            Text("\(calendar.component(.day, from: date))")
+                .font(.caption)
+                .fontWeight(isToday ? .bold : .regular)
+                .foregroundStyle(foregroundColor)
+        }
+        .frame(width: 36, height: 36)
+        .opacity(isFuture ? 0.3 : 1.0)
+        .onTapGesture {
+            onTap()
+        }
     }
 
     private var foregroundColor: Color {
+        if goalFrequency > 1 { return isFuture ? .secondary : .primary }
         if isCompleted { return .white }
         if isFuture { return .secondary }
         return .primary

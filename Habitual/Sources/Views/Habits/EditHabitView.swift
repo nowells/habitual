@@ -16,6 +16,13 @@ struct EditHabitView: View {
     @State private var reminderTime: Date
     @State private var nudgeEnabled: Bool
     @State private var nudgeTime: Date
+    @State private var periodRemindersEnabled: Bool
+    @State private var periodStartEnabled: Bool
+    @State private var periodStartTime: Date
+    @State private var periodMidEnabled: Bool
+    @State private var periodMidTime: Date
+    @State private var periodEndEnabled: Bool
+    @State private var periodEndTime: Date
     @State private var showDeleteConfirmation = false
 
     init(habit: Habit, habitStore: HabitStore) {
@@ -32,6 +39,15 @@ struct EditHabitView: View {
         let existingNudge = NudgeService.settings(for: habit)
         _nudgeEnabled = State(initialValue: existingNudge.isEnabled)
         _nudgeTime = State(initialValue: existingNudge.nudgeTime)
+
+        let existingPeriod = NudgeService.periodSettings(for: habit)
+        _periodRemindersEnabled = State(initialValue: existingPeriod.isEnabled)
+        _periodStartEnabled = State(initialValue: existingPeriod.startReminderEnabled)
+        _periodStartTime = State(initialValue: existingPeriod.startReminderTime)
+        _periodMidEnabled = State(initialValue: existingPeriod.midReminderEnabled)
+        _periodMidTime = State(initialValue: existingPeriod.midReminderTime)
+        _periodEndEnabled = State(initialValue: existingPeriod.endReminderEnabled)
+        _periodEndTime = State(initialValue: existingPeriod.endReminderTime)
 
         let matchingColor = HabitColor.presets.first {
             abs($0.red - habit.colorComponents.red) < 0.01 &&
@@ -141,6 +157,32 @@ struct EditHabitView: View {
                 }
             }
 
+            // MARK: Period Reminders
+
+            Section {
+                Toggle("Period Reminders", isOn: $periodRemindersEnabled)
+                if periodRemindersEnabled {
+                    Toggle(periodStartLabel, isOn: $periodStartEnabled)
+                    if periodStartEnabled {
+                        DatePicker("Time", selection: $periodStartTime, displayedComponents: .hourAndMinute)
+                    }
+
+                    Toggle(periodMidLabel, isOn: $periodMidEnabled)
+                    if periodMidEnabled {
+                        DatePicker("Time", selection: $periodMidTime, displayedComponents: .hourAndMinute)
+                    }
+
+                    Toggle(periodEndLabel, isOn: $periodEndEnabled)
+                    if periodEndEnabled {
+                        DatePicker("Time", selection: $periodEndTime, displayedComponents: .hourAndMinute)
+                    }
+                }
+            } header: {
+                Text("Period Reminders")
+            } footer: {
+                Text(periodReminderFooter)
+            }
+
             // MARK: Danger Zone
 
             Section {
@@ -188,6 +230,41 @@ struct EditHabitView: View {
         }
     }
 
+    private var periodStartLabel: String {
+        switch goalPeriod {
+        case .daily: return "Morning Reminder"
+        case .weekly: return "Start of Week"
+        case .monthly: return "Start of Month"
+        }
+    }
+
+    private var periodMidLabel: String {
+        switch goalPeriod {
+        case .daily: return "Midday Check-in"
+        case .weekly: return "Mid-Week Check-in"
+        case .monthly: return "Mid-Month Check-in"
+        }
+    }
+
+    private var periodEndLabel: String {
+        switch goalPeriod {
+        case .daily: return "Evening Reminder"
+        case .weekly: return "End of Week Reminder"
+        case .monthly: return "End of Month Reminder"
+        }
+    }
+
+    private var periodReminderFooter: String {
+        switch goalPeriod {
+        case .daily:
+            return "Get reminded at the start, middle, and end of each day to hit your goal."
+        case .weekly:
+            return "Get reminded at the start of the week, mid-week, and before the week ends."
+        case .monthly:
+            return "Get reminded at the start, middle, and end of each month."
+        }
+    }
+
     private func saveChanges() {
         var updated = habit
         updated.name = name.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -209,6 +286,17 @@ struct EditHabitView: View {
 
         let nudgeSettings = NudgeSettings(isEnabled: nudgeEnabled, nudgeTime: nudgeTime)
         NudgeService.apply(nudgeSettings, for: updated)
+
+        let periodSettings = PeriodReminderSettings(
+            isEnabled: periodRemindersEnabled,
+            startReminderTime: periodStartTime,
+            startReminderEnabled: periodStartEnabled,
+            midReminderTime: periodMidTime,
+            midReminderEnabled: periodMidEnabled,
+            endReminderTime: periodEndTime,
+            endReminderEnabled: periodEndEnabled
+        )
+        NudgeService.applyPeriodSettings(periodSettings, for: updated)
 
         dismiss()
     }

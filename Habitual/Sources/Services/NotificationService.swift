@@ -221,6 +221,110 @@ class NotificationService {
         }
     }
 
+    // MARK: - Period-Aware Reminders
+
+    /// Schedule start/mid/end-of-period reminders for the next 7 periods.
+    func schedulePeriodReminders(for habit: Habit, settings: PeriodReminderSettings) {
+        removePeriodReminders(for: habit)
+
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        let currentPeriodStart = habit.goalPeriod.periodStart(for: today, calendar: cal)
+
+        // Schedule for the next 7 periods
+        for periodOffset in 0..<7 {
+            guard let periodStart = cal.date(
+                byAdding: habit.goalPeriod.calendarComponent,
+                value: periodOffset,
+                to: currentPeriodStart
+            ) else { continue }
+
+            let periodEnd = habit.goalPeriod.periodEnd(for: periodStart, calendar: cal)
+
+            // Start of period reminder
+            if settings.startReminderEnabled {
+                let startHour = cal.component(.hour, from: settings.startReminderTime)
+                let startMinute = cal.component(.minute, from: settings.startReminderTime)
+
+                if let fireDate = cal.date(bySettingHour: startHour, minute: startMinute, second: 0, of: periodStart),
+                   fireDate > Date() {
+                    let content = periodReminderContent(
+                        for: habit,
+                        phase: .start,
+                        periodStart: periodStart,
+                        periodEnd: periodEnd
+                    )
+                    scheduleOneShotNotification(
+                        id: periodReminderID(for: habit, periodOffset: periodOffset, phase: "start"),
+                        content: content,
+                        fireDate: fireDate
+                    )
+                }
+            }
+
+            // Mid-period reminder
+            if settings.midReminderEnabled {
+                let midDate = midPeriodDate(
+                    period: habit.goalPeriod,
+                    periodStart: periodStart,
+                    periodEnd: periodEnd,
+                    calendar: cal
+                )
+                let midHour = cal.component(.hour, from: settings.midReminderTime)
+                let midMinute = cal.component(.minute, from: settings.midReminderTime)
+
+                if let fireDate = cal.date(bySettingHour: midHour, minute: midMinute, second: 0, of: midDate),
+                   fireDate > Date() {
+                    // Only fire if goal not yet met
+                    let completionsSoFar = habit.completionsInPeriod(containing: periodStart)
+                    if completionsSoFar < habit.goalFrequency || periodOffset > 0 {
+                        let content = periodReminderContent(
+                            for: habit,
+                            phase: .mid,
+                            periodStart: periodStart,
+                            periodEnd: periodEnd
+                        )
+                        scheduleOneShotNotification(
+                            id: periodReminderID(for: habit, periodOffset: periodOffset, phase: "mid"),
+                            content: content,
+                            fireDate: fireDate
+                        )
+                    }
+                }
+            }
+
+            // End of period (urgent) reminder
+            if settings.endReminderEnabled {
+                let endDate = endPeriodDate(
+                    period: habit.goalPeriod,
+                    periodStart: periodStart,
+                    periodEnd: periodEnd,
+                    calendar: cal
+                )
+                let endHour = cal.component(.hour, from: settings.endReminderTime)
+                let endMinute = cal.component(.minute, from: settings.endReminderTime)
+
+                if let fireDate = cal.date(bySettingHour: endHour, minute: endMinute, second: 0, of: endDate),
+                   fireDate > Date() {
+                    let completionsSoFar = habit.completionsInPeriod(containing: periodStart)
+                    if completionsSoFar < habit.goalFrequency || periodOffset > 0 {
+                        let content = periodReminderContent(
+                            for: habit,
+                            phase: .end,
+                            periodStart: periodStart,
+                            periodEnd: periodEnd
+                        )
+                        scheduleOneShotNotification(
+                            id: periodReminderID(for: habit, periodOffset: periodOffset, phase: "end"),
+                            content: content,
+                            fireDate: fireDate
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     // MARK: - Removal
 
     func removeReminder(for habit: Habit) {
@@ -231,6 +335,14 @@ class NotificationService {
 
     func removeNudges(for habit: Habit) {
         let ids = (0..<7).map { nudgeID(for: habit, dayOffset: $0) }
+        notificationCenter?.removePendingNotificationRequests(withIdentifiers: ids)
+    }
+
+    func removePeriodReminders(for habit: Habit) {
+        let phases = ["start", "mid", "end"]
+        let ids = (0..<7).flatMap { offset in
+            phases.map { phase in periodReminderID(for: habit, periodOffset: offset, phase: phase) }
+        }
         notificationCenter?.removePendingNotificationRequests(withIdentifiers: ids)
     }
 
@@ -267,6 +379,109 @@ class NotificationService {
             return "You're on a \(streak)-day streak. Keep it going!"
         }
         return gentleNudgeMessages.randomElement() ?? "Every day counts."
+    }
+
+    // MARK: - Period Reminder Helpers
+
+    private enum ReminderPhase {
+        case start, mid, end
+    }
+
+    private func periodReminderID(for habit: Habit, periodOffset: Int, phase: String) -> String {
+        "habit-\(habit.id.uuidString)-period-\(periodOffset)-\(phase)"
+    }
+
+    private func scheduleOneShotNotification(id: String, content: UNMutableNotificationContent, fireDate: Date) {
+        let cal = Calendar.current
+        let triggerComponents = cal.dateComponents([.year, .month, .day, .hour, .minute], from: fireDate)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerComponents, repeats: false)
+        let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
+        notificationCenter?.add(request) { error in
+            if let error { print("Error scheduling period reminder: \(error)") }
+        }
+    }
+
+    private func midPeriodDate(period: Habit.GoalPeriod, periodStart: Date, periodEnd: Date, calendar: Calendar) -> Date {
+        switch period {
+        case .daily:
+            // Noon
+            return calendar.date(bySettingHour: 12, minute: 0, second: 0, of: periodStart) ?? periodStart
+        case .weekly:
+            // Mid-week (Wednesday/Thursday = 3 days after start)
+            return calendar.date(byAdding: .day, value: 3, to: periodStart) ?? periodStart
+        case .monthly:
+            // Mid-month (15th or middle of the month)
+            return calendar.date(byAdding: .day, value: 14, to: periodStart) ?? periodStart
+        }
+    }
+
+    private func endPeriodDate(period: Habit.GoalPeriod, periodStart: Date, periodEnd: Date, calendar: Calendar) -> Date {
+        switch period {
+        case .daily:
+            // Evening of the same day
+            return periodStart
+        case .weekly:
+            // Last day of the week (1 day before period end)
+            return calendar.date(byAdding: .day, value: -1, to: periodEnd) ?? periodStart
+        case .monthly:
+            // Last 3 days of month (3 days before period end)
+            return calendar.date(byAdding: .day, value: -3, to: periodEnd) ?? periodStart
+        }
+    }
+
+    private func periodReminderContent(
+        for habit: Habit,
+        phase: ReminderPhase,
+        periodStart: Date,
+        periodEnd: Date
+    ) -> UNMutableNotificationContent {
+        let content = UNMutableNotificationContent()
+        content.sound = .default
+        content.userInfo = [
+            UserInfoKey.habitID: habit.id.uuidString,
+            UserInfoKey.habitName: habit.name,
+        ]
+
+        let periodName = habit.goalPeriod.periodLabel
+        let freq = habit.goalFrequency
+
+        switch phase {
+        case .start:
+            content.title = habit.name
+            content.body = startOfPeriodMessage(periodName: periodName, frequency: freq)
+            content.categoryIdentifier = Category.nudge
+        case .mid:
+            content.title = "Check in: \(habit.name)"
+            content.body = midPeriodMessage(periodName: periodName, frequency: freq)
+            content.categoryIdentifier = Category.nudge
+        case .end:
+            content.title = "⏰ \(habit.name)"
+            content.body = endOfPeriodMessage(periodName: periodName, frequency: freq)
+            content.categoryIdentifier = Category.streakAtRisk
+        }
+
+        return content
+    }
+
+    private func startOfPeriodMessage(periodName: String, frequency: Int) -> String {
+        if frequency == 1 {
+            return "New \(periodName) starts now! You've got this."
+        }
+        return "New \(periodName)! Goal: \(frequency) times this \(periodName). Let's go!"
+    }
+
+    private func midPeriodMessage(periodName: String, frequency: Int) -> String {
+        if frequency == 1 {
+            return "Halfway through the \(periodName). Still time to check this off!"
+        }
+        return "The \(periodName) is halfway through. How's your progress?"
+    }
+
+    private func endOfPeriodMessage(periodName: String, frequency: Int) -> String {
+        if frequency == 1 {
+            return "The \(periodName) is almost over — don't miss it!"
+        }
+        return "Running out of time this \(periodName)! Make sure to hit your goal."
     }
 
     private let encouragingMessages = [

@@ -12,6 +12,8 @@ struct HabitCardView: View {
     private let calendar = Calendar.current
 
     private var isCompletedToday: Bool { habit.isCompletedOn(date: today) }
+    private var periodCompletions: Int { habit.completionsInPeriod(containing: today) }
+    private var isPeriodGoalMet: Bool { habit.isPeriodComplete(for: today) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -42,13 +44,15 @@ struct HabitCardView: View {
                         .transition(.scale.combined(with: .opacity))
                 }
 
-                // Quick complete button for today
-                Button(action: {
-                    withAnimation(.spring(duration: 0.3, bounce: 0.5)) {
-                        habitStore.toggleTodayCompletion(for: habit)
-                    }
-                    // Show mascot reaction when completing (not uncompleting)
-                    if !isCompletedToday {
+                // Quick check-in button with radial progress
+                RadialCheckInButton(
+                    habit: habit,
+                    today: today,
+                    size: 40,
+                    onTap: {
+                        withAnimation(.spring(duration: 0.3, bounce: 0.5)) {
+                            habitStore.addCompletion(for: habit, on: today)
+                        }
                         let streak = habit.currentStreak(asOf: today)
                         reactionMascot = Mascot.forStreak(streak + 1, completed: true)
                         withAnimation(.spring(duration: 0.4, bounce: 0.5)) {
@@ -59,18 +63,11 @@ struct HabitCardView: View {
                             withAnimation { showMascotReaction = false }
                         }
                     }
-                }) {
-                    Image(systemName: isCompletedToday ? "checkmark.circle.fill" : "circle")
-                        .font(.title2)
-                        .foregroundStyle(isCompletedToday ? habit.color : Color.systemGray3)
-                        .scaleEffect(isCompletedToday ? 1.1 : 1.0)
-                        .animation(.spring(duration: 0.3, bounce: 0.6), value: isCompletedToday)
-                }
-                .buttonStyle(.plain)
+                )
             }
 
-            // Compact Heatmap Grid
-            CompactHeatmapView(habit: habit)
+            // Compact Period Heatmap Grid
+            CompactPeriodHeatmapView(habit: habit)
                 .frame(maxWidth: .infinity)
 
             // Stats Row
@@ -117,16 +114,19 @@ struct HabitCardView: View {
         .overlay {
             RoundedRectangle(cornerRadius: 16)
                 .strokeBorder(
-                    isCompletedToday ? habit.color.opacity(0.4) : Color.systemGray5,
-                    lineWidth: isCompletedToday ? 1.5 : 0.5
+                    isPeriodGoalMet ? habit.color.opacity(0.4) : Color.systemGray5,
+                    lineWidth: isPeriodGoalMet ? 1.5 : 0.5
                 )
         }
         .contextMenu {
-            Button(action: { habitStore.toggleTodayCompletion(for: habit) }) {
-                Label(
-                    isCompletedToday ? "Unmark Today" : "Complete Today",
-                    systemImage: isCompletedToday ? "xmark.circle" : "checkmark.circle"
-                )
+            Button(action: { habitStore.addCompletion(for: habit, on: today) }) {
+                Label("Add Completion", systemImage: "plus.circle")
+            }
+
+            if periodCompletions > 0 {
+                Button(action: { habitStore.removeLastCompletion(for: habit, on: today) }) {
+                    Label("Remove Last Completion", systemImage: "minus.circle")
+                }
             }
 
             Divider()
