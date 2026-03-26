@@ -178,14 +178,7 @@ struct PersistenceController {
             fatalError("Failed to retrieve a persistent store description.")
         }
 
-        // Enable CloudKit sync
-        if !inMemory {
-            description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
-                containerIdentifier: "iCloud.com.habitual-helper.app"
-            )
-        }
-
-        // Enable persistent history tracking for CloudKit
+        // Enable persistent history tracking (needed for CloudKit and useful for local too)
         description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
         description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
 
@@ -193,6 +186,29 @@ struct PersistenceController {
         if !inMemory {
             let storeURL = Self.appGroupStoreURL
             description.url = storeURL
+        }
+
+        // Only enable CloudKit sync if an iCloud account is available.
+        // Without this guard the container setup crashes on devices/simulators
+        // with no iCloud account (CKAccountStatusNoAccount).
+        if !inMemory {
+            let semaphore = DispatchSemaphore(value: 0)
+            var hasICloud = false
+            CKContainer(identifier: "iCloud.com.habitual-helper.app").accountStatus { status, _ in
+                hasICloud = (status == .available)
+                semaphore.signal()
+            }
+            semaphore.wait()
+
+            if hasICloud {
+                description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
+                    containerIdentifier: "iCloud.com.habitual-helper.app"
+                )
+            } else {
+                // Local-only mode — disable CloudKit integration
+                description.cloudKitContainerOptions = nil
+                print("[CloudKit] ⚠️ No iCloud account — running in local-only mode")
+            }
         }
 
         container.loadPersistentStores { _, error in
