@@ -206,7 +206,7 @@ struct HabitDetailView: View {
 
             PeriodHeatmapGridView(
                 habit: currentHabit,
-                months: 6,
+                months: 12,
                 cellSize: 14,
                 cellSpacing: 3,
                 showLabels: true,
