@@ -638,7 +638,7 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
             (.dragon, .excited, "7 days! Ryū is absolutely fired up! 🔥"),
             (.cat, .happy, "Nice work! 3 days in a row — you're building something real."),
             (.capybara, .encouraging, "Kapiiko is cheering you on. There's still time today!"),
-            (.dog, .relaxed, "Wanko says: every journey starts with one step. No rush!")
+            (.dog, .relaxed, "Wanko says: every journey starts with one step. No rush!"),
         ]
 
         let view = SnapshotContainer(width: 390) {
@@ -709,7 +709,7 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
             (TestData.exerciseHabit, "Active Streak"),
             (TestData.readHabit, "Weekly Goal"),
             (TestData.meditateHabit, "No Data Yet"),
-            (TestData.waterHabit, "100% Complete")
+            (TestData.waterHabit, "100% Complete"),
         ]
 
         let view = SnapshotContainer(width: 390) {

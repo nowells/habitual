@@ -127,7 +127,7 @@ final class HeatmapSnapshotTests: SnapshotTestCase {
             ("Blue", TestData.exerciseHabit),
             ("Orange", TestData.readHabit),
             ("Purple", TestData.meditateHabit),
-            ("Cyan", TestData.waterHabit)
+            ("Cyan", TestData.waterHabit),
         ]
 
         for (name, habit) in colors {

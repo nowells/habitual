@@ -104,7 +104,7 @@ struct HabitDetailView: View {
                 return (
                     .encouraging,
                     "You have a \(streak)-\(currentHabit.goalPeriod.periodLabel) streak at stake! "
-                    + "\(mascot.name) believes in you."
+                        + "\(mascot.name) believes in you."
                 )
             } else {
                 return (.encouraging, "\(mascot.name) is cheering you on. There's still time today!")
@@ -250,7 +250,7 @@ struct HabitDetailView: View {
             LazyVGrid(
                 columns: [
                     GridItem(.flexible()),
-                    GridItem(.flexible())
+                    GridItem(.flexible()),
                 ], spacing: 12
             ) {
                 StatCard(

@@ -71,7 +71,7 @@ struct HabitualComplicationProvider: TimelineProvider {
             request.predicate = NSPredicate(format: "isArchived == NO")
             request.sortDescriptors = [
                 NSSortDescriptor(keyPath: \CDHabit.sortOrder, ascending: true),
-                NSSortDescriptor(keyPath: \CDHabit.createdAt, ascending: false)
+                NSSortDescriptor(keyPath: \CDHabit.createdAt, ascending: false),
             ]
             request.fetchLimit = 1
 
@@ -242,7 +242,7 @@ struct HabitualComplicationWidget: Widget {
                 .accessoryCircular,
                 .accessoryRectangular,
                 .accessoryInline,
-                .accessoryCorner
+                .accessoryCorner,
             ])
         #endif
     }

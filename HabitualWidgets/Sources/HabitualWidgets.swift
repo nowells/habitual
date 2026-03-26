@@ -53,7 +53,7 @@ struct HabitWidgetProvider: TimelineProvider {
         request.predicate = NSPredicate(format: "isArchived == NO")
         request.sortDescriptors = [
             NSSortDescriptor(keyPath: \CDHabit.sortOrder, ascending: true),
-            NSSortDescriptor(keyPath: \CDHabit.createdAt, ascending: false)
+            NSSortDescriptor(keyPath: \CDHabit.createdAt, ascending: false),
         ]
         let habits = (try? context.fetch(request))?.map { $0.toHabit() } ?? []
 
@@ -113,7 +113,7 @@ struct HabitWidgetEntry: TimelineEntry {
             HabitSnapshot(
                 id: UUID(), name: "Meditate", icon: "brain.head.profile", colorRed: 0.65, colorGreen: 0.35,
                 colorBlue: 0.90, isPeriodComplete: true, periodCompletions: 3, goalFrequency: 3, currentStreak: 12,
-                completionRate: 0.75, recentCompletions: [])
+                completionRate: 0.75, recentCompletions: []),
         ],
         totalHabits: 3,
         completedToday: 2
@@ -464,7 +464,7 @@ struct HabitualWidget: Widget {
         .supportedFamilies([
             .systemSmall,
             .systemMedium,
-            .systemLarge
+            .systemLarge,
         ])
     }
 }
@@ -530,7 +530,7 @@ struct SingleHabitWidgetProvider: IntentTimelineProvider {
         request.predicate = NSPredicate(format: "isArchived == NO")
         request.sortDescriptors = [
             NSSortDescriptor(keyPath: \CDHabit.sortOrder, ascending: true),
-            NSSortDescriptor(keyPath: \CDHabit.createdAt, ascending: false)
+            NSSortDescriptor(keyPath: \CDHabit.createdAt, ascending: false),
         ]
         request.fetchLimit = 1
         let habits = (try? context.fetch(request))?.map { $0.toHabit() } ?? []

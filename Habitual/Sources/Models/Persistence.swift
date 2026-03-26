@@ -21,11 +21,13 @@ struct PersistenceController {
         for bundle in bundles {
             if let url = bundle.url(forResource: containerName, withExtension: "momd")
                 ?? bundle.url(forResource: containerName, withExtension: "mom"),
-                let model = NSManagedObjectModel(contentsOf: url) {
+                let model = NSManagedObjectModel(contentsOf: url)
+            {
                 return model
             }
             if let model = NSManagedObjectModel.mergedModel(from: [bundle]),
-                !model.entities.isEmpty {
+                !model.entities.isEmpty
+            {
                 return model
             }
         }
@@ -91,7 +93,7 @@ struct PersistenceController {
             hColorBlue, hColorGreen, hColorRed, hCreatedAt,
             hGoalFreq, hGoalPeriod, hDesc, hIcon,
             hId, hIsArchived, hName, hReminder, hSortOrder,
-            completionsRel
+            completionsRel,
         ]
         completion.properties = [cDate, cId, cNote, cValue, habitRel]
 

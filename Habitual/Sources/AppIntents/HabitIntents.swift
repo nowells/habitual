@@ -145,7 +145,7 @@ struct HabitualShortcuts: AppShortcutsProvider {
                 "Log \(\.$habit) in \(.applicationName)",
                 "Mark \(\.$habit) done in \(.applicationName)",
                 "I finished \(\.$habit) in \(.applicationName)",
-                "Complete \(\.$habit) in \(.applicationName)"
+                "Complete \(\.$habit) in \(.applicationName)",
             ],
             shortTitle: "Log Habit",
             systemImageName: "checkmark.circle.fill"
@@ -155,7 +155,7 @@ struct HabitualShortcuts: AppShortcutsProvider {
             phrases: [
                 "Check \(\.$habit) in \(.applicationName)",
                 "Did I do \(\.$habit) today in \(.applicationName)",
-                "Have I completed \(\.$habit) in \(.applicationName)"
+                "Have I completed \(\.$habit) in \(.applicationName)",
             ],
             shortTitle: "Check Habit",
             systemImageName: "questionmark.circle.fill"
