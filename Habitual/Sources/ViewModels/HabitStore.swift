@@ -1,6 +1,9 @@
 import SwiftUI
 import CoreData
 import Combine
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 @MainActor
 class HabitStore: ObservableObject {
@@ -130,7 +133,7 @@ class HabitStore: ObservableObject {
 
         save()
         fetchHabits()
-        WidgetUpdateService.reloadHabitWidgets()
+        notifyWidgets()
     }
 
     func toggleTodayCompletion(for habit: Habit) {
@@ -152,7 +155,7 @@ class HabitStore: ObservableObject {
 
         save()
         fetchHabits()
-        WidgetUpdateService.reloadHabitWidgets()
+        notifyWidgets()
     }
 
     /// Remove the most recent completion for the given date
@@ -171,7 +174,7 @@ class HabitStore: ObservableObject {
             viewContext.delete(last)
             save()
             fetchHabits()
-            WidgetUpdateService.reloadHabitWidgets()
+            notifyWidgets()
         }
     }
 
@@ -232,5 +235,12 @@ class HabitStore: ObservableObject {
         } catch {
             print("Error saving context: \(error)")
         }
+    }
+
+    private func notifyWidgets() {
+        #if canImport(WidgetKit)
+        WidgetCenter.shared.reloadTimelines(ofKind: "HabitualWidget")
+        WidgetCenter.shared.reloadTimelines(ofKind: "SingleHabitWidget")
+        #endif
     }
 }

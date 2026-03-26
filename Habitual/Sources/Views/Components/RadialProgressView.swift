@@ -34,25 +34,40 @@ struct PieProgressFill: View {
         return RadialProgressView.ringColor(base: baseColor, rotation: rotation)
     }
 
+    /// Color for completed full rotations (the layer underneath)
+    private var baseFillColor: Color {
+        guard fullRotations > 0 else { return baseColor }
+        // The most recent completed rotation's color
+        let rotation = max(0, fullRotations - 1)
+        return RadialProgressView.ringColor(base: baseColor, rotation: rotation)
+    }
+
     var body: some View {
-        // Path-based pie wedge: draw from center with an oversized radius so the arc
-        // extends past every corner of the bounding square, then clip to the rounded rect.
-        Path { path in
-            let center = CGPoint(x: size / 2, y: size / 2)
-            // radius = size covers the half-diagonal (size/2 * √2 ≈ 0.71*size) with room to spare
-            path.move(to: center)
-            path.addArc(
-                center: center,
-                radius: size,
-                startAngle: .degrees(-90),
-                endAngle: .degrees(-90 + 360 * currentFraction),
-                clockwise: false
-            )
-            path.closeSubpath()
+        ZStack {
+            // Draw completed full rotations as a solid fill
+            if fullRotations > 0 && currentFraction < 1.0 {
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(baseFillColor.opacity(0.85))
+                    .frame(width: size, height: size)
+            }
+
+            // Draw current rotation as a pie wedge on top
+            Path { path in
+                let center = CGPoint(x: size / 2, y: size / 2)
+                path.move(to: center)
+                path.addArc(
+                    center: center,
+                    radius: size,
+                    startAngle: .degrees(-90),
+                    endAngle: .degrees(-90 + 360 * currentFraction),
+                    clockwise: false
+                )
+                path.closeSubpath()
+            }
+            .fill(fillColor.opacity(0.85))
+            .frame(width: size, height: size)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
         }
-        .fill(fillColor.opacity(0.85))
-        .frame(width: size, height: size)
-        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
     }
 }
 

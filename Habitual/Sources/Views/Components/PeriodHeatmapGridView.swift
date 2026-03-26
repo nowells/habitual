@@ -108,20 +108,14 @@ struct PeriodHeatmapGridView: View {
                     .frame(width: cellSize, height: cellSize)
 
                 if !day.isFuture {
-                    if habit.goalFrequency > 1 {
-                        let count = habit.completionsInPeriod(containing: day.date)
-                        if count > 0 {
-                            PieProgressFill(
-                                completionCount: count,
-                                goalFrequency: habit.goalFrequency,
-                                baseColor: habit.color,
-                                size: cellSize
-                            )
-                        }
-                    } else if day.isCompleted {
-                        RoundedRectangle(cornerRadius: cellSize * 0.2)
-                            .fill(habit.color.opacity(min(1.0, 0.4 + day.value * 0.6)))
-                            .frame(width: cellSize, height: cellSize)
+                    let count = habit.completionsInPeriod(containing: day.date)
+                    if count > 0 {
+                        PieProgressFill(
+                            completionCount: count,
+                            goalFrequency: habit.goalFrequency,
+                            baseColor: habit.color,
+                            size: cellSize
+                        )
                     }
                 }
 
@@ -422,20 +416,14 @@ struct CompactPeriodHeatmapView: View {
                     .frame(width: cellSize, height: cellSize)
 
                 if !day.isFuture {
-                    if habit.goalFrequency > 1 {
-                        let count = habit.completionsInPeriod(containing: day.date)
-                        if count > 0 {
-                            PieProgressFill(
-                                completionCount: count,
-                                goalFrequency: habit.goalFrequency,
-                                baseColor: habit.color,
-                                size: cellSize
-                            )
-                        }
-                    } else if day.isCompleted {
-                        RoundedRectangle(cornerRadius: cellSize * 0.2)
-                            .fill(habit.color.opacity(min(1.0, 0.4 + day.value * 0.6)))
-                            .frame(width: cellSize, height: cellSize)
+                    let count = habit.completionsInPeriod(containing: day.date)
+                    if count > 0 {
+                        PieProgressFill(
+                            completionCount: count,
+                            goalFrequency: habit.goalFrequency,
+                            baseColor: habit.color,
+                            size: cellSize
+                        )
                     }
                 }
 
