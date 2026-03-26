@@ -36,6 +36,7 @@ class HabitStore: ObservableObject {
         NotificationCenter.default.publisher(for: .NSPersistentStoreRemoteChange)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
+                self?.viewContext.refreshAllObjects()
                 self?.fetchHabits()
             }
             .store(in: &cancellables)

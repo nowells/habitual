@@ -27,14 +27,15 @@
 		A10024 /* HabitIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10024 /* HabitIntents.swift */; };
 		A10025 /* MascotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10025 /* MascotView.swift */; };
 		A10026 /* EnvironmentValues+Today.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10026 /* EnvironmentValues+Today.swift */; };
+		A10030 /* Habitual Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C20001 /* Habitual Watch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A20001 /* HabitualWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20001 /* HabitualWatchApp.swift */; };
 		A20002 /* WatchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20002 /* WatchContentView.swift */; };
-		A20008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B20003 /* Assets.xcassets */; };
 		A20003 /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10003 /* Habit.swift */; };
 		A20004 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10004 /* Persistence.swift */; };
 		A20005 /* HabitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10005 /* HabitStore.swift */; };
 		A20006 /* Habitual.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B10015 /* Habitual.xcdatamodeld */; };
 		A20007 /* EnvironmentValues+Today.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10026 /* EnvironmentValues+Today.swift */; };
+		A20008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B20003 /* Assets.xcassets */; };
 		A20009 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10012 /* NotificationService.swift */; };
 		A20010 /* NudgeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10023 /* NudgeService.swift */; };
 		A30001 /* HabitualWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30001 /* HabitualWidgets.swift */; };
@@ -49,7 +50,6 @@
 		A40004 /* HabitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10005 /* HabitStore.swift */; };
 		A40005 /* Habitual.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B10015 /* Habitual.xcdatamodeld */; };
 		A40006 /* EnvironmentValues+Today.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10026 /* EnvironmentValues+Today.swift */; };
-		A10030 /* Habitual Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C20001 /* Habitual Watch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,13 +62,19 @@
 		};
 /* End PBXContainerItemProxy section */
 
-/* Begin PBXTargetDependency section */
-		TD20001 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = T20001 /* Habitual Watch */;
-			targetProxy = P20001 /* PBXContainerItemProxy */;
+/* Begin PBXCopyFilesBuildPhase section */
+		F10003 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				A10030 /* Habitual Watch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
 		};
-/* End PBXTargetDependency section */
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		B10001 /* HabitualApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitualApp.swift; sourceTree = "<group>"; };
@@ -260,15 +266,6 @@
 			path = HabitualWatch;
 			sourceTree = "<group>";
 		};
-		D22001 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				B20003 /* Assets.xcassets */,
-				B20004 /* HabitualWatch.entitlements */,
-			);
-			path = Resources;
-			sourceTree = "<group>";
-		};
 		D21001 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
@@ -293,6 +290,15 @@
 				B40001 /* HabitualComplications.swift */,
 			);
 			path = Complications;
+			sourceTree = "<group>";
+		};
+		D22001 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B20003 /* Assets.xcassets */,
+				B20004 /* HabitualWatch.entitlements */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		D30001 /* HabitualWidgets */ = {
@@ -469,20 +475,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		F10003 /* Embed Watch Content */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
-			dstSubfolderSpec = 16;
-			files = (
-				A10030 /* Habitual Watch.app in Embed Watch Content */,
-			);
-			name = "Embed Watch Content";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		F10001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -553,6 +545,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		TD20001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = T20001 /* Habitual Watch */;
+			targetProxy = P20001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		G00001 /* Debug */ = {
@@ -669,7 +669,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Habitual/Resources/Habitual.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Habitual/Resources/Info.plist;
@@ -684,7 +684,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.habitual-helper.app";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -705,7 +705,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Habitual/Resources/Habitual.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Habitual/Resources/Info.plist;
@@ -720,7 +720,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.habitual-helper.app";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
