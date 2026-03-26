@@ -126,14 +126,16 @@ struct AddHabitView: View {
             } header: {
                 Text("Smart Nudges")
             } footer: {
-                Text("A nudge fires if you haven't logged this habit by the nudge time. Streak-at-risk alerts appear when you have 3+ days in a row.")
+                Text(
+                    "A nudge fires if you haven't logged this habit by the nudge time. Streak-at-risk alerts appear when you have 3+ days in a row."
+                )
             }
         }
         .navigationTitle("New Habit")
         #if os(macOS)
-        .formStyle(.grouped)
+            .formStyle(.grouped)
         #elseif os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.inline)
         #endif
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {

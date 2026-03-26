@@ -3,7 +3,7 @@ import Foundation
 
 extension CDCompletion {
     @nonobjc public class func fetchRequest() -> NSFetchRequest<CDCompletion> {
-        return NSFetchRequest<CDCompletion>(entityName: "CDCompletion")
+        NSFetchRequest<CDCompletion>(entityName: "CDCompletion")
     }
 
     @NSManaged public var date: Date?

@@ -3,7 +3,7 @@ import Foundation
 
 extension CDHabit {
     @nonobjc public class func fetchRequest() -> NSFetchRequest<CDHabit> {
-        return NSFetchRequest<CDHabit>(entityName: "CDHabit")
+        NSFetchRequest<CDHabit>(entityName: "CDHabit")
     }
 
     @NSManaged public var colorBlue: Double

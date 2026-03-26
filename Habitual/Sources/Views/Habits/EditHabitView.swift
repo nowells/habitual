@@ -38,17 +38,19 @@ struct EditHabitView: View {
         // If user had legacy daily reminder but no period reminders, migrate to morning reminder
         let migrateFromLegacy = habit.reminderTime != nil && !existingPeriod.isEnabled
         _periodStartEnabled = State(initialValue: migrateFromLegacy || existingPeriod.startReminderEnabled)
-        _periodStartTime = State(initialValue: migrateFromLegacy ? (habit.reminderTime ?? existingPeriod.startReminderTime) : existingPeriod.startReminderTime)
+        _periodStartTime = State(
+            initialValue: migrateFromLegacy
+                ? (habit.reminderTime ?? existingPeriod.startReminderTime) : existingPeriod.startReminderTime)
         _periodMidEnabled = State(initialValue: existingPeriod.midReminderEnabled)
         _periodMidTime = State(initialValue: existingPeriod.midReminderTime)
         _periodEndEnabled = State(initialValue: existingPeriod.endReminderEnabled)
         _periodEndTime = State(initialValue: existingPeriod.endReminderTime)
 
-        let matchingColor = HabitColor.presets.first {
-            abs($0.red - habit.colorComponents.red) < 0.01 &&
-            abs($0.green - habit.colorComponents.green) < 0.01 &&
-            abs($0.blue - habit.colorComponents.blue) < 0.01
-        } ?? HabitColor.presets[0]
+        let matchingColor =
+            HabitColor.presets.first {
+                abs($0.red - habit.colorComponents.red) < 0.01 && abs($0.green - habit.colorComponents.green) < 0.01
+                    && abs($0.blue - habit.colorComponents.blue) < 0.01
+            } ?? HabitColor.presets[0]
         _selectedColor = State(initialValue: matchingColor)
     }
 
@@ -159,7 +161,9 @@ struct EditHabitView: View {
             } header: {
                 Text("Smart Nudges")
             } footer: {
-                Text("A nudge fires if you haven't logged this habit by the nudge time. Streak-at-risk alerts appear when you have 3+ days in a row.")
+                Text(
+                    "A nudge fires if you haven't logged this habit by the nudge time. Streak-at-risk alerts appear when you have 3+ days in a row."
+                )
             }
 
             // MARK: Danger Zone
@@ -182,9 +186,9 @@ struct EditHabitView: View {
         }
         .navigationTitle("Edit Habit")
         #if os(macOS)
-        .formStyle(.grouped)
+            .formStyle(.grouped)
         #elseif os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.inline)
         #endif
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {

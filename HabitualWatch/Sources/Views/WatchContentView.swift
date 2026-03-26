@@ -124,10 +124,12 @@ struct WatchHabitDetailView: View {
                                 .font(.title)
                                 .foregroundStyle(.green)
                         } else if currentHabit.goalFrequency > 1 {
-                            Text("\(currentHabit.completionsInPeriod(containing: Date()))/\(currentHabit.goalFrequency)")
-                                .font(.title3)
-                                .fontWeight(.bold)
-                                .foregroundStyle(currentHabit.color)
+                            Text(
+                                "\(currentHabit.completionsInPeriod(containing: Date()))/\(currentHabit.goalFrequency)"
+                            )
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundStyle(currentHabit.color)
                         } else {
                             Image(systemName: "circle")
                                 .font(.title)
@@ -150,10 +152,21 @@ struct WatchHabitDetailView: View {
 
                 // Stats
                 VStack(spacing: 8) {
-                    WatchStatRow(icon: "flame.fill", label: "Streak", value: "\(currentHabit.currentStreak) \(currentHabit.goalPeriod.periodLabelPlural)", color: .orange)
-                    WatchStatRow(icon: "trophy.fill", label: "Best", value: "\(currentHabit.longestStreak) \(currentHabit.goalPeriod.periodLabelPlural)", color: .yellow)
-                    WatchStatRow(icon: "checkmark", label: "Total", value: "\(currentHabit.totalCompletions) \(currentHabit.goalPeriod.periodLabelPlural)", color: currentHabit.color)
-                    WatchStatRow(icon: "chart.line.uptrend.xyaxis", label: "Rate", value: "\(Int(currentHabit.completionRate * 100))%", color: .green)
+                    WatchStatRow(
+                        icon: "flame.fill", label: "Streak",
+                        value: "\(currentHabit.currentStreak) \(currentHabit.goalPeriod.periodLabelPlural)",
+                        color: .orange)
+                    WatchStatRow(
+                        icon: "trophy.fill", label: "Best",
+                        value: "\(currentHabit.longestStreak) \(currentHabit.goalPeriod.periodLabelPlural)",
+                        color: .yellow)
+                    WatchStatRow(
+                        icon: "checkmark", label: "Total",
+                        value: "\(currentHabit.totalCompletions) \(currentHabit.goalPeriod.periodLabelPlural)",
+                        color: currentHabit.color)
+                    WatchStatRow(
+                        icon: "chart.line.uptrend.xyaxis", label: "Rate",
+                        value: "\(Int(currentHabit.completionRate * 100))%", color: .green)
                 }
             }
             .padding(.horizontal)

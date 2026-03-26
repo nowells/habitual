@@ -4,75 +4,75 @@ import UserNotifications
 // MARK: - App Delegate (iOS)
 
 #if os(iOS)
-import UIKit
+    import UIKit
 
-/// Handles notification action responses and sets the UNUserNotificationCenter delegate.
-/// Runs notification-triggered completions in the background without opening the app.
-class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    /// Handles notification action responses and sets the UNUserNotificationCenter delegate.
+    /// Runs notification-triggered completions in the background without opening the app.
+    class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
-    func application(
-        _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
-    ) -> Bool {
-        UNUserNotificationCenter.current().delegate = self
-        return true
-    }
-
-    // MARK: - Notification Response
-
-    func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        didReceive response: UNNotificationResponse,
-        withCompletionHandler completionHandler: @escaping () -> Void
-    ) {
-        let userInfo = response.notification.request.content.userInfo
-        guard
-            let habitIDString = userInfo[NotificationService.UserInfoKey.habitID] as? String,
-            let habitID = UUID(uuidString: habitIDString)
-        else {
-            completionHandler()
-            return
+        func application(
+            _ application: UIApplication,
+            didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+        ) -> Bool {
+            UNUserNotificationCenter.current().delegate = self
+            return true
         }
 
-        let habitName = (userInfo[NotificationService.UserInfoKey.habitName] as? String) ?? ""
+        // MARK: - Notification Response
 
-        switch response.actionIdentifier {
-        case NotificationService.Action.completeBackground:
-            // Add one completion without opening the app
-            Task { @MainActor in
-                let store = HabitStore(context: PersistenceController.shared.container.viewContext)
-                if let habit = store.activeHabits.first(where: { $0.id == habitID }) {
-                    store.addCompletion(for: habit)
-                    // Reschedule nudges so today's windows are cleared
-                    NudgeService.refresh(for: habit)
-                    NudgeService.refreshPeriod(for: habit)
-                }
+        func userNotificationCenter(
+            _ center: UNUserNotificationCenter,
+            didReceive response: UNNotificationResponse,
+            withCompletionHandler completionHandler: @escaping () -> Void
+        ) {
+            let userInfo = response.notification.request.content.userInfo
+            guard
+                let habitIDString = userInfo[NotificationService.UserInfoKey.habitID] as? String,
+                let habitID = UUID(uuidString: habitIDString)
+            else {
                 completionHandler()
+                return
             }
 
-        case NotificationService.Action.snooze:
-            NotificationService.shared.scheduleSnooze(for: habitID, habitName: habitName)
-            completionHandler()
+            let habitName = (userInfo[NotificationService.UserInfoKey.habitName] as? String) ?? ""
 
-        case NotificationService.Action.skip:
-            // User chose to skip — just dismiss; no completion logged
-            completionHandler()
+            switch response.actionIdentifier {
+            case NotificationService.Action.completeBackground:
+                // Add one completion without opening the app
+                Task { @MainActor in
+                    let store = HabitStore(context: PersistenceController.shared.container.viewContext)
+                    if let habit = store.activeHabits.first(where: { $0.id == habitID }) {
+                        store.addCompletion(for: habit)
+                        // Reschedule nudges so today's windows are cleared
+                        NudgeService.refresh(for: habit)
+                        NudgeService.refreshPeriod(for: habit)
+                    }
+                    completionHandler()
+                }
 
-        default:
-            // Default tap: app will open and navigate naturally
-            completionHandler()
+            case NotificationService.Action.snooze:
+                NotificationService.shared.scheduleSnooze(for: habitID, habitName: habitName)
+                completionHandler()
+
+            case NotificationService.Action.skip:
+                // User chose to skip — just dismiss; no completion logged
+                completionHandler()
+
+            default:
+                // Default tap: app will open and navigate naturally
+                completionHandler()
+            }
+        }
+
+        // Show notifications as banners even when the app is in the foreground
+        func userNotificationCenter(
+            _ center: UNUserNotificationCenter,
+            willPresent notification: UNNotification,
+            withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+        ) {
+            completionHandler([.banner, .sound])
         }
     }
-
-    // Show notifications as banners even when the app is in the foreground
-    func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        willPresent notification: UNNotification,
-        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
-    ) {
-        completionHandler([.banner, .sound])
-    }
-}
 #endif
 
 // MARK: - App Entry Point
@@ -80,7 +80,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 @main
 struct HabitualApp: App {
     #if os(iOS)
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+        @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     #endif
 
     let persistenceController = PersistenceController.shared
@@ -96,7 +96,7 @@ struct HabitualApp: App {
                 .onAppear {
                     refreshNudgesOnLaunch()
                     #if targetEnvironment(macCatalyst)
-                    UIApplication.shared.registerForRemoteNotifications()
+                        UIApplication.shared.registerForRemoteNotifications()
                     #endif
                 }
         }

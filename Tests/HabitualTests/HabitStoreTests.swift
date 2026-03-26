@@ -1,5 +1,6 @@
-import XCTest
 import CoreData
+import XCTest
+
 @testable import HabitualCore
 
 @MainActor

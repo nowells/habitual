@@ -1,5 +1,5 @@
-import CoreData
 import CloudKit
+import CoreData
 
 actor CloudSyncService {
     static let shared = CloudSyncService()

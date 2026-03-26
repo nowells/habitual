@@ -28,7 +28,8 @@ struct PieProgressFill: View {
     private var fillColor: Color {
         // When exactly on a goal boundary (e.g. 3/3), fullRotations is 1 but we're still
         // completing the first rotation, not starting the second — use rotation 0 (base color).
-        let rotation = (completionCount > 0 && completionCount % goalFrequency == 0)
+        let rotation =
+            (completionCount > 0 && completionCount % goalFrequency == 0)
             ? fullRotations - 1
             : fullRotations
         return RadialProgressView.ringColor(base: baseColor, rotation: rotation)

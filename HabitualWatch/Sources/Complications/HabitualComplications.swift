@@ -1,6 +1,6 @@
-import WidgetKit
-import SwiftUI
 import CoreData
+import SwiftUI
+import WidgetKit
 
 // MARK: - Watch Complications using WidgetKit
 
@@ -238,12 +238,12 @@ struct HabitualComplicationWidget: Widget {
         .configurationDisplayName("Habitual")
         .description("Track your habits at a glance.")
         #if os(watchOS)
-        .supportedFamilies([
-            .accessoryCircular,
-            .accessoryRectangular,
-            .accessoryInline,
-            .accessoryCorner,
-        ])
+            .supportedFamilies([
+                .accessoryCircular,
+                .accessoryRectangular,
+                .accessoryInline,
+                .accessoryCorner,
+            ])
         #endif
     }
 }

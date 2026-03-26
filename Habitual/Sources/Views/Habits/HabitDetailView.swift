@@ -43,7 +43,7 @@ struct HabitDetailView: View {
         }
         .navigationTitle(currentHabit.name)
         #if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.inline)
         #endif
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
@@ -57,7 +57,7 @@ struct HabitDetailView: View {
                 EditHabitView(habit: currentHabit, habitStore: habitStore)
             }
             #if os(macOS)
-            .frame(minWidth: 520, minHeight: 620)
+                .frame(minWidth: 520, minHeight: 620)
             #endif
         }
         .overlay {
@@ -97,9 +97,14 @@ struct HabitDetailView: View {
             } else if isDone && streak >= 3 {
                 return (.happy, "Nice work! \(streak) \(unit) in a row — you're building something real.")
             } else if isDone {
-                return (.happy, "\(mascot.name) is proud! Every \(currentHabit.goalPeriod.periodLabel) you show up matters.")
+                return (
+                    .happy, "\(mascot.name) is proud! Every \(currentHabit.goalPeriod.periodLabel) you show up matters."
+                )
             } else if streak >= 3 {
-                return (.encouraging, "You have a \(streak)-\(currentHabit.goalPeriod.periodLabel) streak at stake! \(mascot.name) believes in you.")
+                return (
+                    .encouraging,
+                    "You have a \(streak)-\(currentHabit.goalPeriod.periodLabel) streak at stake! \(mascot.name) believes in you."
+                )
             } else {
                 return (.encouraging, "\(mascot.name) is cheering you on. There's still time today!")
             }
@@ -241,10 +246,12 @@ struct HabitDetailView: View {
             Text("Statistics")
                 .font(.headline)
 
-            LazyVGrid(columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible()),
-            ], spacing: 12) {
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible()),
+                    GridItem(.flexible()),
+                ], spacing: 12
+            ) {
                 StatCard(
                     title: "Current Streak",
                     value: "\(currentHabit.currentStreak(asOf: today))",
@@ -444,7 +451,8 @@ struct CalendarGridView: View {
 
     private var calendarDays: [Date?] {
         guard let monthInterval = calendar.dateInterval(of: .month, for: month),
-              let _ = calendar.dateInterval(of: .weekOfMonth, for: monthInterval.start) else {
+            let _ = calendar.dateInterval(of: .weekOfMonth, for: monthInterval.start)
+        else {
             return []
         }
 

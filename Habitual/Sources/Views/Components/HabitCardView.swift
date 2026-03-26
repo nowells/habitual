@@ -165,9 +165,9 @@ struct StatBadge: View {
 
     var body: some View {
         HStack(spacing: 4) {
-                    HabitIcon.image(icon)
-                        .font(.caption2)
-                        .foregroundStyle(color)
+            HabitIcon.image(icon)
+                .font(.caption2)
+                .foregroundStyle(color)
             Text(value)
                 .font(.caption)
                 .fontWeight(.semibold)

@@ -9,7 +9,7 @@ struct NudgeSettings: Codable, Equatable {
     /// Time of day for the nudge (only hour/minute components are used).
     var nudgeTime: Date
 
-    static let defaultNudgeHour = 20 // 8:00 PM
+    static let defaultNudgeHour = 20  // 8:00 PM
     static let defaultNudgeMinute = 0
 
     static var defaultNudgeTime: Date {
@@ -95,7 +95,7 @@ enum NudgeService {
     static func settings(for habit: Habit) -> NudgeSettings {
         let key = keyPrefix + habit.id.uuidString
         guard let data = defaults.data(forKey: key),
-              let decoded = try? JSONDecoder().decode(NudgeSettings.self, from: data)
+            let decoded = try? JSONDecoder().decode(NudgeSettings.self, from: data)
         else { return .default }
         return decoded
     }
@@ -146,7 +146,7 @@ enum NudgeService {
     static func periodSettings(for habit: Habit) -> PeriodReminderSettings {
         let key = periodKeyPrefix + habit.id.uuidString
         guard let data = defaults.data(forKey: key),
-              let decoded = try? JSONDecoder().decode(PeriodReminderSettings.self, from: data)
+            let decoded = try? JSONDecoder().decode(PeriodReminderSettings.self, from: data)
         else { return PeriodReminderSettings.defaults(for: habit.goalPeriod) }
         return decoded
     }

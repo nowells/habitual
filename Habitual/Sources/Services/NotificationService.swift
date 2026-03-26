@@ -1,5 +1,5 @@
-import UserNotifications
 import SwiftUI
+import UserNotifications
 
 class NotificationService {
     static let shared = NotificationService()
@@ -34,7 +34,10 @@ class NotificationService {
     // MARK: - Permission
 
     func requestPermission(completion: ((Bool) -> Void)? = nil) {
-        guard let center = notificationCenter else { completion?(false); return }
+        guard let center = notificationCenter else {
+            completion?(false)
+            return
+        }
         center.requestAuthorization(
             options: [.alert, .badge, .sound]
         ) { granted, error in
@@ -158,7 +161,7 @@ class NotificationService {
 
         for dayOffset in 0..<7 {
             guard let day = cal.date(byAdding: .day, value: dayOffset, to: today),
-                  let nudgeDate = cal.date(bySettingHour: nudgeHour, minute: nudgeMinute, second: 0, of: day)
+                let nudgeDate = cal.date(bySettingHour: nudgeHour, minute: nudgeMinute, second: 0, of: day)
             else { continue }
 
             // Skip nudges in the past
@@ -173,7 +176,8 @@ class NotificationService {
             let content = UNMutableNotificationContent()
             if streakAtRisk {
                 content.title = "🔥 Don't break your streak!"
-                content.body = "\(habit.name) — \(streak) \(habit.goalPeriod.periodLabelPlural) in a row. You're so close!"
+                content.body =
+                    "\(habit.name) — \(streak) \(habit.goalPeriod.periodLabelPlural) in a row. You're so close!"
                 content.categoryIdentifier = Category.streakAtRisk
             } else {
                 content.title = nudgeTitle(for: habit, dayOffset: dayOffset)
@@ -242,11 +246,13 @@ class NotificationService {
 
         // Schedule for the next 7 periods
         for periodOffset in 0..<7 {
-            guard let periodStart = cal.date(
-                byAdding: habit.goalPeriod.calendarComponent,
-                value: periodOffset,
-                to: currentPeriodStart
-            ) else { continue }
+            guard
+                let periodStart = cal.date(
+                    byAdding: habit.goalPeriod.calendarComponent,
+                    value: periodOffset,
+                    to: currentPeriodStart
+                )
+            else { continue }
 
             let periodEnd = habit.goalPeriod.periodEnd(for: periodStart, calendar: cal)
 
@@ -256,7 +262,8 @@ class NotificationService {
                 let startMinute = cal.component(.minute, from: settings.startReminderTime)
 
                 if let fireDate = cal.date(bySettingHour: startHour, minute: startMinute, second: 0, of: periodStart),
-                   fireDate > Date() {
+                    fireDate > Date()
+                {
                     let content = periodReminderContent(
                         for: habit,
                         phase: .start,
@@ -283,7 +290,8 @@ class NotificationService {
                 let midMinute = cal.component(.minute, from: settings.midReminderTime)
 
                 if let fireDate = cal.date(bySettingHour: midHour, minute: midMinute, second: 0, of: midDate),
-                   fireDate > Date() {
+                    fireDate > Date()
+                {
                     // Only fire if goal not yet met
                     let completionsSoFar = habit.completionsInPeriod(containing: periodStart)
                     if completionsSoFar < habit.goalFrequency || periodOffset > 0 {
@@ -314,7 +322,8 @@ class NotificationService {
                 let endMinute = cal.component(.minute, from: settings.endReminderTime)
 
                 if let fireDate = cal.date(bySettingHour: endHour, minute: endMinute, second: 0, of: endDate),
-                   fireDate > Date() {
+                    fireDate > Date()
+                {
                     let completionsSoFar = habit.completionsInPeriod(containing: periodStart)
                     if completionsSoFar < habit.goalFrequency || periodOffset > 0 {
                         let content = periodReminderContent(
@@ -427,7 +436,8 @@ class NotificationService {
         }
     }
 
-    private func midPeriodDate(period: Habit.GoalPeriod, periodStart: Date, periodEnd: Date, calendar: Calendar) -> Date {
+    private func midPeriodDate(period: Habit.GoalPeriod, periodStart: Date, periodEnd: Date, calendar: Calendar) -> Date
+    {
         switch period {
         case .daily:
             // Noon
@@ -441,7 +451,8 @@ class NotificationService {
         }
     }
 
-    private func endPeriodDate(period: Habit.GoalPeriod, periodStart: Date, periodEnd: Date, calendar: Calendar) -> Date {
+    private func endPeriodDate(period: Habit.GoalPeriod, periodStart: Date, periodEnd: Date, calendar: Calendar) -> Date
+    {
         switch period {
         case .daily:
             // Evening of the same day

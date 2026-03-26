@@ -1,8 +1,9 @@
-import SwiftUI
-import CoreData
 import Combine
+import CoreData
+import SwiftUI
+
 #if canImport(WidgetKit)
-import WidgetKit
+    import WidgetKit
 #endif
 
 @MainActor
@@ -26,8 +27,8 @@ class HabitStore: ObservableObject {
             return activeHabits
         }
         return activeHabits.filter {
-            $0.name.localizedCaseInsensitiveContains(searchText) ||
-            $0.description.localizedCaseInsensitiveContains(searchText)
+            $0.name.localizedCaseInsensitiveContains(searchText)
+                || $0.description.localizedCaseInsensitiveContains(searchText)
         }
     }
 
@@ -166,7 +167,8 @@ class HabitStore: ObservableObject {
         guard let cdHabit = fetchCDHabit(by: habit.id) else { return }
         let completionSet = (cdHabit.completions as? Set<CDCompletion>) ?? []
 
-        let dayCompletions = completionSet
+        let dayCompletions =
+            completionSet
             .filter { calendar.startOfDay(for: $0.date ?? Date()) == targetDay }
             .sorted { ($0.date ?? Date()) > ($1.date ?? Date()) }
 
@@ -239,8 +241,8 @@ class HabitStore: ObservableObject {
 
     private func notifyWidgets() {
         #if canImport(WidgetKit)
-        WidgetCenter.shared.reloadTimelines(ofKind: "HabitualWidget")
-        WidgetCenter.shared.reloadTimelines(ofKind: "SingleHabitWidget")
+            WidgetCenter.shared.reloadTimelines(ofKind: "HabitualWidget")
+            WidgetCenter.shared.reloadTimelines(ofKind: "SingleHabitWidget")
         #endif
     }
 }

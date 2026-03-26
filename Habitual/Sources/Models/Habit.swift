@@ -1,9 +1,10 @@
-import SwiftUI
 import CoreData
+import SwiftUI
+
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #elseif canImport(AppKit)
-import AppKit
+    import AppKit
 #endif
 
 // MARK: - Habit Value Type
@@ -228,13 +229,17 @@ extension Habit {
 
         // If the current period's goal isn't met yet, start checking from the previous period
         if !isPeriodComplete(for: periodStart, calendar: calendar) {
-            guard let prev = calendar.date(byAdding: goalPeriod.calendarComponent, value: -1, to: periodStart) else { return 0 }
+            guard let prev = calendar.date(byAdding: goalPeriod.calendarComponent, value: -1, to: periodStart) else {
+                return 0
+            }
             periodStart = goalPeriod.periodStart(for: prev, calendar: calendar)
         }
 
         while isPeriodComplete(for: periodStart, calendar: calendar) {
             streak += 1
-            guard let prev = calendar.date(byAdding: goalPeriod.calendarComponent, value: -1, to: periodStart) else { break }
+            guard let prev = calendar.date(byAdding: goalPeriod.calendarComponent, value: -1, to: periodStart) else {
+                break
+            }
             periodStart = goalPeriod.periodStart(for: prev, calendar: calendar)
         }
 
@@ -264,7 +269,9 @@ extension Habit {
             } else {
                 current = 0
             }
-            guard let next = calendar.date(byAdding: goalPeriod.calendarComponent, value: 1, to: periodStart) else { break }
+            guard let next = calendar.date(byAdding: goalPeriod.calendarComponent, value: 1, to: periodStart) else {
+                break
+            }
             periodStart = goalPeriod.periodStart(for: next, calendar: calendar)
         }
 
@@ -307,7 +314,9 @@ extension Habit {
             if isPeriodComplete(for: periodStart, calendar: calendar) {
                 completedPeriods += 1
             }
-            guard let next = calendar.date(byAdding: goalPeriod.calendarComponent, value: 1, to: periodStart) else { break }
+            guard let next = calendar.date(byAdding: goalPeriod.calendarComponent, value: 1, to: periodStart) else {
+                break
+            }
             periodStart = goalPeriod.periodStart(for: next, calendar: calendar)
         }
 
@@ -324,7 +333,8 @@ extension Habit {
     func completionValue(for date: Date) -> Double {
         let calendar = Calendar.current
         let targetDay = calendar.startOfDay(for: date)
-        return completions
+        return
+            completions
             .filter { calendar.startOfDay(for: $0.date) == targetDay }
             .reduce(0) { $0 + $1.value }
     }
@@ -376,14 +386,15 @@ extension Habit {
             }.count
             let isFuture = current > todayStart
             let isCurrentPeriod = current <= todayStart && end > todayStart
-            periods.append(PeriodData(
-                periodStart: current,
-                periodEnd: end,
-                completionCount: count,
-                goalFrequency: goalFrequency,
-                isFuture: isFuture,
-                isCurrentPeriod: isCurrentPeriod
-            ))
+            periods.append(
+                PeriodData(
+                    periodStart: current,
+                    periodEnd: end,
+                    completionCount: count,
+                    goalFrequency: goalFrequency,
+                    isFuture: isFuture,
+                    isCurrentPeriod: isCurrentPeriod
+                ))
             current = end
         }
 
@@ -532,11 +543,11 @@ struct HabitIcon {
 
     private static func isSymbolAvailable(_ symbolName: String) -> Bool {
         #if canImport(UIKit)
-        return UIImage(systemName: symbolName) != nil
+            return UIImage(systemName: symbolName) != nil
         #elseif canImport(AppKit)
-        return NSImage(systemSymbolName: symbolName, accessibilityDescription: nil) != nil
+            return NSImage(systemSymbolName: symbolName, accessibilityDescription: nil) != nil
         #else
-        return true
+            return true
         #endif
     }
 

@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import HabitualCore
 
 final class HabitModelTests: XCTestCase {
@@ -119,7 +120,7 @@ final class HabitModelTests: XCTestCase {
 
     func testCurrentStreakCompletedToday() {
         let habit = makeHabit(completions: [
-            makeCompletion(daysAgo: 0),
+            makeCompletion(daysAgo: 0)
         ])
         XCTAssertEqual(habit.currentStreak, 1)
     }
@@ -166,7 +167,7 @@ final class HabitModelTests: XCTestCase {
 
     func testCurrentStreakSingleDayYesterday() {
         let habit = makeHabit(completions: [
-            makeCompletion(daysAgo: 1),
+            makeCompletion(daysAgo: 1)
         ])
         XCTAssertEqual(habit.currentStreak, 1)
     }
@@ -190,7 +191,7 @@ final class HabitModelTests: XCTestCase {
 
     func testLongestStreakSingleCompletion() {
         let habit = makeHabit(completions: [
-            makeCompletion(daysAgo: 5),
+            makeCompletion(daysAgo: 5)
         ])
         XCTAssertEqual(habit.longestStreak, 1)
     }
@@ -272,24 +273,26 @@ final class HabitModelTests: XCTestCase {
     }
 
     func testCompletionRateAllDays() {
-        let createdAt = makeDate(daysAgo: 4) // 5 days total (0,1,2,3,4)
-        let habit = makeHabit(completions: [
-            makeCompletion(daysAgo: 0),
-            makeCompletion(daysAgo: 1),
-            makeCompletion(daysAgo: 2),
-            makeCompletion(daysAgo: 3),
-            makeCompletion(daysAgo: 4),
-        ], createdAt: createdAt)
+        let createdAt = makeDate(daysAgo: 4)  // 5 days total (0,1,2,3,4)
+        let habit = makeHabit(
+            completions: [
+                makeCompletion(daysAgo: 0),
+                makeCompletion(daysAgo: 1),
+                makeCompletion(daysAgo: 2),
+                makeCompletion(daysAgo: 3),
+                makeCompletion(daysAgo: 4),
+            ], createdAt: createdAt)
         XCTAssertEqual(habit.completionRate, 1.0, accuracy: 0.001)
     }
 
     func testCompletionRatePartial() {
-        let createdAt = makeDate(daysAgo: 9) // 10 days total
-        let habit = makeHabit(completions: [
-            makeCompletion(daysAgo: 0),
-            makeCompletion(daysAgo: 2),
-            makeCompletion(daysAgo: 5),
-        ], createdAt: createdAt)
+        let createdAt = makeDate(daysAgo: 9)  // 10 days total
+        let habit = makeHabit(
+            completions: [
+                makeCompletion(daysAgo: 0),
+                makeCompletion(daysAgo: 2),
+                makeCompletion(daysAgo: 5),
+            ], createdAt: createdAt)
         XCTAssertEqual(habit.completionRate, 0.3, accuracy: 0.001)
     }
 
@@ -315,7 +318,7 @@ final class HabitModelTests: XCTestCase {
 
     func testIsCompletedOnFalse() {
         let habit = makeHabit(completions: [
-            makeCompletion(daysAgo: 0),
+            makeCompletion(daysAgo: 0)
         ])
         XCTAssertFalse(habit.isCompletedOn(date: makeDate(daysAgo: 1)))
         XCTAssertFalse(habit.isCompletedOn(date: makeDate(daysAgo: 5)))
@@ -327,7 +330,7 @@ final class HabitModelTests: XCTestCase {
         let laterToday = calendar.date(byAdding: .hour, value: 14, to: startOfToday)!
 
         let habit = makeHabit(completions: [
-            Completion(date: startOfToday),
+            Completion(date: startOfToday)
         ])
         XCTAssertTrue(habit.isCompletedOn(date: laterToday))
     }
@@ -341,7 +344,7 @@ final class HabitModelTests: XCTestCase {
 
     func testCompletionValueDefault() {
         let habit = makeHabit(completions: [
-            makeCompletion(daysAgo: 0),
+            makeCompletion(daysAgo: 0)
         ])
         XCTAssertEqual(habit.completionValue(for: Date()), 1.0, accuracy: 0.001)
     }
@@ -357,7 +360,7 @@ final class HabitModelTests: XCTestCase {
 
     func testCompletionValueNoCompletion() {
         let habit = makeHabit(completions: [
-            makeCompletion(daysAgo: 1),
+            makeCompletion(daysAgo: 1)
         ])
         XCTAssertEqual(habit.completionValue(for: Date()), 0.0, accuracy: 0.001)
     }
@@ -381,7 +384,7 @@ final class HabitModelTests: XCTestCase {
 
     func testHeatmapDataContainsCompletions() {
         let habit = makeHabit(completions: [
-            makeCompletion(daysAgo: 0),
+            makeCompletion(daysAgo: 0)
         ])
         let data = habit.heatmapData(months: 1)
         let allDays = data.flatMap { $0 }

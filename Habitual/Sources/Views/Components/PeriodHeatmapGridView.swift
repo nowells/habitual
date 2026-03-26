@@ -34,7 +34,7 @@ struct PeriodHeatmapGridView: View {
     // Forward periods per type: daily = 1 week, weekly = 5 weeks (~1 month), monthly = 12 months
     private var forwardPeriods: Int {
         switch habit.goalPeriod {
-        case .daily: return 0      // forward days handled separately
+        case .daily: return 0  // forward days handled separately
         case .weekly: return 5
         case .monthly: return 12
         }

@@ -5,7 +5,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("appTheme") private var appTheme: String = "system"
     @AppStorage("showCompletionAnimations") private var showCompletionAnimations: Bool = true
-    @AppStorage("startOfWeek") private var startOfWeek: Int = 1 // 1 = Sunday (Calendar default)
+    @AppStorage("startOfWeek") private var startOfWeek: Int = 1  // 1 = Sunday (Calendar default)
     @State private var notificationStatus: UNAuthorizationStatus = .notDetermined
 
     var body: some View {
@@ -76,14 +76,14 @@ struct SettingsView: View {
         }
         .navigationTitle("Settings")
         #if os(macOS)
-        .formStyle(.grouped)
+            .formStyle(.grouped)
         #elseif os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Done") { dismiss() }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
             }
-        }
         #endif
         .task {
             await refreshNotificationStatus()

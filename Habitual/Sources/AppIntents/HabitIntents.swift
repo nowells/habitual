@@ -117,7 +117,8 @@ struct CheckHabitStatusIntent: AppIntent {
                 dialog: "\(match.name) is done today! You're on a \(streak)-\(match.goalPeriod.periodLabel) streak."
             )
         } else {
-            let nudge = streak >= 3 ? " You have a \(streak)-\(match.goalPeriod.periodLabel) streak — don't break it!" : ""
+            let nudge =
+                streak >= 3 ? " You have a \(streak)-\(match.goalPeriod.periodLabel) streak — don't break it!" : ""
             return .result(
                 value: false,
                 dialog: "\(match.name) isn't logged yet today.\(nudge)"

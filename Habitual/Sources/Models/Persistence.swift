@@ -1,5 +1,5 @@
-import CoreData
 import CloudKit
+import CoreData
 
 struct PersistenceController {
     static let shared = PersistenceController()
@@ -12,20 +12,22 @@ struct PersistenceController {
         // Try loading the compiled .momd from the appropriate bundle.
         let bundles: [Bundle] = {
             #if SWIFT_PACKAGE
-            return [Bundle.module, Bundle.main]
+                return [Bundle.module, Bundle.main]
             #else
-            return [Bundle.main]
+                return [Bundle.main]
             #endif
         }()
 
         for bundle in bundles {
             if let url = bundle.url(forResource: containerName, withExtension: "momd")
                 ?? bundle.url(forResource: containerName, withExtension: "mom"),
-               let model = NSManagedObjectModel(contentsOf: url) {
+                let model = NSManagedObjectModel(contentsOf: url)
+            {
                 return model
             }
             if let model = NSManagedObjectModel.mergedModel(from: [bundle]),
-               !model.entities.isEmpty {
+                !model.entities.isEmpty
+            {
                 return model
             }
         }
@@ -45,29 +47,29 @@ struct PersistenceController {
         habit.name = "CDHabit"
         habit.managedObjectClassName = "CDHabit"
 
-        let hColorBlue    = attr("colorBlue",    .doubleAttributeType,    default: 0.5)
-        let hColorGreen   = attr("colorGreen",   .doubleAttributeType,    default: 0.5)
-        let hColorRed     = attr("colorRed",     .doubleAttributeType,    default: 0.3)
-        let hCreatedAt    = attr("createdAt",    .dateAttributeType,      optional: true)
-        let hGoalFreq     = attr("goalFrequency",.integer16AttributeType, default: Int16(1))
-        let hGoalPeriod   = attr("goalPeriod",   .stringAttributeType,    default: "daily")
-        let hDesc         = attr("habitDescription", .stringAttributeType, optional: true)
-        let hIcon         = attr("icon",         .stringAttributeType,    default: "star.fill")
-        let hId           = attr("id",           .UUIDAttributeType,      optional: true)
-        let hIsArchived   = attr("isArchived",   .booleanAttributeType,   default: false)
-        let hName         = attr("name",         .stringAttributeType,    default: "")
-        let hReminder     = attr("reminderTime", .dateAttributeType,      optional: true)
-        let hSortOrder    = attr("sortOrder",    .integer16AttributeType, default: Int16(0))
+        let hColorBlue = attr("colorBlue", .doubleAttributeType, default: 0.5)
+        let hColorGreen = attr("colorGreen", .doubleAttributeType, default: 0.5)
+        let hColorRed = attr("colorRed", .doubleAttributeType, default: 0.3)
+        let hCreatedAt = attr("createdAt", .dateAttributeType, optional: true)
+        let hGoalFreq = attr("goalFrequency", .integer16AttributeType, default: Int16(1))
+        let hGoalPeriod = attr("goalPeriod", .stringAttributeType, default: "daily")
+        let hDesc = attr("habitDescription", .stringAttributeType, optional: true)
+        let hIcon = attr("icon", .stringAttributeType, default: "star.fill")
+        let hId = attr("id", .UUIDAttributeType, optional: true)
+        let hIsArchived = attr("isArchived", .booleanAttributeType, default: false)
+        let hName = attr("name", .stringAttributeType, default: "")
+        let hReminder = attr("reminderTime", .dateAttributeType, optional: true)
+        let hSortOrder = attr("sortOrder", .integer16AttributeType, default: Int16(0))
 
         // — CDCompletion —
         let completion = NSEntityDescription()
         completion.name = "CDCompletion"
         completion.managedObjectClassName = "CDCompletion"
 
-        let cDate  = attr("date",  .dateAttributeType,   optional: true)
-        let cId    = attr("id",    .UUIDAttributeType,    optional: true)
-        let cNote  = attr("note",  .stringAttributeType,  optional: true)
-        let cValue = attr("value", .doubleAttributeType,  default: 1.0)
+        let cDate = attr("date", .dateAttributeType, optional: true)
+        let cId = attr("id", .UUIDAttributeType, optional: true)
+        let cNote = attr("note", .stringAttributeType, optional: true)
+        let cValue = attr("value", .doubleAttributeType, default: 1.0)
 
         // — Relationships —
         let completionsRel = NSRelationshipDescription()
@@ -75,14 +77,14 @@ struct PersistenceController {
         completionsRel.destinationEntity = completion
         completionsRel.isOptional = true
         completionsRel.deleteRule = .cascadeDeleteRule
-        completionsRel.maxCount = 0 // to-many
+        completionsRel.maxCount = 0  // to-many
 
         let habitRel = NSRelationshipDescription()
         habitRel.name = "habit"
         habitRel.destinationEntity = habit
         habitRel.isOptional = true
         habitRel.deleteRule = .nullifyDeleteRule
-        habitRel.maxCount = 1 // to-one
+        habitRel.maxCount = 1  // to-one
 
         completionsRel.inverseRelationship = habitRel
         habitRel.inverseRelationship = completionsRel
@@ -227,13 +229,15 @@ struct PersistenceController {
             object: container,
             queue: nil
         ) { notification in
-            guard let event = notification.userInfo?[NSPersistentCloudKitContainer.eventNotificationUserInfoKey]
-                    as? NSPersistentCloudKitContainer.Event else { return }
+            guard
+                let event = notification.userInfo?[NSPersistentCloudKitContainer.eventNotificationUserInfoKey]
+                    as? NSPersistentCloudKitContainer.Event
+            else { return }
             let type: String
             switch event.type {
-            case .setup:   type = "setup"
-            case .import:  type = "import"
-            case .export:  type = "export"
+            case .setup: type = "setup"
+            case .import: type = "import"
+            case .export: type = "export"
             @unknown default: type = "unknown"
             }
             if let error = event.error {
