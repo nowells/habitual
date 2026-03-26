@@ -118,14 +118,20 @@ struct PersistenceController {
         let viewContext = controller.container.viewContext
 
         // Create sample habits for previews
-        let sampleHabits: [(String, String, String, Double, Double, Double)] = [
-            ("Exercise", "Daily workout routine", "figure.run", 0.35, 0.65, 0.85),
-            ("Read", "Read for 30 minutes", "book.fill", 0.95, 0.55, 0.20),
-            ("Meditate", "Morning meditation", "brain.head.profile", 0.55, 0.40, 0.80),
-            ("Water", "Drink 8 glasses of water", "drop.fill", 0.20, 0.70, 0.90)
-        ]
+        let names = ["Exercise", "Read", "Meditate", "Water"]
+        let descs = ["Daily workout routine", "Read for 30 minutes", "Morning meditation", "Drink 8 glasses of water"]
+        let icons = ["figure.run", "book.fill", "brain.head.profile", "drop.fill"]
+        let reds = [0.35, 0.95, 0.55, 0.20]
+        let greens = [0.65, 0.55, 0.40, 0.70]
+        let blues = [0.85, 0.20, 0.80, 0.90]
 
-        for (name, desc, icon, red, green, blue) in sampleHabits {
+        for index in names.indices {
+            let name = names[index]
+            let desc = descs[index]
+            let icon = icons[index]
+            let red = reds[index]
+            let green = greens[index]
+            let blue = blues[index]
             let habit = CDHabit(context: viewContext)
             habit.id = UUID()
             habit.name = name
@@ -171,7 +177,7 @@ struct PersistenceController {
         )
 
         if inMemory {
-            container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
+            container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
         }
 
         guard let description = container.persistentStoreDescriptions.first else {
