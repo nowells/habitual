@@ -103,7 +103,8 @@ struct HabitDetailView: View {
             } else if streak >= 3 {
                 return (
                     .encouraging,
-                    "You have a \(streak)-\(currentHabit.goalPeriod.periodLabel) streak at stake! \(mascot.name) believes in you."
+                    "You have a \(streak)-\(currentHabit.goalPeriod.periodLabel) streak at stake! "
+                    + "\(mascot.name) believes in you."
                 )
             } else {
                 return (.encouraging, "\(mascot.name) is cheering you on. There's still time today!")
@@ -451,7 +452,7 @@ struct CalendarGridView: View {
 
     private var calendarDays: [Date?] {
         guard let monthInterval = calendar.dateInterval(of: .month, for: month),
-            let _ = calendar.dateInterval(of: .weekOfMonth, for: monthInterval.start)
+            calendar.dateInterval(of: .weekOfMonth, for: monthInterval.start) != nil
         else {
             return []
         }

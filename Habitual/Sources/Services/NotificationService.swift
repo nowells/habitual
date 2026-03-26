@@ -433,7 +433,9 @@ class NotificationService {
         }
     }
 
-    private func midPeriodDate(period: Habit.GoalPeriod, periodStart: Date, periodEnd: Date, calendar: Calendar) -> Date {
+    private func midPeriodDate(
+        period: Habit.GoalPeriod, periodStart: Date, periodEnd: Date, calendar: Calendar
+    ) -> Date {
         switch period {
         case .daily:
             // Noon
@@ -447,7 +449,9 @@ class NotificationService {
         }
     }
 
-    private func endPeriodDate(period: Habit.GoalPeriod, periodStart: Date, periodEnd: Date, calendar: Calendar) -> Date {
+    private func endPeriodDate(
+        period: Habit.GoalPeriod, periodStart: Date, periodEnd: Date, calendar: Calendar
+    ) -> Date {
         switch period {
         case .daily:
             // Evening of the same day

@@ -611,8 +611,9 @@ struct SingleHabitWidget: Widget {
     let kind: String = "SingleHabitWidget"
 
     var body: some WidgetConfiguration {
-        IntentConfiguration(kind: kind, intent: SingleHabitIntent.self, provider: SingleHabitWidgetProvider()) {
-            entry in
+        IntentConfiguration(
+            kind: kind, intent: SingleHabitIntent.self, provider: SingleHabitWidgetProvider()
+        ) { entry in
             SingleHabitWidgetView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }

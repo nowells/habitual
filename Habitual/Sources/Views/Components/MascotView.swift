@@ -269,7 +269,7 @@ struct MascotCelebrationView: View {
                 particle.shape
                     .foregroundStyle(particle.color)
                     .font(.system(size: particle.size))
-                    .position(x: particle.x, y: particle.y)
+                    .position(x: particle.posX, y: particle.posY)
                     .opacity(animating ? 0 : 1)
                     .offset(y: animating ? -180 : 0)
                     .animation(
@@ -344,18 +344,18 @@ struct MascotCelebrationView: View {
 struct MangaSpeedLinesView: View {
     var body: some View {
         GeometryReader { geo in
-            let cx = geo.size.width / 2
-            let cy = geo.size.height / 2
+            let centerX = geo.size.width / 2
+            let centerY = geo.size.height / 2
             Canvas { context, size in
                 let lineCount = 24
-                for i in 0..<lineCount {
-                    let angle = Double(i) / Double(lineCount) * .pi * 2
+                for index in 0..<lineCount {
+                    let angle = Double(index) / Double(lineCount) * .pi * 2
                     let length = max(size.width, size.height) * 0.7
-                    let x2 = cx + cos(angle) * length
-                    let y2 = cy + sin(angle) * length
+                    let endX = centerX + cos(angle) * length
+                    let endY = centerY + sin(angle) * length
                     var path = Path()
-                    path.move(to: CGPoint(x: cx, y: cy))
-                    path.addLine(to: CGPoint(x: x2, y: y2))
+                    path.move(to: CGPoint(x: centerX, y: centerY))
+                    path.addLine(to: CGPoint(x: endX, y: endY))
                     context.stroke(path, with: .color(.orange), lineWidth: 2)
                 }
             }
@@ -367,8 +367,8 @@ struct MangaSpeedLinesView: View {
 
 struct SparkleParticle: Identifiable {
     let id = UUID()
-    let x: CGFloat
-    let y: CGFloat
+    let posX: CGFloat
+    let posY: CGFloat
     let size: CGFloat
     let color: Color
 
@@ -381,8 +381,8 @@ struct SparkleParticle: Identifiable {
         let colors: [Color] = [.yellow, .orange, .pink, .cyan, .green]
         return (0..<count).map { _ in
             SparkleParticle(
-                x: CGFloat.random(in: 40...340),
-                y: CGFloat.random(in: 100...600),
+                posX: CGFloat.random(in: 40...340),
+                posY: CGFloat.random(in: 100...600),
                 size: CGFloat.random(in: 14...28),
                 color: colors.randomElement() ?? .yellow
             )
@@ -400,36 +400,36 @@ struct SpeechBubbleShape: Shape {
     var tailHeight: CGFloat = 10  // vertical height of the tail triangle
 
     func path(in rect: CGRect) -> Path {
-        let r = min(cornerRadius, rect.height / 2)
+        let radius = min(cornerRadius, rect.height / 2)
         let left = tailOutset
 
-        var p = Path()
+        var path = Path()
         // Top edge (after top-left arc)
-        p.move(to: CGPoint(x: left + r, y: 0))
-        p.addLine(to: CGPoint(x: rect.maxX - r, y: 0))
+        path.move(to: CGPoint(x: left + radius, y: 0))
+        path.addLine(to: CGPoint(x: rect.maxX - radius, y: 0))
         // Top-right arc
-        p.addArc(
-            center: CGPoint(x: rect.maxX - r, y: r),
-            radius: r, startAngle: .degrees(-90), endAngle: .degrees(0), clockwise: false)
+        path.addArc(
+            center: CGPoint(x: rect.maxX - radius, y: radius),
+            radius: radius, startAngle: .degrees(-90), endAngle: .degrees(0), clockwise: false)
         // Right edge
-        p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - r))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - radius))
         // Bottom-right arc
-        p.addArc(
-            center: CGPoint(x: rect.maxX - r, y: rect.maxY - r),
-            radius: r, startAngle: .degrees(0), endAngle: .degrees(90), clockwise: false)
+        path.addArc(
+            center: CGPoint(x: rect.maxX - radius, y: rect.maxY - radius),
+            radius: radius, startAngle: .degrees(0), endAngle: .degrees(90), clockwise: false)
         // Bottom edge — no bottom-left arc; tail starts here
-        p.addLine(to: CGPoint(x: left, y: rect.maxY))
+        path.addLine(to: CGPoint(x: left, y: rect.maxY))
         // Tail: tip → reconnect
-        p.addLine(to: CGPoint(x: 0, y: rect.maxY))
-        p.addLine(to: CGPoint(x: left, y: rect.maxY - tailHeight))
+        path.addLine(to: CGPoint(x: 0, y: rect.maxY))
+        path.addLine(to: CGPoint(x: left, y: rect.maxY - tailHeight))
         // Left edge up
-        p.addLine(to: CGPoint(x: left, y: r))
+        path.addLine(to: CGPoint(x: left, y: radius))
         // Top-left arc
-        p.addArc(
-            center: CGPoint(x: left + r, y: r),
-            radius: r, startAngle: .degrees(180), endAngle: .degrees(-90), clockwise: false)
-        p.closeSubpath()
-        return p
+        path.addArc(
+            center: CGPoint(x: left + radius, y: radius),
+            radius: radius, startAngle: .degrees(180), endAngle: .degrees(-90), clockwise: false)
+        path.closeSubpath()
+        return path
     }
 }
 

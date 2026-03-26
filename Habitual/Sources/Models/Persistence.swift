@@ -105,12 +105,12 @@ struct PersistenceController {
         optional: Bool = false,
         default defaultValue: Any? = nil
     ) -> NSAttributeDescription {
-        let a = NSAttributeDescription()
-        a.name = name
-        a.attributeType = type
-        a.isOptional = optional
-        if let v = defaultValue { a.defaultValue = v }
-        return a
+        let attribute = NSAttributeDescription()
+        attribute.name = name
+        attribute.attributeType = type
+        attribute.isOptional = optional
+        if let value = defaultValue { attribute.defaultValue = value }
+        return attribute
     }
 
     static var preview: PersistenceController = {
@@ -125,15 +125,15 @@ struct PersistenceController {
             ("Water", "Drink 8 glasses of water", "drop.fill", 0.20, 0.70, 0.90)
         ]
 
-        for (name, desc, icon, r, g, b) in sampleHabits {
+        for (name, desc, icon, red, green, blue) in sampleHabits {
             let habit = CDHabit(context: viewContext)
             habit.id = UUID()
             habit.name = name
             habit.habitDescription = desc
             habit.icon = HabitIcon.resolve(icon)
-            habit.colorRed = r
-            habit.colorGreen = g
-            habit.colorBlue = b
+            habit.colorRed = red
+            habit.colorGreen = green
+            habit.colorBlue = blue
             habit.createdAt = Date()
             habit.isArchived = false
             habit.goalFrequency = 1

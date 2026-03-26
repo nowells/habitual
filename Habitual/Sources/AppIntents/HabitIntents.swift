@@ -57,6 +57,7 @@ extension Habit {
 struct LogHabitIntent: AppIntent {
     static let title: LocalizedStringResource = "Log Habit"
     static let description = IntentDescription(
+        // swiftlint:disable:next line_length
         "Mark a habit as complete for today. Use with Shortcuts automations to log habits on a schedule or when triggered by a location, focus mode, or other event.",
         categoryName: "Habit Tracking"
     )
@@ -93,6 +94,7 @@ struct LogHabitIntent: AppIntent {
 struct CheckHabitStatusIntent: AppIntent {
     static let title: LocalizedStringResource = "Check Habit Status"
     static let description = IntentDescription(
+        // swiftlint:disable:next line_length
         "Find out if a habit is already logged for today. Use in Shortcuts to skip a reminder if you've already completed the habit.",
         categoryName: "Habit Tracking"
     )

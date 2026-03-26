@@ -21,6 +21,7 @@ opt_in_rules:
 
 disabled_rules:
   - trailing_whitespace  # swift-format handles this
+  - multiple_closures_with_trailing_closure  # conflicts with idiomatic SwiftUI
 
 line_length:
   warning: 120
@@ -29,13 +30,35 @@ line_length:
   ignores_urls: true
 
 type_body_length:
-  warning: 300
-  error: 500
+  warning: 400
+  error: 600
 
 file_length:
-  warning: 500
-  error: 800
+  warning: 600
+  error: 1000
 
 function_body_length:
-  warning: 60
-  error: 100
+  warning: 80
+  error: 120
+
+cyclomatic_complexity:
+  warning: 12
+  error: 20
+
+large_tuple:
+  warning: 3
+  error: 5
+
+# Allow short names common in drawing/math code and closures
+identifier_name:
+  min_length:
+    warning: 2
+    error: 1
+  excluded:
+    - id
+    - i
+    - x
+    - y
+    - r
+    - g
+    - b

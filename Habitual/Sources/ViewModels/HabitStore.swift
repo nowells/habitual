@@ -187,8 +187,8 @@ class HabitStore: ObservableObject {
         let completionSet = (cdHabit.completions as? Set<CDCompletion>) ?? []
 
         let periodCompletions = completionSet.filter { completion in
-            let d = calendar.startOfDay(for: completion.date ?? Date())
-            return d >= periodStart && d < periodEnd
+            let completionDay = calendar.startOfDay(for: completion.date ?? Date())
+            return completionDay >= periodStart && completionDay < periodEnd
         }
 
         for completion in periodCompletions {

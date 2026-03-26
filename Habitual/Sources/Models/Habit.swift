@@ -344,8 +344,8 @@ extension Habit {
         let start = goalPeriod.periodStart(for: date, calendar: calendar)
         let end = goalPeriod.periodEnd(for: date, calendar: calendar)
         return completions.filter { completion in
-            let d = calendar.startOfDay(for: completion.date)
-            return d >= start && d < end
+            let day = calendar.startOfDay(for: completion.date)
+            return day >= start && day < end
         }.count
     }
 
@@ -381,8 +381,8 @@ extension Habit {
         while current < endDate {
             let end = goalPeriod.periodEnd(for: current, calendar: calendar)
             let count = completions.filter { completion in
-                let d = calendar.startOfDay(for: completion.date)
-                return d >= current && d < end
+                let day = calendar.startOfDay(for: completion.date)
+                return day >= current && day < end
             }.count
             let isFuture = current > todayStart
             let isCurrentPeriod = current <= todayStart && end > todayStart
