@@ -27,7 +27,7 @@
 		A10024 /* HabitIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10024 /* HabitIntents.swift */; };
 		A10025 /* MascotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10025 /* MascotView.swift */; };
 		A10026 /* EnvironmentValues+Today.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10026 /* EnvironmentValues+Today.swift */; };
-		A10030 /* Habitual Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C20001 /* Habitual Watch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A10030 /* Habitual Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C20001 /* Habitual Watch.app */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A20001 /* HabitualWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20001 /* HabitualWatchApp.swift */; };
 		A20002 /* WatchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20002 /* WatchContentView.swift */; };
 		A20003 /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10003 /* Habit.swift */; };
@@ -549,6 +549,7 @@
 /* Begin PBXTargetDependency section */
 		TD20001 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = T20001 /* Habitual Watch */;
 			targetProxy = P20001 /* PBXContainerItemProxy */;
 		};
@@ -669,7 +670,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Habitual/Resources/Habitual.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Habitual/Resources/Info.plist;
@@ -705,7 +706,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Habitual/Resources/Habitual.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Habitual/Resources/Info.plist;
