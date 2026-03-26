@@ -1,5 +1,6 @@
 import WidgetKit
 import SwiftUI
+import CoreData
 
 // MARK: - Watch Complications using WidgetKit
 
@@ -7,6 +8,10 @@ struct HabitualComplicationProvider: TimelineProvider {
     let persistenceController = PersistenceController.shared
 
     func placeholder(in context: Context) -> HabitComplicationEntry {
+        defaultEntry()
+    }
+
+    private func defaultEntry() -> HabitComplicationEntry {
         HabitComplicationEntry(
             date: Date(),
             habitName: "Exercise",
@@ -36,24 +41,46 @@ struct HabitualComplicationProvider: TimelineProvider {
     }
 
     private func fetchCurrentEntry() -> HabitComplicationEntry {
-        let context = persistenceController.container.viewContext
-        let store = HabitStore(context: context)
-
-        guard let firstHabit = store.activeHabits.first else {
-            return placeholder(in: .init())
+        guard let habit = loadFirstActiveHabit() else {
+            return defaultEntry()
         }
 
         return HabitComplicationEntry(
             date: Date(),
-            habitName: firstHabit.name,
-            habitIcon: firstHabit.icon,
-            isCompleted: firstHabit.isCompletedOn(date: Date()),
-            streak: firstHabit.currentStreak,
-            completionRate: firstHabit.completionRate,
-            colorRed: firstHabit.colorComponents.red,
-            colorGreen: firstHabit.colorComponents.green,
-            colorBlue: firstHabit.colorComponents.blue
+            habitName: habit.name,
+            habitIcon: habit.icon,
+            isCompleted: habit.isCompletedOn(date: Date()),
+            streak: habit.currentStreak,
+            completionRate: habit.completionRate,
+            colorRed: habit.colorComponents.red,
+            colorGreen: habit.colorComponents.green,
+            colorBlue: habit.colorComponents.blue
         )
+    }
+
+    private func loadFirstActiveHabit() -> Habit? {
+        let context = persistenceController.container.newBackgroundContext()
+        var habit: Habit?
+
+        context.performAndWait {
+            let request: NSFetchRequest<CDHabit> = CDHabit.fetchRequest()
+            request.predicate = NSPredicate(format: "isArchived == NO")
+            request.sortDescriptors = [
+                NSSortDescriptor(keyPath: \CDHabit.sortOrder, ascending: true),
+                NSSortDescriptor(keyPath: \CDHabit.createdAt, ascending: false),
+            ]
+            request.fetchLimit = 1
+
+            do {
+                if let cdHabit = try context.fetch(request).first {
+                    habit = cdHabit.toHabit()
+                }
+            } catch {
+                print("Complication fetch failed: \(error)")
+            }
+        }
+
+        return habit
     }
 }
 

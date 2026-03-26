@@ -1,5 +1,28 @@
 import WidgetKit
 import SwiftUI
+import CoreData
+#if canImport(UIKit)
+import UIKit
+#endif
+
+// MARK: - Platform Colors
+
+private extension Color {
+    static var systemGray3: Color {
+        #if canImport(UIKit)
+        Color(UIColor.systemGray3)
+        #else
+        Color.gray.opacity(0.45)
+        #endif
+    }
+    static var systemGray5: Color {
+        #if canImport(UIKit)
+        Color(UIColor.systemGray5)
+        #else
+        Color.gray.opacity(0.18)
+        #endif
+    }
+}
 
 // MARK: - Widget Timeline Provider
 
@@ -24,8 +47,13 @@ struct HabitWidgetProvider: TimelineProvider {
 
     private func fetchEntry() -> HabitWidgetEntry {
         let context = persistenceController.container.viewContext
-        let store = HabitStore(context: context)
-        let habits = store.activeHabits
+        let request: NSFetchRequest<CDHabit> = CDHabit.fetchRequest()
+        request.predicate = NSPredicate(format: "isArchived == NO")
+        request.sortDescriptors = [
+            NSSortDescriptor(keyPath: \CDHabit.sortOrder, ascending: true),
+            NSSortDescriptor(keyPath: \CDHabit.createdAt, ascending: false),
+        ]
+        let habits = (try? context.fetch(request))?.map { $0.toHabit() } ?? []
 
         let habitSnapshots = habits.prefix(6).map { habit in
             HabitSnapshot(
@@ -120,7 +148,7 @@ struct SmallHabitWidget: View {
                 Spacer()
                 ZStack {
                     Circle()
-                        .stroke(Color(.systemGray5), lineWidth: 6)
+                        .stroke(Color.systemGray5, lineWidth: 6)
                         .frame(width: 50, height: 50)
 
                     Circle()
@@ -179,7 +207,7 @@ struct MediumHabitWidget: View {
                 HStack(spacing: 8) {
                     Image(systemName: habit.isCompletedToday ? "checkmark.circle.fill" : "circle")
                         .font(.body)
-                        .foregroundStyle(habit.isCompletedToday ? habit.color : Color(.systemGray3))
+                        .foregroundStyle(habit.isCompletedToday ? habit.color : Color.systemGray3)
 
                     Image(systemName: habit.icon)
                         .font(.caption)
@@ -238,7 +266,7 @@ struct LargeHabitWidget: View {
                 // Progress ring
                 ZStack {
                     Circle()
-                        .stroke(Color(.systemGray5), lineWidth: 4)
+                        .stroke(Color.systemGray5, lineWidth: 4)
                         .frame(width: 36, height: 36)
                     Circle()
                         .trim(from: 0, to: entry.completionFraction)
@@ -258,7 +286,7 @@ struct LargeHabitWidget: View {
                 HStack(spacing: 8) {
                     Image(systemName: habit.isCompletedToday ? "checkmark.circle.fill" : "circle")
                         .font(.body)
-                        .foregroundStyle(habit.isCompletedToday ? habit.color : Color(.systemGray3))
+                        .foregroundStyle(habit.isCompletedToday ? habit.color : Color.systemGray3)
 
                     Image(systemName: habit.icon)
                         .font(.caption)
@@ -275,7 +303,7 @@ struct LargeHabitWidget: View {
                         HStack(spacing: 2) {
                             ForEach(0..<min(14, habit.recentCompletions.count), id: \.self) { idx in
                                 Circle()
-                                    .fill(habit.recentCompletions[idx] ? habit.color : Color(.systemGray5))
+                                    .fill(habit.recentCompletions[idx] ? habit.color : Color.systemGray5)
                                     .frame(width: 6, height: 6)
                             }
                         }
@@ -393,9 +421,6 @@ struct HabitualWidget: Widget {
             .systemSmall,
             .systemMedium,
             .systemLarge,
-            .accessoryCircular,
-            .accessoryRectangular,
-            .accessoryInline,
         ])
     }
 }
@@ -412,12 +437,14 @@ struct HabitualWidgetEntryView: View {
             MediumHabitWidget(entry: entry)
         case .systemLarge:
             LargeHabitWidget(entry: entry)
+        #if !os(macOS)
         case .accessoryCircular:
             AccessoryCircularHabitWidget(entry: entry)
         case .accessoryRectangular:
             AccessoryRectangularHabitWidget(entry: entry)
         case .accessoryInline:
             AccessoryInlineHabitWidget(entry: entry)
+        #endif
         default:
             MediumHabitWidget(entry: entry)
         }
@@ -450,9 +477,16 @@ struct SingleHabitWidgetProvider: IntentTimelineProvider {
 
     private func fetchEntry() -> SingleHabitEntry {
         let context = persistenceController.container.viewContext
-        let store = HabitStore(context: context)
+        let request: NSFetchRequest<CDHabit> = CDHabit.fetchRequest()
+        request.predicate = NSPredicate(format: "isArchived == NO")
+        request.sortDescriptors = [
+            NSSortDescriptor(keyPath: \CDHabit.sortOrder, ascending: true),
+            NSSortDescriptor(keyPath: \CDHabit.createdAt, ascending: false),
+        ]
+        request.fetchLimit = 1
+        let habits = (try? context.fetch(request))?.map { $0.toHabit() } ?? []
 
-        guard let habit = store.activeHabits.first else {
+        guard let habit = habits.first else {
             return .placeholder
         }
 
@@ -607,7 +641,7 @@ struct WidgetHeatmapGrid: View {
     private func cellColor(for day: HeatmapDay) -> Color {
         if day.isFuture { return .clear }
         if day.isCompleted { return color }
-        return Color(.systemGray5)
+        return Color.systemGray5
     }
 }
 
