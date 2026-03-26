@@ -70,14 +70,25 @@ struct PeriodHeatmapGridView: View {
                     dayOfWeekLabels
                 }
 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: cellSpacing) {
-                        ForEach(weeks.indices, id: \.self) { weekIndex in
-                            VStack(spacing: cellSpacing) {
-                                ForEach(weeks[weekIndex].indices, id: \.self) { dayIndex in
-                                    dailyCell(day: weeks[weekIndex][dayIndex])
+                ScrollViewReader { proxy in
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: cellSpacing) {
+                            ForEach(weeks.indices, id: \.self) { weekIndex in
+                                VStack(spacing: cellSpacing) {
+                                    ForEach(weeks[weekIndex].indices, id: \.self) { dayIndex in
+                                        dailyCell(day: weeks[weekIndex][dayIndex])
+                                    }
                                 }
+                                .id(weekIndex)
                             }
+                        }
+                    }
+                    .onAppear {
+                        // Find the week containing today and scroll to it
+                        if let todayWeek = weeks.lastIndex(where: { week in
+                            week.contains { Calendar.current.isDate($0.date, inSameDayAs: today) }
+                        }) {
+                            proxy.scrollTo(todayWeek, anchor: .trailing)
                         }
                     }
                 }
@@ -131,10 +142,17 @@ struct PeriodHeatmapGridView: View {
                 weeklyLabels
             }
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: cellSpacing) {
-                    ForEach(periodData) { period in
-                        periodCell(period)
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: cellSpacing) {
+                        ForEach(periodData) { period in
+                            periodCell(period)
+                        }
+                    }
+                }
+                .onAppear {
+                    if let current = periodData.first(where: { $0.isCurrentPeriod }) {
+                        proxy.scrollTo(current.id, anchor: .trailing)
                     }
                 }
             }
@@ -149,10 +167,17 @@ struct PeriodHeatmapGridView: View {
                 monthlyLabels
             }
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: cellSpacing + 2) {
-                    ForEach(periodData) { period in
-                        periodCell(period, size: cellSize * 1.8)
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: cellSpacing + 2) {
+                        ForEach(periodData) { period in
+                            periodCell(period, size: cellSize * 1.8)
+                        }
+                    }
+                }
+                .onAppear {
+                    if let current = periodData.first(where: { $0.isCurrentPeriod }) {
+                        proxy.scrollTo(current.id, anchor: .trailing)
                     }
                 }
             }
@@ -323,43 +348,66 @@ struct PeriodHeatmapGridView: View {
 
 // MARK: - Compact Period Heatmap (for cards)
 
+/// Automatically fills available width — shows as many periods as fit.
 struct CompactPeriodHeatmapView: View {
     let habit: Habit
-    let months: Int
     let cellSize: CGFloat
     let cellSpacing: CGFloat
 
     @Environment(\.today) private var today
 
-    init(habit: Habit, months: Int = 3, cellSize: CGFloat = 10, cellSpacing: CGFloat = 2) {
+    init(habit: Habit, cellSize: CGFloat = 10, cellSpacing: CGFloat = 2) {
         self.habit = habit
-        self.months = months
         self.cellSize = cellSize
         self.cellSpacing = cellSpacing
     }
 
     var body: some View {
+        GeometryReader { geometry in
+            let width = geometry.size.width
+            switch habit.goalPeriod {
+            case .daily:
+                compactDaily(availableWidth: width)
+            case .weekly:
+                compactWeekly(availableWidth: width)
+            case .monthly:
+                compactMonthly(availableWidth: width)
+            }
+        }
+        .frame(height: compactHeight)
+    }
+
+    private var compactHeight: CGFloat {
         switch habit.goalPeriod {
         case .daily:
-            compactDaily
+            return 7 * cellSize + 6 * cellSpacing
         case .weekly:
-            compactWeekly
+            return cellSize
         case .monthly:
-            compactMonthly
+            return cellSize * 1.5
         }
     }
 
-    private var compactDaily: some View {
+    // MARK: - Daily
+
+    private func compactDaily(availableWidth: CGFloat) -> some View {
+        let columnWidth = cellSize + cellSpacing
+        let maxWeeks = max(1, Int(availableWidth / columnWidth))
+        // Convert weeks to months (roughly 4.33 weeks/month), request enough data + 1 week forward
+        let months = max(1, Int(ceil(Double(maxWeeks) / 4.33)))
         let weeks = habit.heatmapData(months: months, forwardDays: 7, today: today)
+        // Take only as many weeks as fit
+        let visibleWeeks = Array(weeks.suffix(maxWeeks))
         return HStack(spacing: cellSpacing) {
-            ForEach(weeks.indices, id: \.self) { weekIndex in
+            ForEach(visibleWeeks.indices, id: \.self) { weekIndex in
                 VStack(spacing: cellSpacing) {
-                    ForEach(weeks[weekIndex].indices, id: \.self) { dayIndex in
-                        compactDailyCell(day: weeks[weekIndex][dayIndex])
+                    ForEach(visibleWeeks[weekIndex].indices, id: \.self) { dayIndex in
+                        compactDailyCell(day: visibleWeeks[weekIndex][dayIndex])
                     }
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .trailing)
     }
 
     @ViewBuilder
@@ -400,27 +448,42 @@ struct CompactPeriodHeatmapView: View {
         }
     }
 
-    private var compactWeekly: some View {
+    // MARK: - Weekly
+
+    private func compactWeekly(availableWidth: CGFloat) -> some View {
+        let columnWidth = cellSize + cellSpacing
+        let maxPeriods = max(1, Int(availableWidth / columnWidth))
+        let months = max(1, Int(ceil(Double(maxPeriods) / 4.33)))
         let periods = habit.periodHeatmapData(months: months, forwardPeriods: 5, today: today)
-        return ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: cellSpacing) {
-                ForEach(periods) { period in
-                    compactPeriodCell(period)
-                }
+        let visiblePeriods = Array(periods.suffix(maxPeriods))
+        return HStack(spacing: cellSpacing) {
+            ForEach(visiblePeriods) { period in
+                compactPeriodCell(period)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .trailing)
     }
 
-    private var compactMonthly: some View {
-        let periods = habit.periodHeatmapData(months: months * 2, forwardPeriods: months, today: today)
-        return ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: cellSpacing + 1) {
-                ForEach(periods) { period in
-                    compactPeriodCell(period, size: cellSize * 1.5)
-                }
+    // MARK: - Monthly
+
+    private func compactMonthly(availableWidth: CGFloat) -> some View {
+        let monthlyCellSize = cellSize * 1.5
+        let monthlySpacing = cellSpacing + 1
+        let columnWidth = monthlyCellSize + monthlySpacing
+        let maxPeriods = max(1, Int(availableWidth / columnWidth))
+        let backMonths = max(1, maxPeriods)
+        let forwardMonths = min(12, maxPeriods / 3)
+        let periods = habit.periodHeatmapData(months: backMonths, forwardPeriods: forwardMonths, today: today)
+        let visiblePeriods = Array(periods.suffix(maxPeriods))
+        return HStack(spacing: monthlySpacing) {
+            ForEach(visiblePeriods) { period in
+                compactPeriodCell(period, size: monthlyCellSize)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .trailing)
     }
+
+    // MARK: - Period Cell
 
     @ViewBuilder
     private func compactPeriodCell(_ period: PeriodData, size: CGFloat? = nil) -> some View {

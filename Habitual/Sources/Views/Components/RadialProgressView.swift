@@ -198,6 +198,7 @@ struct RadialCheckInButton: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .simultaneousGesture(

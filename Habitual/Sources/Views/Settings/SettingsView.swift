@@ -4,7 +4,6 @@ import UserNotifications
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("appTheme") private var appTheme: String = "system"
-    @AppStorage("heatmapMonths") private var heatmapMonths: Int = 4
     @AppStorage("showCompletionAnimations") private var showCompletionAnimations: Bool = true
     @AppStorage("startOfWeek") private var startOfWeek: Int = 1 // 1 = Sunday (Calendar default)
     @State private var notificationStatus: UNAuthorizationStatus = .notDetermined
@@ -19,12 +18,6 @@ struct SettingsView: View {
                     Text("Dark").tag("dark")
                 }
 
-                Picker("Heatmap Range", selection: $heatmapMonths) {
-                    Text("3 Months").tag(3)
-                    Text("4 Months").tag(4)
-                    Text("6 Months").tag(6)
-                    Text("12 Months").tag(12)
-                }
             }
 
             // Behavior

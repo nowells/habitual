@@ -133,9 +133,9 @@ struct ContentView: View {
                 syncStatusView
 
                 ForEach(habitStore.filteredHabits) { habit in
-                    HabitCardView(habit: habit, habitStore: habitStore)
-                        .contentShape(Rectangle())
-                        .onTapGesture { selectedHabit = habit }
+                    HabitCardView(habit: habit, habitStore: habitStore, onNavigate: {
+                        selectedHabit = habit
+                    })
                 }
             }
             .padding()

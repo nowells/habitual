@@ -3,6 +3,7 @@ import SwiftUI
 struct HabitCardView: View {
     let habit: Habit
     @ObservedObject var habitStore: HabitStore
+    var onNavigate: (() -> Void)?
 
     @Environment(\.today) private var today
 
@@ -19,24 +20,28 @@ struct HabitCardView: View {
         VStack(alignment: .leading, spacing: 12) {
             // Header
             HStack {
-                HabitIcon.image(habit.icon)
-                    .font(.title3)
-                    .foregroundStyle(habit.color)
+                HStack {
+                    HabitIcon.image(habit.icon)
+                        .font(.title3)
+                        .foregroundStyle(habit.color)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(habit.name)
-                        .font(.headline)
-                        .foregroundStyle(.primary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(habit.name)
+                            .font(.headline)
+                            .foregroundStyle(.primary)
 
-                    if !habit.description.isEmpty {
-                        Text(habit.description)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                        if !habit.description.isEmpty {
+                            Text(habit.description)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
                     }
-                }
 
-                Spacer()
+                    Spacer()
+                }
+                .contentShape(Rectangle())
+                .onTapGesture { onNavigate?() }
 
                 // Mini mascot reaction (shown briefly after completion)
                 if showMascotReaction {
@@ -74,6 +79,8 @@ struct HabitCardView: View {
             // Compact Period Heatmap Grid
             CompactPeriodHeatmapView(habit: habit)
                 .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+                .onTapGesture { onNavigate?() }
 
             // Stats Row
             HStack(spacing: 16) {
@@ -109,6 +116,8 @@ struct HabitCardView: View {
                     .background(Color.systemGray6)
                     .clipShape(Capsule())
             }
+            .contentShape(Rectangle())
+            .onTapGesture { onNavigate?() }
         }
         .padding()
         .background {
@@ -122,6 +131,7 @@ struct HabitCardView: View {
                     isPeriodGoalMet ? habit.color.opacity(0.4) : Color.systemGray5,
                     lineWidth: isPeriodGoalMet ? 1.5 : 0.5
                 )
+                .allowsHitTesting(false)
         }
         .contextMenu {
             Button(action: { habitStore.addCompletion(for: habit, on: today) }) {
