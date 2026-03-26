@@ -124,10 +124,7 @@ struct ContentView: View {
                 syncStatusView
 
                 ForEach(habitStore.filteredHabits) { habit in
-                    NavigationLink(destination: HabitDetailView(habit: habit, habitStore: habitStore)) {
-                        HabitCardView(habit: habit, habitStore: habitStore)
-                    }
-                    .buttonStyle(.plain)
+                    HabitCardRow(habit: habit, habitStore: habitStore)
                 }
             }
             .padding()
@@ -182,6 +179,27 @@ struct ContentView: View {
             NotificationService.shared.notifySyncFailure(message: message)
         }
         isSyncing = false
+    }
+}
+
+// MARK: - Habit Card Row
+
+/// Wraps HabitCardView with tap-to-navigate behaviour.
+/// Using onTapGesture instead of NavigationLink-as-container ensures that
+/// Button subviews (like the check-in button) correctly intercept their own taps
+/// without also triggering navigation.
+private struct HabitCardRow: View {
+    let habit: Habit
+    @ObservedObject var habitStore: HabitStore
+    @State private var showDetail = false
+
+    var body: some View {
+        HabitCardView(habit: habit, habitStore: habitStore)
+            .contentShape(Rectangle())
+            .onTapGesture { showDetail = true }
+            .navigationDestination(isPresented: $showDetail) {
+                HabitDetailView(habit: habit, habitStore: habitStore)
+            }
     }
 }
 

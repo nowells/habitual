@@ -306,17 +306,24 @@ extension Habit {
     }
 
     /// Returns period-based heatmap data: one entry per period going back N months
-    func periodHeatmapData(months: Int = 4, today: Date = Date()) -> [PeriodData] {
+    /// and forward by `forwardPeriods` additional periods past the current one.
+    func periodHeatmapData(months: Int = 4, forwardPeriods: Int = 0, today: Date = Date()) -> [PeriodData] {
         let calendar = Calendar.current
         let todayStart = calendar.startOfDay(for: today)
         guard let startDate = calendar.date(byAdding: .month, value: -months, to: todayStart) else { return [] }
 
-        let periodStart = goalPeriod.periodStart(for: startDate, calendar: calendar)
+        let firstPeriodStart = goalPeriod.periodStart(for: startDate, calendar: calendar)
+
+        // End date: end of current period + forwardPeriods more periods
+        var endDate = goalPeriod.periodEnd(for: todayStart, calendar: calendar)
+        for _ in 0..<forwardPeriods {
+            endDate = goalPeriod.periodEnd(for: endDate, calendar: calendar)
+        }
 
         var periods: [PeriodData] = []
-        var current = periodStart
+        var current = firstPeriodStart
 
-        while current <= todayStart {
+        while current < endDate {
             let end = goalPeriod.periodEnd(for: current, calendar: calendar)
             let count = completions.filter { completion in
                 let d = calendar.startOfDay(for: completion.date)
@@ -338,8 +345,9 @@ extension Habit {
         return periods
     }
 
-    /// Returns a grid of completion data for the heatmap, organized by weeks
-    func heatmapData(months: Int = 4, today: Date = Date()) -> [[DayData]] {
+    /// Returns a grid of completion data for the heatmap, organized by weeks.
+    /// Extends `forwardDays` days past today to show upcoming empty slots.
+    func heatmapData(months: Int = 4, forwardDays: Int = 0, today: Date = Date()) -> [[DayData]] {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: today)
         guard let startDate = calendar.date(byAdding: .month, value: -months, to: today) else { return [] }
@@ -349,6 +357,8 @@ extension Habit {
         let daysToSubtract = weekday - calendar.firstWeekday
         guard let alignedStart = calendar.date(byAdding: .day, value: -daysToSubtract, to: startDate) else { return [] }
 
+        let endDate = calendar.date(byAdding: .day, value: forwardDays, to: today) ?? today
+
         let completionDates = Dictionary(
             grouping: completions,
             by: { calendar.startOfDay(for: $0.date) }
@@ -357,15 +367,13 @@ extension Habit {
         var weeks: [[DayData]] = []
         var currentDate = alignedStart
 
-        while currentDate <= today {
+        while currentDate <= endDate {
             var week: [DayData] = []
             for _ in 0..<7 {
-                if currentDate <= today && currentDate >= alignedStart {
-                    let value = completionDates[currentDate] ?? 0
-                    week.append(DayData(date: currentDate, value: value, isFuture: currentDate > today))
-                } else {
-                    week.append(DayData(date: currentDate, value: 0, isFuture: true))
-                }
+                let isPadding = currentDate < alignedStart
+                let isFuture = !isPadding && currentDate > today
+                let value = (!isPadding && !isFuture) ? (completionDates[currentDate] ?? 0) : 0
+                week.append(DayData(date: currentDate, value: value, isFuture: isFuture, isPadding: isPadding))
                 guard let nextDay = calendar.date(byAdding: .day, value: 1, to: currentDate) else { break }
                 currentDate = nextDay
             }
@@ -382,7 +390,10 @@ struct DayData: Identifiable {
     let id = UUID()
     let date: Date
     let value: Double
+    /// True when this date is after today (an upcoming empty slot to show)
     let isFuture: Bool
+    /// True when this date is outside the history window (padding to align the week grid — hide the cell)
+    let isPadding: Bool
 
     var isCompleted: Bool { value > 0 }
 }

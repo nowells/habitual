@@ -1,10 +1,60 @@
 import SwiftUI
 
-// MARK: - Radial Progress View (Fitness Ring Style)
+// MARK: - Pie Progress Fill (for heatmap cells)
 
-/// Renders a radial progress indicator similar to Apple Watch fitness rings.
-/// Supports multiple rotations: each full completion of the goal adds a new ring layer
-/// with a progressively adjusted color, creating an overlapping ring effect.
+/// Fills a rounded square like a pie/clock sweep. As completions accumulate the
+/// square fills clockwise from 12 o'clock. Completing the goal fills it fully;
+/// over-completion wraps into a new rotation with a complementary color.
+struct PieProgressFill: View {
+    let completionCount: Int
+    let goalFrequency: Int
+    let baseColor: Color
+    let size: CGFloat
+
+    private var cornerRadius: CGFloat { size * 0.2 }
+
+    private var fullRotations: Int {
+        guard goalFrequency > 0 else { return 0 }
+        return completionCount / goalFrequency
+    }
+
+    private var currentFraction: Double {
+        guard goalFrequency > 0 else { return 0 }
+        let remainder = completionCount % goalFrequency
+        if remainder == 0 && completionCount > 0 { return 1.0 }
+        return Double(remainder) / Double(goalFrequency)
+    }
+
+    private var fillColor: Color {
+        RadialProgressView.ringColor(base: baseColor, rotation: fullRotations)
+    }
+
+    var body: some View {
+        // Path-based pie wedge: draw from center with an oversized radius so the arc
+        // extends past every corner of the bounding square, then clip to the rounded rect.
+        Path { path in
+            let center = CGPoint(x: size / 2, y: size / 2)
+            // radius = size covers the half-diagonal (size/2 * √2 ≈ 0.71*size) with room to spare
+            path.move(to: center)
+            path.addArc(
+                center: center,
+                radius: size,
+                startAngle: .degrees(-90),
+                endAngle: .degrees(-90 + 360 * currentFraction),
+                clockwise: false
+            )
+            path.closeSubpath()
+        }
+        .fill(fillColor.opacity(0.85))
+        .frame(width: size, height: size)
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+    }
+}
+
+// MARK: - Radial Progress View (ring style — used only in check-in button)
+
+/// Renders a radial ring indicator similar to Apple Watch fitness rings.
+/// Each full completion of the goal adds a new ring layer with a complementary color.
 struct RadialProgressView: View {
     let completionCount: Int
     let goalFrequency: Int
@@ -24,11 +74,6 @@ struct RadialProgressView: View {
         self.baseColor = baseColor
         self.lineWidth = lineWidth
         self.size = size
-    }
-
-    private var progress: Double {
-        guard goalFrequency > 0 else { return 0 }
-        return Double(completionCount) / Double(goalFrequency)
     }
 
     private var fullRotations: Int {
@@ -93,60 +138,35 @@ struct RadialProgressView: View {
     }
 }
 
-// MARK: - Radial Progress Heatmap Cell
-
-/// A single cell in the period heatmap, showing a small radial progress ring
-struct RadialHeatmapCell: View {
-    let periodData: PeriodData
-    let baseColor: Color
-    let size: CGFloat
-    var onTap: (() -> Void)?
-
-    var body: some View {
-        ZStack {
-            // Background square
-            RoundedRectangle(cornerRadius: size * 0.2)
-                .fill(Color.systemGray5.opacity(periodData.isFuture ? 0 : 1))
-                .frame(width: size, height: size)
-
-            if !periodData.isFuture && periodData.completionCount > 0 {
-                RadialProgressView(
-                    completionCount: periodData.completionCount,
-                    goalFrequency: periodData.goalFrequency,
-                    baseColor: baseColor,
-                    lineWidth: max(1.5, size * 0.12),
-                    size: size * 0.85
-                )
-            }
-        }
-        .onTapGesture {
-            if !periodData.isFuture {
-                onTap?()
-            }
-        }
-    }
-}
-
 // MARK: - Radial Check-in Button
 
-/// A check-in button that shows radial progress for the current period.
-/// Tapping adds one completion. The ring fills as completions approach the goal.
+/// A check-in button that shows radial ring progress for the current period.
+/// Tap = add one completion. Long press (≥0.5 s) = remove last completion.
+///
+/// Uses a real Button (so it consumes taps and prevents parent onTapGesture from firing)
+/// combined with simultaneousGesture(LongPressGesture). A `longPressActivated` flag
+/// prevents the Button action from also firing after a long press.
 struct RadialCheckInButton: View {
     let habit: Habit
     let today: Date
     let size: CGFloat
     var onTap: () -> Void
+    var onLongPress: (() -> Void)?
+
+    @State private var longPressActivated = false
 
     private var completionsInPeriod: Int {
         habit.completionsInPeriod(containing: today)
     }
 
-    private var progress: Double {
-        habit.periodProgress(for: today)
-    }
-
     var body: some View {
-        Button(action: onTap) {
+        Button {
+            if longPressActivated {
+                longPressActivated = false
+            } else {
+                onTap()
+            }
+        } label: {
             VStack(spacing: 4) {
                 ZStack {
                     RadialProgressView(
@@ -157,7 +177,6 @@ struct RadialCheckInButton: View {
                         size: size
                     )
 
-                    // Center content
                     if completionsInPeriod == 0 {
                         Image(systemName: "plus")
                             .font(.system(size: size * 0.3, weight: .medium))
@@ -181,43 +200,44 @@ struct RadialCheckInButton: View {
             }
         }
         .buttonStyle(.plain)
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.5)
+                .onEnded { _ in
+                    longPressActivated = true
+                    onLongPress?()
+                }
+        )
     }
 }
 
 // MARK: - Previews
 
-#Preview("Radial Progress Sizes") {
+#Preview("Pie Fill Cells") {
     VStack(spacing: 20) {
-        HStack(spacing: 16) {
-            ForEach([0, 1, 2, 3, 4, 5], id: \.self) { count in
-                VStack {
-                    RadialProgressView(
-                        completionCount: count,
-                        goalFrequency: 3,
-                        baseColor: .blue,
-                        lineWidth: 4,
-                        size: 40
-                    )
-                    Text("\(count)/3")
-                        .font(.caption)
+        HStack(spacing: 8) {
+            ForEach([0, 1, 2, 3, 4, 5, 6], id: \.self) { count in
+                VStack(spacing: 4) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 3)
+                            .fill(Color.systemGray5)
+                            .frame(width: 24, height: 24)
+                        if count > 0 {
+                            PieProgressFill(completionCount: count, goalFrequency: 3, baseColor: .blue, size: 24)
+                        }
+                    }
+                    Text("\(count)/3").font(.system(size: 9))
                 }
             }
         }
+    }
+    .padding()
+}
 
-        HStack(spacing: 16) {
-            ForEach([0, 1, 2, 3, 6, 9], id: \.self) { count in
-                VStack {
-                    RadialProgressView(
-                        completionCount: count,
-                        goalFrequency: 3,
-                        baseColor: .green,
-                        lineWidth: 6,
-                        size: 60
-                    )
-                    Text("\(count)/3")
-                        .font(.caption)
-                }
-            }
+#Preview("Radial Check-In Button") {
+    HStack(spacing: 24) {
+        ForEach([0, 1, 2, 3, 5], id: \.self) { count in
+            let habit = Habit(name: "Test", goalFrequency: 3, goalPeriod: .daily)
+            RadialCheckInButton(habit: habit, today: Date(), size: 44, onTap: {})
         }
     }
     .padding()

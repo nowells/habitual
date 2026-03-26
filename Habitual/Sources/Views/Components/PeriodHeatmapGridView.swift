@@ -2,8 +2,9 @@ import SwiftUI
 
 // MARK: - Period Heatmap Grid View
 
-/// A heatmap that shows one cell per period (day/week/month) with radial progress rings
-/// instead of simple colored squares. Collapses daily heatmaps into period-appropriate views.
+/// A heatmap that shows one cell per period (day/week/month).
+/// Daily habits show a GitHub-style grid; weekly/monthly use a horizontal row.
+/// Cells use a pie fill: the rounded square fills clockwise as completions accumulate.
 struct PeriodHeatmapGridView: View {
     let habit: Habit
     let months: Int
@@ -16,7 +17,7 @@ struct PeriodHeatmapGridView: View {
 
     init(
         habit: Habit,
-        months: Int = 4,
+        months: Int = 12,
         cellSize: CGFloat = 14,
         cellSpacing: CGFloat = 3,
         showLabels: Bool = true,
@@ -30,8 +31,17 @@ struct PeriodHeatmapGridView: View {
         self.onTapPeriod = onTapPeriod
     }
 
+    // Forward periods per type: daily = 1 week, weekly = 5 weeks (~1 month), monthly = 12 months
+    private var forwardPeriods: Int {
+        switch habit.goalPeriod {
+        case .daily: return 0      // forward days handled separately
+        case .weekly: return 5
+        case .monthly: return 12
+        }
+    }
+
     private var periodData: [PeriodData] {
-        habit.periodHeatmapData(months: months, today: today)
+        habit.periodHeatmapData(months: months, forwardPeriods: forwardPeriods, today: today)
     }
 
     var body: some View {
@@ -45,10 +55,11 @@ struct PeriodHeatmapGridView: View {
         }
     }
 
-    // MARK: - Daily Layout (original heatmap style but with radial cells for multi-frequency)
+    // MARK: - Daily Layout
 
     private var dailyLayout: some View {
-        let weeks = habit.heatmapData(months: months, today: today)
+        // 1 week of future empty slots
+        let weeks = habit.heatmapData(months: months, forwardDays: 7, today: today)
         return VStack(alignment: .leading, spacing: 4) {
             if showLabels {
                 dailyMonthLabels(weeks: weeks)
@@ -64,8 +75,7 @@ struct PeriodHeatmapGridView: View {
                         ForEach(weeks.indices, id: \.self) { weekIndex in
                             VStack(spacing: cellSpacing) {
                                 ForEach(weeks[weekIndex].indices, id: \.self) { dayIndex in
-                                    let day = weeks[weekIndex][dayIndex]
-                                    dailyCell(day: day)
+                                    dailyCell(day: weeks[weekIndex][dayIndex])
                                 }
                             }
                         }
@@ -77,36 +87,43 @@ struct PeriodHeatmapGridView: View {
 
     @ViewBuilder
     private func dailyCell(day: DayData) -> some View {
-        if habit.goalFrequency > 1 {
-            // Multi-frequency: show radial progress
-            let count = habit.completionsInPeriod(containing: day.date)
+        if day.isPadding {
+            Color.clear.frame(width: cellSize, height: cellSize)
+        } else {
+            let isToday = Calendar.current.isDateInToday(day.date)
             ZStack {
                 RoundedRectangle(cornerRadius: cellSize * 0.2)
-                    .fill(day.isFuture ? Color.clear : Color.systemGray5)
+                    .fill(day.isFuture ? Color.systemGray5.opacity(0.35) : Color.systemGray5)
                     .frame(width: cellSize, height: cellSize)
 
-                if !day.isFuture && count > 0 {
-                    RadialProgressView(
-                        completionCount: count,
-                        goalFrequency: habit.goalFrequency,
-                        baseColor: habit.color,
-                        lineWidth: max(1.5, cellSize * 0.12),
-                        size: cellSize * 0.85
-                    )
+                if !day.isFuture {
+                    if habit.goalFrequency > 1 {
+                        let count = habit.completionsInPeriod(containing: day.date)
+                        if count > 0 {
+                            PieProgressFill(
+                                completionCount: count,
+                                goalFrequency: habit.goalFrequency,
+                                baseColor: habit.color,
+                                size: cellSize
+                            )
+                        }
+                    } else if day.isCompleted {
+                        RoundedRectangle(cornerRadius: cellSize * 0.2)
+                            .fill(habit.color.opacity(min(1.0, 0.4 + day.value * 0.6)))
+                            .frame(width: cellSize, height: cellSize)
+                    }
+                }
+
+                if isToday {
+                    RoundedRectangle(cornerRadius: cellSize * 0.2)
+                        .strokeBorder(habit.color, lineWidth: 1)
+                        .frame(width: cellSize, height: cellSize)
                 }
             }
-        } else {
-            // Single-frequency: keep simple colored squares
-            HeatmapCell(
-                day: day,
-                color: habit.color,
-                size: cellSize,
-                onTap: nil
-            )
         }
     }
 
-    // MARK: - Weekly Layout (horizontal row of weeks)
+    // MARK: - Weekly Layout
 
     private var weeklyLayout: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -124,7 +141,7 @@ struct PeriodHeatmapGridView: View {
         }
     }
 
-    // MARK: - Monthly Layout (horizontal row of months)
+    // MARK: - Monthly Layout
 
     private var monthlyLayout: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -142,29 +159,28 @@ struct PeriodHeatmapGridView: View {
         }
     }
 
-    // MARK: - Period Cell
+    // MARK: - Period Cell (weekly/monthly)
 
     @ViewBuilder
     private func periodCell(_ period: PeriodData, size: CGFloat? = nil) -> some View {
         let effectiveSize = size ?? cellSize
         ZStack {
             RoundedRectangle(cornerRadius: effectiveSize * 0.2)
-                .fill(period.isFuture ? Color.clear : Color.systemGray5)
+                .fill(period.isFuture ? Color.systemGray5.opacity(0.35) : Color.systemGray5)
                 .frame(width: effectiveSize, height: effectiveSize)
 
             if !period.isFuture && period.completionCount > 0 {
-                RadialProgressView(
+                PieProgressFill(
                     completionCount: period.completionCount,
                     goalFrequency: period.goalFrequency,
                     baseColor: habit.color,
-                    lineWidth: max(1.5, effectiveSize * 0.1),
-                    size: effectiveSize * 0.85
+                    size: effectiveSize
                 )
             }
 
             if period.isCurrentPeriod {
                 RoundedRectangle(cornerRadius: effectiveSize * 0.2)
-                    .strokeBorder(habit.color.opacity(0.5), lineWidth: 1)
+                    .strokeBorder(habit.color, lineWidth: 1.5)
                     .frame(width: effectiveSize, height: effectiveSize)
             }
         }
@@ -331,14 +347,14 @@ struct CompactPeriodHeatmapView: View {
         }
     }
 
+    // 12 months back + 1 week forward
     private var compactDaily: some View {
-        let weeks = habit.heatmapData(months: 3, today: today)
+        let weeks = habit.heatmapData(months: 12, forwardDays: 7, today: today)
         return HStack(spacing: cellSpacing) {
             ForEach(weeks.indices, id: \.self) { weekIndex in
                 VStack(spacing: cellSpacing) {
                     ForEach(weeks[weekIndex].indices, id: \.self) { dayIndex in
-                        let day = weeks[weekIndex][dayIndex]
-                        compactDailyCell(day: day)
+                        compactDailyCell(day: weeks[weekIndex][dayIndex])
                     }
                 }
             }
@@ -347,32 +363,45 @@ struct CompactPeriodHeatmapView: View {
 
     @ViewBuilder
     private func compactDailyCell(day: DayData) -> some View {
-        if habit.goalFrequency > 1 {
-            let count = habit.completionsInPeriod(containing: day.date)
+        if day.isPadding {
+            Color.clear.frame(width: cellSize, height: cellSize)
+        } else {
+            let isToday = Calendar.current.isDateInToday(day.date)
             ZStack {
                 RoundedRectangle(cornerRadius: cellSize * 0.2)
-                    .fill(day.isFuture ? Color.clear : Color.systemGray5)
+                    .fill(day.isFuture ? Color.systemGray5.opacity(0.35) : Color.systemGray5)
                     .frame(width: cellSize, height: cellSize)
 
-                if !day.isFuture && count > 0 {
-                    RadialProgressView(
-                        completionCount: count,
-                        goalFrequency: habit.goalFrequency,
-                        baseColor: habit.color,
-                        lineWidth: max(1, cellSize * 0.12),
-                        size: cellSize * 0.85
-                    )
+                if !day.isFuture {
+                    if habit.goalFrequency > 1 {
+                        let count = habit.completionsInPeriod(containing: day.date)
+                        if count > 0 {
+                            PieProgressFill(
+                                completionCount: count,
+                                goalFrequency: habit.goalFrequency,
+                                baseColor: habit.color,
+                                size: cellSize
+                            )
+                        }
+                    } else if day.isCompleted {
+                        RoundedRectangle(cornerRadius: cellSize * 0.2)
+                            .fill(habit.color.opacity(min(1.0, 0.4 + day.value * 0.6)))
+                            .frame(width: cellSize, height: cellSize)
+                    }
+                }
+
+                if isToday {
+                    RoundedRectangle(cornerRadius: cellSize * 0.2)
+                        .strokeBorder(habit.color, lineWidth: 1)
+                        .frame(width: cellSize, height: cellSize)
                 }
             }
-        } else {
-            RoundedRectangle(cornerRadius: cellSize * 0.2)
-                .fill(cellColor(for: day))
-                .frame(width: cellSize, height: cellSize)
         }
     }
 
+    // 12 months back + 5 weeks forward (~1 month)
     private var compactWeekly: some View {
-        let periods = habit.periodHeatmapData(months: 3, today: today)
+        let periods = habit.periodHeatmapData(months: 12, forwardPeriods: 5, today: today)
         return ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: cellSpacing) {
                 ForEach(periods) { period in
@@ -382,8 +411,9 @@ struct CompactPeriodHeatmapView: View {
         }
     }
 
+    // 24 months back + 12 months forward
     private var compactMonthly: some View {
-        let periods = habit.periodHeatmapData(months: 6, today: today)
+        let periods = habit.periodHeatmapData(months: 24, forwardPeriods: 12, today: today)
         return ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: cellSpacing + 1) {
                 ForEach(periods) { period in
@@ -398,27 +428,24 @@ struct CompactPeriodHeatmapView: View {
         let effectiveSize = size ?? cellSize
         ZStack {
             RoundedRectangle(cornerRadius: effectiveSize * 0.2)
-                .fill(period.isFuture ? Color.clear : Color.systemGray5)
+                .fill(period.isFuture ? Color.systemGray5.opacity(0.35) : Color.systemGray5)
                 .frame(width: effectiveSize, height: effectiveSize)
 
             if !period.isFuture && period.completionCount > 0 {
-                RadialProgressView(
+                PieProgressFill(
                     completionCount: period.completionCount,
                     goalFrequency: period.goalFrequency,
                     baseColor: habit.color,
-                    lineWidth: max(1, effectiveSize * 0.1),
-                    size: effectiveSize * 0.85
+                    size: effectiveSize
                 )
             }
-        }
-    }
 
-    private func cellColor(for day: DayData) -> Color {
-        if day.isFuture { return .clear }
-        if day.isCompleted {
-            return habit.color.opacity(min(1.0, 0.4 + day.value * 0.6))
+            if period.isCurrentPeriod {
+                RoundedRectangle(cornerRadius: effectiveSize * 0.2)
+                    .strokeBorder(habit.color, lineWidth: 1)
+                    .frame(width: effectiveSize, height: effectiveSize)
+            }
         }
-        return Color.systemGray5
     }
 }
 

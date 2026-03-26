@@ -44,7 +44,7 @@ struct HabitCardView: View {
                         .transition(.scale.combined(with: .opacity))
                 }
 
-                // Quick check-in button with radial progress
+                // Quick check-in button: tap = add, long press = remove
                 RadialCheckInButton(
                     habit: habit,
                     today: today,
@@ -61,6 +61,11 @@ struct HabitCardView: View {
                         Task {
                             try? await Task.sleep(nanoseconds: 1_800_000_000)
                             withAnimation { showMascotReaction = false }
+                        }
+                    },
+                    onLongPress: {
+                        withAnimation(.spring(duration: 0.3, bounce: 0.3)) {
+                            habitStore.removeLastCompletion(for: habit, on: today)
                         }
                     }
                 )
