@@ -153,6 +153,54 @@ HabitualWidgets/
     └── HabitualWidgets.entitlements
 ```
 
+## Development
+
+### Prerequisites
+
+Install the required tools via Homebrew:
+
+```bash
+brew install swiftlint swift-format
+gem install xcpretty  # for build output formatting
+```
+
+### Linting
+
+```bash
+make lint        # check for violations (strict mode)
+make lint-fix    # auto-fix violations, then lint
+```
+
+### Formatting
+
+```bash
+make format        # format all Swift sources in-place
+make format-check  # check formatting without modifying files
+```
+
+### Testing
+
+```bash
+make test                   # unit & integration tests
+make test-snapshot          # snapshot tests (comparison mode)
+make test-snapshot-record   # re-record snapshot golden images
+make test-all               # unit + snapshot tests
+```
+
+Or run directly with `swift test`:
+
+```bash
+swift test --filter HabitualTests           # unit tests
+swift test --filter HabitualSnapshotTests   # snapshot tests
+SNAPSHOT_RECORD=true swift test --filter HabitualSnapshotTests  # re-record
+```
+
+### Build
+
+```bash
+make build  # build for iOS Simulator
+```
+
 ## Requirements
 
 - Xcode 15.3+

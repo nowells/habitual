@@ -1,0 +1,197 @@
+{
+  "lockfile-version": 1,
+  "manifest": {
+    "version": 1,
+    "install": {
+      "swift-format": {
+        "pkg-path": "swift-format"
+      },
+      "swiftlint": {
+        "pkg-path": "swiftlint",
+        "systems": [
+          "aarch64-darwin",
+          "x86_64-darwin"
+        ]
+      }
+    },
+    "hook": {},
+    "profile": {},
+    "options": {}
+  },
+  "packages": [
+    {
+      "attr_path": "swift-format",
+      "broken": false,
+      "derivation": "/nix/store/b7zm9pm0mfss4gxji7pi2g21cmznbzf4-swift-format-5.10.1.drv",
+      "description": "Formatting technology for Swift source code",
+      "install_id": "swift-format",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "name": "swift-format-5.10.1",
+      "pname": "swift-format",
+      "rev": "6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "rev_count": 967235,
+      "rev_date": "2026-03-21T15:16:39Z",
+      "scrape_date": "2026-03-25T15:45:55.925915Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.10.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/6amrsjzxi0zszf8a48i06bcg5a6yh8mh-swift-format-5.10.1"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "swift-format",
+      "broken": false,
+      "derivation": "/nix/store/ajl1giyfrpcy7gc5jrp0jxcxs89dkhmz-swift-format-5.10.1.drv",
+      "description": "Formatting technology for Swift source code",
+      "install_id": "swift-format",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "name": "swift-format-5.10.1",
+      "pname": "swift-format",
+      "rev": "6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "rev_count": 967235,
+      "rev_date": "2026-03-21T15:16:39Z",
+      "scrape_date": "2026-03-25T16:27:12.267115Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.10.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/ldr92cg4jrghza3nxizy87xh5511yldp-swift-format-5.10.1"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "swift-format",
+      "broken": false,
+      "derivation": "/nix/store/avgjkpy1bmdv486vzj1zi41pxkx260sz-swift-format-5.10.1.drv",
+      "description": "Formatting technology for Swift source code",
+      "install_id": "swift-format",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "name": "swift-format-5.10.1",
+      "pname": "swift-format",
+      "rev": "6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "rev_count": 967235,
+      "rev_date": "2026-03-21T15:16:39Z",
+      "scrape_date": "2026-03-25T17:04:40.392957Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.10.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/qsmvifq23zlfpqhwfsyxk1nrkf0f3gms-swift-format-5.10.1"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "swift-format",
+      "broken": false,
+      "derivation": "/nix/store/mvja96ghlnxvkma9ldlwx01a5cjydgfz-swift-format-5.10.1.drv",
+      "description": "Formatting technology for Swift source code",
+      "install_id": "swift-format",
+      "license": "Apache-2.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "name": "swift-format-5.10.1",
+      "pname": "swift-format",
+      "rev": "6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "rev_count": 967235,
+      "rev_date": "2026-03-21T15:16:39Z",
+      "scrape_date": "2026-03-25T17:49:42.742169Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "5.10.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/4027h6wfzc2y8m9axyc7aha9rn176pv9-swift-format-5.10.1"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "swiftlint",
+      "broken": false,
+      "derivation": "/nix/store/yby9qhy12pfyy67in9ql1gj70061b36q-swiftlint-0.62.1.drv",
+      "description": "Tool to enforce Swift style and conventions",
+      "install_id": "swiftlint",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "name": "swiftlint-0.62.1",
+      "pname": "swiftlint",
+      "rev": "6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "rev_count": 967235,
+      "rev_date": "2026-03-21T15:16:39Z",
+      "scrape_date": "2026-03-25T15:45:55.978369Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.62.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/srga8r9q2mh52x9h8qqgyp3bkr6qc0g2-swiftlint-0.62.1"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "swiftlint",
+      "broken": false,
+      "derivation": "/nix/store/663d67ii7lf7qr24khyd0gf7hg5x8b2q-swiftlint-0.62.1.drv",
+      "description": "Tool to enforce Swift style and conventions",
+      "install_id": "swiftlint",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "name": "swiftlint-0.62.1",
+      "pname": "swiftlint",
+      "rev": "6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "rev_count": 967235,
+      "rev_date": "2026-03-21T15:16:39Z",
+      "scrape_date": "2026-03-25T17:04:40.447736Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.62.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/96plzwc3bvdrk8wh2d7236g058lr0bga-swiftlint-0.62.1"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    }
+  ]
+}
