@@ -110,7 +110,7 @@ struct HabitualCircularComplication: View {
             AccessoryWidgetBackground()
 
             VStack(spacing: 1) {
-                Image(systemName: entry.habitIcon)
+                HabitIcon.image(entry.habitIcon)
                     .font(.caption)
                     .foregroundStyle(entry.isCompleted ? .green : entry.color)
 
@@ -133,7 +133,7 @@ struct HabitualRectangularComplication: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Image(systemName: entry.habitIcon)
+            HabitIcon.image(entry.habitIcon)
                 .font(.title3)
                 .foregroundStyle(entry.color)
 
@@ -169,7 +169,7 @@ struct HabitualInlineComplication: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            Image(systemName: entry.habitIcon)
+            HabitIcon.image(entry.habitIcon)
             Text(entry.habitName)
             Text("·")
             Image(systemName: "flame.fill")
@@ -185,9 +185,15 @@ struct HabitualCornerComplication: View {
         ZStack {
             AccessoryWidgetBackground()
 
-            Image(systemName: entry.isCompleted ? "checkmark.circle.fill" : entry.habitIcon)
-                .font(.title3)
-                .foregroundStyle(entry.isCompleted ? .green : entry.color)
+            if entry.isCompleted {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.title3)
+                    .foregroundStyle(.green)
+            } else {
+                HabitIcon.image(entry.habitIcon)
+                    .font(.title3)
+                    .foregroundStyle(entry.color)
+            }
         }
     }
 }

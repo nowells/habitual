@@ -172,7 +172,7 @@ struct SmallHabitWidget: View {
             // Habit icons row
             HStack(spacing: 6) {
                 ForEach(entry.habits.prefix(4)) { habit in
-                    Image(systemName: habit.icon)
+                    HabitIcon.image(habit.icon)
                         .font(.caption)
                         .foregroundStyle(habit.isCompletedToday ? habit.color : .gray)
                 }
@@ -209,7 +209,7 @@ struct MediumHabitWidget: View {
                         .font(.body)
                         .foregroundStyle(habit.isCompletedToday ? habit.color : Color.systemGray3)
 
-                    Image(systemName: habit.icon)
+                    HabitIcon.image(habit.icon)
                         .font(.caption)
                         .foregroundStyle(habit.color)
 
@@ -288,7 +288,7 @@ struct LargeHabitWidget: View {
                         .font(.body)
                         .foregroundStyle(habit.isCompletedToday ? habit.color : Color.systemGray3)
 
-                    Image(systemName: habit.icon)
+                    HabitIcon.image(habit.icon)
                         .font(.caption)
                         .foregroundStyle(habit.color)
                         .frame(width: 20)
@@ -574,7 +574,7 @@ struct SingleHabitWidgetView: View {
         VStack(alignment: .leading, spacing: 8) {
             // Header
             HStack {
-                Image(systemName: entry.habitIcon)
+                HabitIcon.image(entry.habitIcon)
                     .foregroundStyle(entry.color)
                 Text(entry.habitName)
                     .font(.caption)

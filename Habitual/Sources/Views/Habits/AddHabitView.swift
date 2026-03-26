@@ -6,7 +6,7 @@ struct AddHabitView: View {
 
     @State private var name = ""
     @State private var description = ""
-    @State private var selectedIcon = "star.fill"
+    @State private var selectedIcon = HabitIcon.availablePresets.first ?? "star.fill"
     @State private var selectedColor = HabitColor.presets[0]
     @State private var goalFrequency = 1
     @State private var goalPeriod: Habit.GoalPeriod = .daily
@@ -170,8 +170,8 @@ struct IconPickerView: View {
 
     var body: some View {
         LazyVGrid(columns: columns, spacing: 12) {
-            ForEach(HabitIcon.presets, id: \.self) { icon in
-                Image(systemName: icon)
+            ForEach(HabitIcon.availablePresets, id: \.self) { icon in
+                HabitIcon.image(icon)
                     .font(.title3)
                     .foregroundStyle(selectedIcon == icon ? .white : color)
                     .frame(width: 36, height: 36)

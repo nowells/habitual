@@ -62,7 +62,7 @@ class HabitStore: ObservableObject {
         cdHabit.id = habit.id
         cdHabit.name = habit.name
         cdHabit.habitDescription = habit.description
-        cdHabit.icon = habit.icon
+        cdHabit.icon = HabitIcon.resolve(habit.icon)
         cdHabit.colorRed = habit.colorComponents.red
         cdHabit.colorGreen = habit.colorComponents.green
         cdHabit.colorBlue = habit.colorComponents.blue

@@ -73,7 +73,7 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
                 VStack(spacing: 24) {
                     // Header card
                     HStack(spacing: 16) {
-                        Image(systemName: habit.icon)
+                        HabitIcon.image(habit.icon)
                             .font(.largeTitle)
                             .foregroundStyle(habit.color)
                             .frame(width: 60, height: 60)
@@ -182,7 +182,7 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
             ScrollView {
                 VStack(spacing: 24) {
                     HStack(spacing: 16) {
-                        Image(systemName: habit.icon)
+                        HabitIcon.image(habit.icon)
                             .font(.largeTitle)
                             .foregroundStyle(habit.color)
                             .frame(width: 60, height: 60)
@@ -269,7 +269,7 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
         let view = SnapshotContainer(width: 390) {
             VStack(spacing: 24) {
                 HStack(spacing: 16) {
-                    Image(systemName: habit.icon)
+                    HabitIcon.image(habit.icon)
                         .font(.largeTitle)
                         .foregroundStyle(habit.color)
                         .frame(width: 60, height: 60)
@@ -333,7 +333,7 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
         let view = SnapshotContainer(width: 390) {
             VStack(spacing: 24) {
                 HStack(spacing: 16) {
-                    Image(systemName: habit.icon)
+                    HabitIcon.image(habit.icon)
                         .font(.largeTitle)
                         .foregroundStyle(habit.color)
                         .frame(width: 60, height: 60)
@@ -426,7 +426,7 @@ final class ShowcaseSnapshotTests: SnapshotTestCase {
                 ForEach([TestData.exerciseHabit, TestData.readHabit, TestData.waterHabit]) { habit in
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 8) {
-                            Image(systemName: habit.icon)
+                            HabitIcon.image(habit.icon)
                                 .foregroundStyle(habit.color)
                             Text(habit.name)
                                 .font(.subheadline)

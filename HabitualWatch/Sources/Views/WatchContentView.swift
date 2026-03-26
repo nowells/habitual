@@ -49,7 +49,7 @@ struct WatchHabitRow: View {
 
     var body: some View {
         HStack {
-            Image(systemName: currentHabit.icon)
+            HabitIcon.image(currentHabit.icon)
                 .foregroundStyle(currentHabit.color)
                 .font(.title3)
 
@@ -104,7 +104,7 @@ struct WatchHabitDetailView: View {
                     }
                 }) {
                     VStack(spacing: 8) {
-                        Image(systemName: currentHabit.icon)
+                        HabitIcon.image(currentHabit.icon)
                             .font(.largeTitle)
                             .foregroundStyle(currentHabit.color)
 
@@ -148,7 +148,7 @@ struct WatchStatRow: View {
 
     var body: some View {
         HStack {
-            Image(systemName: icon)
+            HabitIcon.image(icon)
                 .foregroundStyle(color)
                 .frame(width: 20)
             Text(label)

@@ -1,5 +1,10 @@
 import SwiftUI
 import CoreData
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
 
 // MARK: - Habit Value Type
 
@@ -60,7 +65,7 @@ struct Habit: Identifiable, Equatable {
         self.id = id
         self.name = name
         self.description = description
-        self.icon = icon
+        self.icon = HabitIcon.resolve(icon)
         self.color = color
         self.colorComponents = colorComponents
         self.createdAt = createdAt
@@ -126,7 +131,7 @@ extension CDHabit {
     func update(from habit: Habit) {
         self.name = habit.name
         self.habitDescription = habit.description
-        self.icon = habit.icon
+        self.icon = HabitIcon.resolve(habit.icon)
         self.colorRed = habit.colorComponents.red
         self.colorGreen = habit.colorComponents.green
         self.colorBlue = habit.colorComponents.blue
@@ -321,4 +326,29 @@ struct HabitIcon {
         "airplane", "graduationcap.fill", "dumbbell.fill", "trophy.fill",
         "hand.thumbsup.fill", "face.smiling.fill", "sparkles", "target",
     ]
+
+    static var availablePresets: [String] {
+        presets.filter { isSymbolAvailable($0) }
+    }
+
+    static func resolve(_ symbolName: String) -> String {
+        guard isSymbolAvailable(symbolName) else {
+            return availablePresets.first ?? "star.fill"
+        }
+        return symbolName
+    }
+
+    private static func isSymbolAvailable(_ symbolName: String) -> Bool {
+        #if canImport(UIKit)
+        return UIImage(systemName: symbolName) != nil
+        #elseif canImport(AppKit)
+        return NSImage(systemSymbolName: symbolName, accessibilityDescription: nil) != nil
+        #else
+        return true
+        #endif
+    }
+
+    static func image(_ symbolName: String) -> Image {
+        Image(systemName: resolve(symbolName))
+    }
 }

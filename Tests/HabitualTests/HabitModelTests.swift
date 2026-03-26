@@ -507,4 +507,17 @@ final class HabitModelTests: XCTestCase {
         let uniqueIcons = Set(HabitIcon.presets)
         XCTAssertEqual(uniqueIcons.count, HabitIcon.presets.count, "All icon presets should be unique")
     }
+
+    func testHabitIconAvailablePresetsSubset() {
+        let presetSet = Set(HabitIcon.presets)
+        XCTAssertFalse(HabitIcon.availablePresets.isEmpty, "Available presets should never be empty")
+        for icon in HabitIcon.availablePresets {
+            XCTAssertTrue(presetSet.contains(icon), "\(icon) should come from presets list")
+        }
+    }
+
+    func testHabitIconResolveFallsBackToAvailablePreset() {
+        let fallback = HabitIcon.availablePresets.first ?? "star.fill"
+        XCTAssertEqual(HabitIcon.resolve("not-a-real-symbol"), fallback)
+    }
 }

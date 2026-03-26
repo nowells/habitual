@@ -112,7 +112,7 @@ struct HabitDetailView: View {
 
     private var headerCard: some View {
         HStack(spacing: 16) {
-            Image(systemName: currentHabit.icon)
+            HabitIcon.image(currentHabit.icon)
                 .font(.largeTitle)
                 .foregroundStyle(currentHabit.color)
                 .frame(width: 60, height: 60)
@@ -323,7 +323,7 @@ struct StatCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Image(systemName: icon)
+                HabitIcon.image(icon)
                     .foregroundStyle(color)
                 Spacer()
             }

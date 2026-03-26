@@ -130,7 +130,7 @@ struct PersistenceController {
             habit.id = UUID()
             habit.name = name
             habit.habitDescription = desc
-            habit.icon = icon
+            habit.icon = HabitIcon.resolve(icon)
             habit.colorRed = r
             habit.colorGreen = g
             habit.colorBlue = b

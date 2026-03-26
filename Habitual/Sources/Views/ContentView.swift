@@ -199,7 +199,7 @@ struct ArchiveView: View {
                     VStack(spacing: 0) {
                         ForEach(habitStore.archivedHabits) { habit in
                             HStack {
-                                Image(systemName: habit.icon)
+                                HabitIcon.image(habit.icon)
                                     .foregroundStyle(habit.color)
                                     .frame(width: 30)
                                 Text(habit.name)

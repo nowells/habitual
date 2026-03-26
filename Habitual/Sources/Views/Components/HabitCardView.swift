@@ -17,7 +17,7 @@ struct HabitCardView: View {
         VStack(alignment: .leading, spacing: 12) {
             // Header
             HStack {
-                Image(systemName: habit.icon)
+                HabitIcon.image(habit.icon)
                     .font(.title3)
                     .foregroundStyle(habit.color)
 
@@ -150,9 +150,9 @@ struct StatBadge: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            Image(systemName: icon)
-                .font(.caption2)
-                .foregroundStyle(color)
+                    HabitIcon.image(icon)
+                        .font(.caption2)
+                        .foregroundStyle(color)
             Text(value)
                 .font(.caption)
                 .fontWeight(.semibold)
