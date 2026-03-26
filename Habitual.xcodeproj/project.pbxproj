@@ -29,6 +29,7 @@
 		A10026 /* EnvironmentValues+Today.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10026 /* EnvironmentValues+Today.swift */; };
 		A20001 /* HabitualWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20001 /* HabitualWatchApp.swift */; };
 		A20002 /* WatchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20002 /* WatchContentView.swift */; };
+		A20008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B20003 /* Assets.xcassets */; };
 		A20003 /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10003 /* Habit.swift */; };
 		A20004 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10004 /* Persistence.swift */; };
 		A20005 /* HabitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10005 /* HabitStore.swift */; };
@@ -77,6 +78,7 @@
 		B10026 /* EnvironmentValues+Today.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EnvironmentValues+Today.swift"; sourceTree = "<group>"; };
 		B20001 /* HabitualWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitualWatchApp.swift; sourceTree = "<group>"; };
 		B20002 /* WatchContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContentView.swift; sourceTree = "<group>"; };
+		B20003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B30001 /* HabitualWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitualWidgets.swift; sourceTree = "<group>"; };
 		B30002 /* HabitualWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HabitualWidgets.entitlements; sourceTree = "<group>"; };
 		B40001 /* HabitualComplications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitualComplications.swift; sourceTree = "<group>"; };
@@ -231,8 +233,17 @@
 			isa = PBXGroup;
 			children = (
 				D21001 /* Sources */,
+				D22001 /* Resources */,
 			);
 			path = HabitualWatch;
+			sourceTree = "<group>";
+		};
+		D22001 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B20003 /* Assets.xcassets */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		D21001 /* Sources */ = {
@@ -327,6 +338,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = E20001 /* Build configuration list for PBXNativeTarget "Habitual Watch" */;
 			buildPhases = (
+				F20002 /* Resources */,
 				F20001 /* Sources */,
 			);
 			buildRules = (
@@ -419,6 +431,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10016 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F20002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A20008 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
