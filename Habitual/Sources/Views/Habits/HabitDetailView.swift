@@ -263,8 +263,8 @@ struct HabitDetailView: View {
 
                 StatCard(
                     title: "Total",
-                    value: "\(currentHabit.totalCompletions)",
-                    subtitle: "completions",
+                    value: "\(currentHabit.totalCompletions(asOf: today))",
+                    subtitle: currentHabit.goalPeriod.periodLabelPlural,
                     icon: "checkmark.circle.fill",
                     color: currentHabit.color
                 )

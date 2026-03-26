@@ -152,7 +152,7 @@ struct WatchHabitDetailView: View {
                 VStack(spacing: 8) {
                     WatchStatRow(icon: "flame.fill", label: "Streak", value: "\(currentHabit.currentStreak) \(currentHabit.goalPeriod.periodLabelPlural)", color: .orange)
                     WatchStatRow(icon: "trophy.fill", label: "Best", value: "\(currentHabit.longestStreak) \(currentHabit.goalPeriod.periodLabelPlural)", color: .yellow)
-                    WatchStatRow(icon: "checkmark", label: "Total", value: "\(currentHabit.totalCompletions)", color: currentHabit.color)
+                    WatchStatRow(icon: "checkmark", label: "Total", value: "\(currentHabit.totalCompletions) \(currentHabit.goalPeriod.periodLabelPlural)", color: currentHabit.color)
                     WatchStatRow(icon: "chart.line.uptrend.xyaxis", label: "Rate", value: "\(Int(currentHabit.completionRate * 100))%", color: .green)
                 }
             }

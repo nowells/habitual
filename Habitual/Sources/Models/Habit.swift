@@ -271,8 +271,21 @@ extension Habit {
         return longest
     }
 
-    var totalCompletions: Int {
-        completions.count
+    /// Number of periods where the goal was fully met.
+    var totalCompletions: Int { totalCompletions(asOf: Date()) }
+
+    func totalCompletions(asOf today: Date) -> Int {
+        let calendar = Calendar.current
+        guard !completions.isEmpty else { return 0 }
+
+        // Group completions by their period start date and count periods that met the goal
+        var periodCounts: [Date: Int] = [:]
+        for completion in completions {
+            let periodStart = goalPeriod.periodStart(for: completion.date, calendar: calendar)
+            periodCounts[periodStart, default: 0] += 1
+        }
+
+        return periodCounts.values.filter { $0 >= goalFrequency }.count
     }
 
     var completionRate: Double { completionRate(asOf: Date()) }
