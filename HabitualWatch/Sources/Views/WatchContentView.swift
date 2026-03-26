@@ -72,12 +72,23 @@ struct WatchHabitRow: View {
 
             Button(action: {
                 withAnimation {
-                    habitStore.toggleTodayCompletion(for: currentHabit)
+                    habitStore.addCompletion(for: currentHabit, on: Date())
                 }
             }) {
-                Image(systemName: currentHabit.isCompletedOn(date: Date()) ? "checkmark.circle.fill" : "circle")
-                    .font(.title3)
-                    .foregroundStyle(currentHabit.isCompletedOn(date: Date()) ? currentHabit.color : .gray)
+                if currentHabit.isPeriodComplete(for: Date()) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(currentHabit.color)
+                } else if currentHabit.goalFrequency > 1 && currentHabit.completionsInPeriod(containing: Date()) > 0 {
+                    Text("\(currentHabit.completionsInPeriod(containing: Date()))/\(currentHabit.goalFrequency)")
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .foregroundStyle(currentHabit.color)
+                } else {
+                    Image(systemName: "circle")
+                        .font(.title3)
+                        .foregroundStyle(.gray)
+                }
             }
             .buttonStyle(.plain)
         }
@@ -100,7 +111,7 @@ struct WatchHabitDetailView: View {
                 // Icon and toggle
                 Button(action: {
                     withAnimation {
-                        habitStore.toggleTodayCompletion(for: currentHabit)
+                        habitStore.addCompletion(for: currentHabit, on: Date())
                     }
                 }) {
                     VStack(spacing: 8) {
@@ -108,11 +119,22 @@ struct WatchHabitDetailView: View {
                             .font(.largeTitle)
                             .foregroundStyle(currentHabit.color)
 
-                        Image(systemName: currentHabit.isCompletedOn(date: Date()) ? "checkmark.circle.fill" : "circle")
-                            .font(.title)
-                            .foregroundStyle(currentHabit.isCompletedOn(date: Date()) ? .green : .gray)
+                        if currentHabit.isPeriodComplete(for: Date()) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.title)
+                                .foregroundStyle(.green)
+                        } else if currentHabit.goalFrequency > 1 {
+                            Text("\(currentHabit.completionsInPeriod(containing: Date()))/\(currentHabit.goalFrequency)")
+                                .font(.title3)
+                                .fontWeight(.bold)
+                                .foregroundStyle(currentHabit.color)
+                        } else {
+                            Image(systemName: "circle")
+                                .font(.title)
+                                .foregroundStyle(.gray)
+                        }
 
-                        Text(currentHabit.isCompletedOn(date: Date()) ? "Completed" : "Tap to Complete")
+                        Text(currentHabit.isPeriodComplete(for: Date()) ? "Completed" : "Tap to Add")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

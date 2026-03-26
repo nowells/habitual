@@ -130,6 +130,7 @@ class HabitStore: ObservableObject {
 
         save()
         fetchHabits()
+        WidgetUpdateService.reloadHabitWidgets()
     }
 
     func toggleTodayCompletion(for habit: Habit) {
@@ -151,6 +152,7 @@ class HabitStore: ObservableObject {
 
         save()
         fetchHabits()
+        WidgetUpdateService.reloadHabitWidgets()
     }
 
     /// Remove the most recent completion for the given date
@@ -169,6 +171,7 @@ class HabitStore: ObservableObject {
             viewContext.delete(last)
             save()
             fetchHabits()
+            WidgetUpdateService.reloadHabitWidgets()
         }
     }
 
