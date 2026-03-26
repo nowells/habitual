@@ -40,7 +40,8 @@ let package = Package(
                 "HabitualCore",
                 .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
             ],
-            path: "Tests/HabitualSnapshotTests"
+            path: "Tests/HabitualSnapshotTests",
+            exclude: ["__Snapshots__"]
         ),
     ]
 )
