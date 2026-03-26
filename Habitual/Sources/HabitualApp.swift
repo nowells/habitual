@@ -95,9 +95,12 @@ struct HabitualApp: App {
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
                 .onAppear {
                     refreshNudgesOnLaunch()
+                    #if targetEnvironment(macCatalyst)
+                    UIApplication.shared.registerForRemoteNotifications()
+                    #endif
                 }
         }
-        #if os(macOS)
+        #if targetEnvironment(macCatalyst)
         Settings {
             SettingsView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)

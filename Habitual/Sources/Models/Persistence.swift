@@ -203,6 +203,31 @@ struct PersistenceController {
 
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergeByPropertyStoreTrumpMergePolicy
+
+        // Log CloudKit sync events to help diagnose sync issues.
+        // Look for these in Xcode console or Console.app when debugging.
+        NotificationCenter.default.addObserver(
+            forName: NSPersistentCloudKitContainer.eventChangedNotification,
+            object: container,
+            queue: nil
+        ) { notification in
+            guard let event = notification.userInfo?[NSPersistentCloudKitContainer.eventNotificationUserInfoKey]
+                    as? NSPersistentCloudKitContainer.Event else { return }
+            let type: String
+            switch event.type {
+            case .setup:   type = "setup"
+            case .import:  type = "import"
+            case .export:  type = "export"
+            @unknown default: type = "unknown"
+            }
+            if let error = event.error {
+                print("[CloudKit] ❌ \(type) failed: \(error)")
+            } else if event.endDate != nil {
+                print("[CloudKit] ✅ \(type) finished")
+            } else {
+                print("[CloudKit] ⏳ \(type) started")
+            }
+        }
     }
 
     static var appGroupStoreURL: URL {
