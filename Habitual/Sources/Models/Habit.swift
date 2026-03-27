@@ -161,12 +161,25 @@ struct Completion: Identifiable, Equatable {
     var date: Date
     var value: Double
     var note: String?
+    /// Stable identifier of the device that created this completion (CRDT origin).
+    var deviceID: String?
+    /// Precise timestamp of the user action that created this completion (CRDT clock).
+    var createdAt: Date?
 
-    init(id: UUID = UUID(), date: Date, value: Double = 1.0, note: String? = nil) {
+    init(
+        id: UUID = UUID(),
+        date: Date,
+        value: Double = 1.0,
+        note: String? = nil,
+        deviceID: String? = nil,
+        createdAt: Date? = nil
+    ) {
         self.id = id
         self.date = date
         self.value = value
         self.note = note
+        self.deviceID = deviceID
+        self.createdAt = createdAt
     }
 }
 
@@ -221,7 +234,9 @@ extension CDCompletion {
             id: id ?? UUID(),
             date: date ?? Date(),
             value: value,
-            note: note
+            note: note,
+            deviceID: deviceID,
+            createdAt: createdAt
         )
     }
 }

@@ -66,7 +66,9 @@ struct PersistenceController {
         completion.name = "CDCompletion"
         completion.managedObjectClassName = "CDCompletion"
 
+        let cCreatedAt = attr("createdAt", .dateAttributeType, optional: true)
         let cDate = attr("date", .dateAttributeType, optional: true)
+        let cDeviceID = attr("deviceID", .stringAttributeType, optional: true)
         let cId = attr("id", .UUIDAttributeType, optional: true)
         let cNote = attr("note", .stringAttributeType, optional: true)
         let cValue = attr("value", .doubleAttributeType, default: 1.0)
@@ -95,7 +97,7 @@ struct PersistenceController {
             hId, hIsArchived, hName, hReminder, hSortOrder,
             completionsRel,
         ]
-        completion.properties = [cDate, cId, cNote, cValue, habitRel]
+        completion.properties = [cCreatedAt, cDate, cDeviceID, cId, cNote, cValue, habitRel]
 
         model.entities = [habit, completion]
         return model
@@ -159,6 +161,8 @@ struct PersistenceController {
                     completion.date = calendar.startOfDay(for: date)
                     completion.value = 1.0
                     completion.habit = habit
+                    completion.deviceID = DeviceIdentifier.current
+                    completion.createdAt = date
                 }
             }
         }

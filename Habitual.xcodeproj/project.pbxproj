@@ -31,6 +31,7 @@
 		A10027 /* RadialProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10027 /* RadialProgressView.swift */; };
 		A10028 /* PeriodHeatmapGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10028 /* PeriodHeatmapGridView.swift */; };
 		A10029 /* CloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10029 /* CloudSyncService.swift */; };
+		A10033 /* DeviceIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10033 /* DeviceIdentifier.swift */; };
 		A10030 /* Habitual Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C20001 /* Habitual Watch.app */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A10031 /* HabitualWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C30001 /* HabitualWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A20001 /* HabitualWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20001 /* HabitualWatchApp.swift */; };
@@ -43,6 +44,7 @@
 		A20008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B20003 /* Assets.xcassets */; };
 		A20009 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10012 /* NotificationService.swift */; };
 		A20010 /* NudgeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10023 /* NudgeService.swift */; };
+		A20012 /* DeviceIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10033 /* DeviceIdentifier.swift */; };
 		A20011 /* HabitualComplications.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C40001 /* HabitualComplications.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A30001 /* HabitualWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30001 /* HabitualWidgets.swift */; };
 		A30002 /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10003 /* Habit.swift */; };
@@ -54,6 +56,7 @@
 		A30008 /* NudgeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10023 /* NudgeService.swift */; };
 		A30009 /* HabitIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10024 /* HabitIntents.swift */; };
 		A30010 /* SingleHabitWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30010 /* SingleHabitWidget.swift */; };
+		A30011 /* DeviceIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10033 /* DeviceIdentifier.swift */; };
 		A40001 /* HabitualComplications.swift in Sources */ = {isa = PBXBuildFile; fileRef = B40001 /* HabitualComplications.swift */; };
 		A40002 /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10003 /* Habit.swift */; };
 		A40003 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10004 /* Persistence.swift */; };
@@ -62,6 +65,7 @@
 		A40006 /* EnvironmentValues+Today.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10026 /* EnvironmentValues+Today.swift */; };
 		A40007 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10012 /* NotificationService.swift */; };
 		A40008 /* NudgeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10023 /* NudgeService.swift */; };
+		A40009 /* DeviceIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10033 /* DeviceIdentifier.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -151,6 +155,7 @@
 		B10024 /* HabitIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitIntents.swift; sourceTree = "<group>"; };
 		B10025 /* MascotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MascotView.swift; sourceTree = "<group>"; };
 		B10032 /* MascotCharacters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MascotCharacters.swift; sourceTree = "<group>"; };
+		B10033 /* DeviceIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIdentifier.swift; sourceTree = "<group>"; };
 		B10026 /* EnvironmentValues+Today.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EnvironmentValues+Today.swift"; sourceTree = "<group>"; };
 		B10027 /* RadialProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadialProgressView.swift; sourceTree = "<group>"; };
 		B10028 /* PeriodHeatmapGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodHeatmapGridView.swift; sourceTree = "<group>"; };
@@ -245,6 +250,7 @@
 				B10012 /* NotificationService.swift */,
 				B10023 /* NudgeService.swift */,
 				B10029 /* CloudSyncService.swift */,
+				B10033 /* DeviceIdentifier.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -565,6 +571,7 @@
 				A10027 /* RadialProgressView.swift in Sources */,
 				A10028 /* PeriodHeatmapGridView.swift in Sources */,
 				A10029 /* CloudSyncService.swift in Sources */,
+				A10033 /* DeviceIdentifier.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -581,6 +588,7 @@
 				A20007 /* EnvironmentValues+Today.swift in Sources */,
 				A20009 /* NotificationService.swift in Sources */,
 				A20010 /* NudgeService.swift in Sources */,
+				A20012 /* DeviceIdentifier.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -598,6 +606,7 @@
 				A30008 /* NudgeService.swift in Sources */,
 			A30009 /* HabitIntents.swift in Sources */,
 			A30010 /* SingleHabitWidget.swift in Sources */,
+			A30011 /* DeviceIdentifier.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -613,6 +622,7 @@
 				A40006 /* EnvironmentValues+Today.swift in Sources */,
 				A40007 /* NotificationService.swift in Sources */,
 				A40008 /* NudgeService.swift in Sources */,
+				A40009 /* DeviceIdentifier.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
