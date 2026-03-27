@@ -828,7 +828,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKBackgroundModes = "remote-notification";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.habitual-helper.app";
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.habitual-helper.app.watchkitapp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -852,7 +852,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKBackgroundModes = "remote-notification";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "com.habitual-helper.app";
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.habitual-helper.app.watchkitapp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -921,7 +921,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "HabitualWatch/Resources/HabitualComplications-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Habitual Complications";
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.habitual-helper.app.watchkitapp.complications";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -942,7 +942,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "HabitualWatch/Resources/HabitualComplications-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Habitual Complications";
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.habitual-helper.app.watchkitapp.complications";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
