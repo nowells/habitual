@@ -8,15 +8,6 @@ enum Mascot: CaseIterable {
     case capybara  // zen rest-day / new habit starter
     case dog  // energetic new-habit welcome
 
-    var emoji: String {
-        switch self {
-        case .dragon: return "🐉"
-        case .cat: return "🐱"
-        case .capybara: return "🦫"
-        case .dog: return "🐶"
-        }
-    }
-
     var name: String {
         switch self {
         case .dragon: return "Ryū"  // 龍
@@ -65,11 +56,11 @@ enum MascotMood {
     }
 }
 
-// MARK: - Mascot Emoji View
+// MARK: - Mascot Character View
 
-/// A large, animated emoji mascot — expressive, mood-driven, and delightful.
-/// Shows the system emoji character with a continuous idle float plus
-/// mood-triggered bounce and wiggle animations on state changes.
+/// A large, animated custom-drawn mascot — expressive, mood-driven, and delightful.
+/// Each character is vector-drawn via Canvas with mood-responsive expressions,
+/// plus continuous idle float and mood-triggered bounce/wiggle animations.
 struct MascotEmojiView: View {
     let mascot: Mascot
     let mood: MascotMood
@@ -78,6 +69,7 @@ struct MascotEmojiView: View {
     @State private var floating = false
     @State private var scale: CGFloat = 1.0
     @State private var rotation: Double = 0
+    @State private var characterBounce: CGFloat = 0
 
     var body: some View {
         ZStack {
@@ -93,10 +85,10 @@ struct MascotEmojiView: View {
                     value: floating
                 )
 
-            // Emoji character
-            Text(mascot.emoji)
-                .font(.system(size: size * 0.82))
+            // Custom-drawn character
+            MascotCharacterDrawing(mascot: mascot, mood: mood, size: size * 0.92)
                 .scaleEffect(scale)
+                .scaleEffect(y: 1.0 + characterBounce * 0.04)
                 .rotationEffect(.degrees(rotation))
                 .offset(y: floating ? -6 : 0)
                 .animation(
@@ -138,13 +130,15 @@ struct MascotEmojiView: View {
                 }
 
             case .happy:
-                // Bouncy pop, settle
+                // Bouncy pop with squash-and-stretch
                 withAnimation(.spring(response: 0.22, dampingFraction: 0.38)) {
                     scale = 1.18
+                    characterBounce = 1.0
                 }
                 try? await Task.sleep(nanoseconds: 230_000_000)
                 withAnimation(.spring(response: 0.38, dampingFraction: 0.62)) {
                     scale = 1.0
+                    characterBounce = 0
                 }
 
             case .encouraging:
@@ -436,7 +430,7 @@ struct SpeechBubbleShape: Shape {
 // MARK: - Preview
 
 #if !os(macOS)
-    #Preview("Mascot Emoji — All Characters") {
+    #Preview("Mascot Characters — All") {
         VStack(spacing: 24) {
             HStack(spacing: 20) {
                 ForEach(Mascot.allCases, id: \.name) { mascot in
