@@ -151,6 +151,17 @@ struct Habit: Identifiable, Equatable {
 
     static func == (lhs: Habit, rhs: Habit) -> Bool {
         lhs.id == rhs.id
+            && lhs.name == rhs.name
+            && lhs.description == rhs.description
+            && lhs.icon == rhs.icon
+            && lhs.isArchived == rhs.isArchived
+            && lhs.goalFrequency == rhs.goalFrequency
+            && lhs.goalPeriod == rhs.goalPeriod
+            && lhs.sortOrder == rhs.sortOrder
+            && lhs.colorComponents.red == rhs.colorComponents.red
+            && lhs.colorComponents.green == rhs.colorComponents.green
+            && lhs.colorComponents.blue == rhs.colorComponents.blue
+            && lhs.completions == rhs.completions
     }
 }
 

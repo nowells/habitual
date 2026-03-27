@@ -289,7 +289,7 @@ class HabitStore: ObservableObject {
     /// app group so all targets (app, widgets, watch) share the migration state.
     /// After backfill, Layer 2 dedup covers historical records too.
     private func backfillCRDTFields() {
-        let defaults = UserDefaults(suiteName: "group.com.habitual-helper.app") ?? .standard
+        let defaults = DeviceIdentifier.persistentDefaults
         let key = "com.habitual.crdtBackfillComplete"
         guard !defaults.bool(forKey: key) else { return }
 

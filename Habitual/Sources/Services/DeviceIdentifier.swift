@@ -14,9 +14,22 @@ enum DeviceIdentifier {
     private static let key = "com.habitual.deviceID"
     private static let appGroupID = "group.com.habitual-helper.app"
 
+    /// Returns a UserDefaults instance that actually persists on this platform.
+    ///
+    /// On macOS the app-group container may not be accessible, causing
+    /// `UserDefaults(suiteName:)` to return a non-persisting instance
+    /// (CFPrefsPlistSource detaches from cfprefsd). We detect this by
+    /// checking whether the app-group container exists on disk.
+    static var persistentDefaults: UserDefaults {
+        if FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) != nil {
+            return UserDefaults(suiteName: appGroupID) ?? .standard
+        }
+        return .standard
+    }
+
     /// The stable device identifier. Generated once and cached.
     static let current: String = {
-        let defaults = UserDefaults(suiteName: appGroupID) ?? .standard
+        let defaults = persistentDefaults
 
         if let existing = defaults.string(forKey: key), !existing.isEmpty {
             return existing
