@@ -35,10 +35,9 @@ struct HabitualComplicationProvider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<HabitComplicationEntry>) -> Void) {
         let entry = fetchCurrentEntry()
 
-        // Refresh at midnight or when the next reminder is
-        let calendar = Calendar.current
-        let tomorrow = calendar.startOfDay(for: calendar.date(byAdding: .day, value: 1, to: Date()) ?? Date())
-        let timeline = Timeline(entries: [entry], policy: .after(tomorrow))
+        // Refresh every 30 minutes to pick up changes from CloudKit sync
+        let refreshDate = Calendar.current.date(byAdding: .minute, value: 30, to: Date()) ?? Date()
+        let timeline = Timeline(entries: [entry], policy: .after(refreshDate))
         completion(timeline)
     }
 
@@ -126,15 +125,15 @@ struct HabitualCircularComplication: View {
                     Image(systemName: "checkmark")
                         .font(.caption2)
                         .foregroundStyle(.green)
-                } else if entry.isMultiFrequency && entry.periodCompletions > 0 {
+                } else if entry.isMultiFrequency {
                     Text("\(entry.periodCompletions)/\(entry.goalFrequency)")
                         .font(.system(size: 9))
                         .fontWeight(.bold)
                         .foregroundStyle(entry.color)
                 } else {
-                    Text("\(entry.streak)")
+                    Image(systemName: "circle")
                         .font(.caption2)
-                        .fontWeight(.bold)
+                        .foregroundStyle(.gray)
                 }
             }
         }
@@ -225,15 +224,30 @@ struct HabitualCornerComplication: View {
 
 // MARK: - Widget Configuration
 
+struct HabitualComplicationEntryView: View {
+    @Environment(\.widgetFamily) var family
+    let entry: HabitComplicationEntry
+
+    var body: some View {
+        switch family {
+        case .accessoryRectangular:
+            HabitualRectangularComplication(entry: entry)
+        case .accessoryInline:
+            HabitualInlineComplication(entry: entry)
+        case .accessoryCorner:
+            HabitualCornerComplication(entry: entry)
+        default:
+            HabitualCircularComplication(entry: entry)
+        }
+    }
+}
+
 struct HabitualComplicationWidget: Widget {
     let kind: String = "HabitualComplication"
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: HabitualComplicationProvider()) { entry in
-            switch entry {
-            default:
-                HabitualCircularComplication(entry: entry)
-            }
+            HabitualComplicationEntryView(entry: entry)
         }
         .configurationDisplayName("Habitual")
         .description("Track your habits at a glance.")

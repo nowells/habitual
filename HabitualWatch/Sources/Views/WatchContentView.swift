@@ -12,16 +12,23 @@ struct WatchContentView: View {
     var body: some View {
         NavigationStack {
             if habitStore.activeHabits.isEmpty {
-                VStack(spacing: 8) {
-                    Image(systemName: "square.grid.3x3.fill")
-                        .font(.title)
-                        .foregroundStyle(.secondary)
-                    Text("No Habits")
-                        .font(.headline)
-                    Text("Add habits on iPhone or Mac")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
+                ScrollView {
+                    VStack(spacing: 8) {
+                        Image(systemName: "square.grid.3x3.fill")
+                            .font(.title)
+                            .foregroundStyle(.secondary)
+                        Text("No Habits")
+                            .font(.headline)
+                        Text("Pull to refresh or\nadd habits on iPhone or Mac")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 40)
+                }
+                .refreshable {
+                    await habitStore.refresh()
                 }
             } else {
                 List {
@@ -30,6 +37,9 @@ struct WatchContentView: View {
                             WatchHabitRow(habit: habit, habitStore: habitStore)
                         }
                     }
+                }
+                .refreshable {
+                    await habitStore.refresh()
                 }
                 .navigationTitle("Habitual")
             }

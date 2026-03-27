@@ -42,6 +42,7 @@ class HabitStore: ObservableObject {
             .sink { [weak self] _ in
                 self?.viewContext.refreshAllObjects()
                 self?.fetchHabits()
+                self?.notifyWidgets()
             }
             .store(in: &cancellables)
     }
@@ -221,6 +222,14 @@ class HabitStore: ObservableObject {
         fetchHabits()
     }
 
+    // MARK: - Sync
+
+    /// Force a refresh from the persistent store (useful for pull-to-refresh on watchOS).
+    func refresh() async {
+        viewContext.refreshAllObjects()
+        fetchHabits()
+    }
+
     // MARK: - Private Helpers
 
     private func fetchCDHabit(by id: UUID) -> CDHabit? {
@@ -243,6 +252,7 @@ class HabitStore: ObservableObject {
         #if canImport(WidgetKit)
             WidgetCenter.shared.reloadTimelines(ofKind: "HabitualWidget")
             WidgetCenter.shared.reloadTimelines(ofKind: "SingleHabitWidget")
+            WidgetCenter.shared.reloadTimelines(ofKind: "HabitualComplication")
         #endif
     }
 }

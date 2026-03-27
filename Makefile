@@ -1,4 +1,4 @@
-.PHONY: lint lint-fix format format-check test test-snapshot test-snapshot-record test-all build build-ios build-mac bump release release-ios release-mac help
+.PHONY: lint lint-fix format format-check test test-snapshot test-snapshot-record test-all build build-ios build-mac bump release release-ios release-mac run help
 
 # ── Linting ──────────────────────────────────────────────────────────────────
 
@@ -65,6 +65,11 @@ build-mac:
 		-destination "generic/platform=macOS,variant=Mac Catalyst" \
 		| xcpretty
 
+# ── Run ─────────────────────────────────────────────────────────────────────
+
+run:
+	@./scripts/run-all.sh
+
 # ── Release ──────────────────────────────────────────────────────────────────
 
 bump:
@@ -102,6 +107,9 @@ help:
 	@echo "  build                Build iOS + Mac Catalyst (warnings as errors)"
 	@echo "  build-ios            Build for iOS only"
 	@echo "  build-mac            Build for Mac Catalyst only"
+	@echo ""
+	@echo "Running:"
+	@echo "  run                  Launch Mac, iPhone sim, and Watch sim in parallel"
 	@echo ""
 	@echo "Release:"
 	@echo "  bump                 Bump build number only"

@@ -196,27 +196,15 @@ struct PersistenceController {
             description.url = storeURL
         }
 
-        // Only enable CloudKit sync if an iCloud account is available.
-        // Without this guard the container setup crashes on devices/simulators
-        // with no iCloud account (CKAccountStatusNoAccount).
+        // Enable CloudKit sync. NSPersistentCloudKitContainer gracefully
+        // handles the no-account case (logs a warning, operates locally).
+        // We avoid a synchronous CKContainer.accountStatus check here because
+        // blocking the main thread during launch causes watchOS to time out
+        // the app after 20 seconds.
         if !inMemory {
-            let semaphore = DispatchSemaphore(value: 0)
-            var hasICloud = false
-            CKContainer(identifier: "iCloud.com.habitual-helper.app").accountStatus { status, _ in
-                hasICloud = (status == .available)
-                semaphore.signal()
-            }
-            semaphore.wait()
-
-            if hasICloud {
-                description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
-                    containerIdentifier: "iCloud.com.habitual-helper.app"
-                )
-            } else {
-                // Local-only mode — disable CloudKit integration
-                description.cloudKitContainerOptions = nil
-                print("[CloudKit] ⚠️ No iCloud account — running in local-only mode")
-            }
+            description.cloudKitContainerOptions = NSPersistentCloudKitContainerOptions(
+                containerIdentifier: "iCloud.com.habitual-helper.app"
+            )
         }
 
         container.loadPersistentStores { _, error in

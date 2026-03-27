@@ -1,5 +1,5 @@
+import AppIntents
 import CoreData
-import Intents
 import SwiftUI
 import WidgetKit
 
@@ -10,14 +10,14 @@ import WidgetKit
 // MARK: - Platform Colors
 
 extension Color {
-    fileprivate static var systemGray3: Color {
+    static var systemGray3: Color {
         #if canImport(UIKit)
             Color(UIColor.systemGray3)
         #else
             Color.gray.opacity(0.45)
         #endif
     }
-    fileprivate static var systemGray5: Color {
+    static var systemGray5: Color {
         #if canImport(UIKit)
             Color(UIColor.systemGray5)
         #else
@@ -59,7 +59,21 @@ struct HabitWidgetProvider: TimelineProvider {
 
         let now = Date()
         let habitSnapshots = habits.prefix(6).map { habit in
-            HabitSnapshot(
+            // Build period-level data for the mini heatmap.
+            // For daily habits each period is one day; for weekly/monthly
+            // each period is one week/month — matching the main app's rendering.
+            let periods: [WidgetPeriod]
+            if habit.goalPeriod == .daily {
+                periods = habit.heatmapData(months: 2).flatMap { $0 }.map { day in
+                    WidgetPeriod(completionCount: day.isFuture ? 0 : Int(day.value), isFuture: day.isFuture)
+                }
+            } else {
+                periods = habit.periodHeatmapData(months: 2).map { period in
+                    WidgetPeriod(completionCount: period.completionCount, isFuture: period.isFuture)
+                }
+            }
+
+            return HabitSnapshot(
                 id: habit.id,
                 name: habit.name,
                 icon: habit.icon,
@@ -71,7 +85,7 @@ struct HabitWidgetProvider: TimelineProvider {
                 goalFrequency: habit.goalFrequency,
                 currentStreak: habit.currentStreak,
                 completionRate: habit.completionRate,
-                recentCompletions: habit.heatmapData(months: 2).flatMap { $0 }.map { $0.isCompleted }
+                recentPeriods: periods
             )
         }
 
@@ -105,19 +119,25 @@ struct HabitWidgetEntry: TimelineEntry {
             HabitSnapshot(
                 id: UUID(), name: "Exercise", icon: "figure.run", colorRed: 0.35, colorGreen: 0.65, colorBlue: 0.85,
                 isPeriodComplete: true, periodCompletions: 1, goalFrequency: 1, currentStreak: 7, completionRate: 0.85,
-                recentCompletions: []),
+                recentPeriods: []),
             HabitSnapshot(
                 id: UUID(), name: "Read", icon: "book.fill", colorRed: 0.95, colorGreen: 0.55, colorBlue: 0.20,
                 isPeriodComplete: false, periodCompletions: 0, goalFrequency: 1, currentStreak: 3, completionRate: 0.60,
-                recentCompletions: []),
+                recentPeriods: []),
             HabitSnapshot(
                 id: UUID(), name: "Meditate", icon: "brain.head.profile", colorRed: 0.65, colorGreen: 0.35,
                 colorBlue: 0.90, isPeriodComplete: true, periodCompletions: 3, goalFrequency: 3, currentStreak: 12,
-                completionRate: 0.75, recentCompletions: []),
+                completionRate: 0.75, recentPeriods: []),
         ],
         totalHabits: 3,
         completedToday: 2
     )
+}
+
+/// One period's worth of completion data for the widget mini heatmap.
+struct WidgetPeriod {
+    let completionCount: Int
+    let isFuture: Bool
 }
 
 struct HabitSnapshot: Identifiable {
@@ -132,7 +152,7 @@ struct HabitSnapshot: Identifiable {
     let goalFrequency: Int
     let currentStreak: Int
     let completionRate: Double
-    let recentCompletions: [Bool]
+    let recentPeriods: [WidgetPeriod]
 
     var color: Color {
         Color(red: colorRed, green: colorGreen, blue: colorBlue)
@@ -343,14 +363,8 @@ struct LargeHabitWidget: View {
                             .fontWeight(.medium)
                             .lineLimit(1)
 
-                        // Mini heatmap dots (last 14 days)
-                        HStack(spacing: 2) {
-                            ForEach(0..<min(14, habit.recentCompletions.count), id: \.self) { idx in
-                                Circle()
-                                    .fill(habit.recentCompletions[idx] ? habit.color : Color.systemGray5)
-                                    .frame(width: 6, height: 6)
-                            }
-                        }
+                        // Mini heatmap dots — last 14 periods with pie-fill progress
+                        WidgetMiniHeatmap(habit: habit)
                     }
 
                     Spacer()
@@ -389,6 +403,101 @@ struct LargeHabitWidget: View {
             }
         }
         .padding()
+    }
+}
+
+// MARK: - Widget Mini Heatmap (with pie-fill progress)
+
+/// Renders the last 14 periods as small dots with pie-fill progress,
+/// matching the main app's `PieProgressFill` rendering.
+struct WidgetMiniHeatmap: View {
+    let habit: HabitSnapshot
+    private let dotSize: CGFloat = 6
+
+    var body: some View {
+        let periods = Array(habit.recentPeriods.suffix(14))
+        HStack(spacing: 2) {
+            ForEach(periods.indices, id: \.self) { idx in
+                let period = periods[idx]
+                if period.isFuture {
+                    Circle()
+                        .fill(Color.clear)
+                        .frame(width: dotSize, height: dotSize)
+                } else if period.completionCount <= 0 {
+                    Circle()
+                        .fill(Color.systemGray5)
+                        .frame(width: dotSize, height: dotSize)
+                } else {
+                    WidgetPieDot(
+                        completionCount: period.completionCount,
+                        goalFrequency: habit.goalFrequency,
+                        color: habit.color,
+                        size: dotSize
+                    )
+                }
+            }
+        }
+    }
+}
+
+/// A tiny pie-fill dot for the widget heatmap, mirroring PieProgressFill.
+struct WidgetPieDot: View {
+    let completionCount: Int
+    let goalFrequency: Int
+    let color: Color
+    let size: CGFloat
+
+    private var fraction: Double {
+        guard goalFrequency > 0 else { return 0 }
+        let remainder = completionCount % goalFrequency
+        if remainder == 0 && completionCount > 0 { return 1.0 }
+        return Double(remainder) / Double(goalFrequency)
+    }
+
+    private var isOverGoal: Bool {
+        goalFrequency > 0 && completionCount > goalFrequency
+    }
+
+    var body: some View {
+        ZStack {
+            // Background circle
+            Circle()
+                .fill(Color.systemGray5)
+                .frame(width: size, height: size)
+
+            // If fully completed or over-completed, solid fill
+            if completionCount >= goalFrequency {
+                Circle()
+                    .fill(isOverGoal ? color.opacity(0.85) : color)
+                    .frame(width: size, height: size)
+            } else {
+                // Partial pie wedge
+                PieWedge(fraction: fraction)
+                    .fill(color)
+                    .frame(width: size, height: size)
+                    .clipShape(Circle())
+            }
+        }
+    }
+}
+
+/// A simple pie-wedge shape for partial completion.
+struct PieWedge: Shape {
+    let fraction: Double
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        path.move(to: center)
+        path.addArc(
+            center: center,
+            radius: max(rect.width, rect.height),
+            startAngle: .degrees(-90),
+            endAngle: .degrees(-90 + 360 * fraction),
+            clockwise: false
+        )
+        path.closeSubpath()
+        return path
     }
 }
 
@@ -492,223 +601,6 @@ struct HabitualWidgetEntryView: View {
         default:
             MediumHabitWidget(entry: entry)
         }
-    }
-}
-
-// MARK: - Single Habit Widget
-
-struct SingleHabitWidgetProvider: IntentTimelineProvider {
-    typealias Intent = SingleHabitIntent
-    typealias Entry = SingleHabitEntry
-
-    let persistenceController = PersistenceController.shared
-
-    func placeholder(in context: Context) -> SingleHabitEntry {
-        SingleHabitEntry.placeholder
-    }
-
-    func getSnapshot(
-        for configuration: SingleHabitIntent, in context: Context, completion: @escaping (SingleHabitEntry) -> Void
-    ) {
-        completion(fetchEntry())
-    }
-
-    func getTimeline(
-        for configuration: SingleHabitIntent, in context: Context,
-        completion: @escaping (Timeline<SingleHabitEntry>) -> Void
-    ) {
-        let entry = fetchEntry()
-        let calendar = Calendar.current
-        let tomorrow = calendar.startOfDay(for: calendar.date(byAdding: .day, value: 1, to: Date()) ?? Date())
-        let timeline = Timeline(entries: [entry], policy: .after(tomorrow))
-        completion(timeline)
-    }
-
-    private func fetchEntry() -> SingleHabitEntry {
-        let context = persistenceController.container.viewContext
-        let request: NSFetchRequest<CDHabit> = CDHabit.fetchRequest()
-        request.predicate = NSPredicate(format: "isArchived == NO")
-        request.sortDescriptors = [
-            NSSortDescriptor(keyPath: \CDHabit.sortOrder, ascending: true),
-            NSSortDescriptor(keyPath: \CDHabit.createdAt, ascending: false),
-        ]
-        request.fetchLimit = 1
-        let habits = (try? context.fetch(request))?.map { $0.toHabit() } ?? []
-
-        guard let habit = habits.first else {
-            return .placeholder
-        }
-
-        let weeks = habit.heatmapData(months: 3)
-        let heatmapValues = weeks.flatMap { week in
-            week.map { day -> HeatmapDay in
-                HeatmapDay(isCompleted: day.isCompleted, isFuture: day.isFuture)
-            }
-        }
-
-        return SingleHabitEntry(
-            date: Date(),
-            habitName: habit.name,
-            habitIcon: habit.icon,
-            colorRed: habit.colorComponents.red,
-            colorGreen: habit.colorComponents.green,
-            colorBlue: habit.colorComponents.blue,
-            isPeriodComplete: habit.isPeriodComplete(for: Date()),
-            periodCompletions: habit.completionsInPeriod(containing: Date()),
-            goalFrequency: habit.goalFrequency,
-            currentStreak: habit.currentStreak,
-            completionRate: habit.completionRate,
-            heatmapDays: heatmapValues
-        )
-    }
-}
-
-struct SingleHabitEntry: TimelineEntry {
-    let date: Date
-    let habitName: String
-    let habitIcon: String
-    let colorRed: Double
-    let colorGreen: Double
-    let colorBlue: Double
-    let isPeriodComplete: Bool
-    let periodCompletions: Int
-    let goalFrequency: Int
-    let currentStreak: Int
-    let completionRate: Double
-    let heatmapDays: [HeatmapDay]
-
-    var color: Color {
-        Color(red: colorRed, green: colorGreen, blue: colorBlue)
-    }
-
-    var isMultiFrequency: Bool { goalFrequency > 1 }
-
-    static let placeholder = SingleHabitEntry(
-        date: Date(),
-        habitName: "Exercise",
-        habitIcon: "figure.run",
-        colorRed: 0.35,
-        colorGreen: 0.65,
-        colorBlue: 0.85,
-        isPeriodComplete: false,
-        periodCompletions: 0,
-        goalFrequency: 1,
-        currentStreak: 5,
-        completionRate: 0.72,
-        heatmapDays: []
-    )
-}
-
-struct HeatmapDay {
-    let isCompleted: Bool
-    let isFuture: Bool
-}
-
-// Placeholder intent - in a real project this would be defined in an Intent Definition file
-class SingleHabitIntent: INIntent {}
-
-struct SingleHabitWidget: Widget {
-    let kind: String = "SingleHabitWidget"
-
-    var body: some WidgetConfiguration {
-        IntentConfiguration(
-            kind: kind, intent: SingleHabitIntent.self, provider: SingleHabitWidgetProvider()
-        ) { entry in
-            SingleHabitWidgetView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
-        }
-        .configurationDisplayName("Single Habit")
-        .description("Focus on a specific habit with a heatmap grid.")
-        .supportedFamilies([.systemSmall, .systemMedium])
-    }
-}
-
-struct SingleHabitWidgetView: View {
-    @Environment(\.widgetFamily) var family
-    let entry: SingleHabitEntry
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // Header
-            HStack {
-                HabitIcon.image(entry.habitIcon)
-                    .foregroundStyle(entry.color)
-                Text(entry.habitName)
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .lineLimit(1)
-                Spacer()
-                if entry.isPeriodComplete {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
-                } else if entry.isMultiFrequency && entry.periodCompletions > 0 {
-                    Text("\(entry.periodCompletions)/\(entry.goalFrequency)")
-                        .font(.caption2)
-                        .fontWeight(.bold)
-                        .foregroundStyle(entry.color)
-                } else {
-                    Image(systemName: "circle")
-                        .foregroundStyle(.gray)
-                }
-            }
-
-            if family == .systemMedium {
-                // Mini heatmap grid
-                WidgetHeatmapGrid(days: entry.heatmapDays, color: entry.color)
-            }
-
-            Spacer()
-
-            // Stats
-            HStack {
-                HStack(spacing: 2) {
-                    Image(systemName: "flame.fill")
-                        .font(.caption2)
-                        .foregroundStyle(.orange)
-                    Text("\(entry.currentStreak)d")
-                        .font(.caption2)
-                        .fontWeight(.semibold)
-                }
-                Spacer()
-                Text("\(Int(entry.completionRate * 100))%")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .padding()
-    }
-}
-
-struct WidgetHeatmapGrid: View {
-    let days: [HeatmapDay]
-    let color: Color
-    let cellSize: CGFloat = 8
-    let spacing: CGFloat = 2
-
-    var body: some View {
-        let rows = 7
-        let cols = days.count / rows
-
-        HStack(spacing: spacing) {
-            ForEach(0..<cols, id: \.self) { col in
-                VStack(spacing: spacing) {
-                    ForEach(0..<rows, id: \.self) { row in
-                        let index = col * rows + row
-                        if index < days.count {
-                            RoundedRectangle(cornerRadius: 1.5)
-                                .fill(cellColor(for: days[index]))
-                                .frame(width: cellSize, height: cellSize)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private func cellColor(for day: HeatmapDay) -> Color {
-        if day.isFuture { return .clear }
-        if day.isCompleted { return color }
-        return Color.systemGray5
     }
 }
 
