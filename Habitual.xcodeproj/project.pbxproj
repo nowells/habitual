@@ -51,6 +51,7 @@
 		A30006 /* EnvironmentValues+Today.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10026 /* EnvironmentValues+Today.swift */; };
 		A30007 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10012 /* NotificationService.swift */; };
 		A30008 /* NudgeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10023 /* NudgeService.swift */; };
+		A30009 /* HabitIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10024 /* HabitIntents.swift */; };
 		A40001 /* HabitualComplications.swift in Sources */ = {isa = PBXBuildFile; fileRef = B40001 /* HabitualComplications.swift */; };
 		A40002 /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10003 /* Habit.swift */; };
 		A40003 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10004 /* Persistence.swift */; };
@@ -588,6 +589,7 @@
 				A30006 /* EnvironmentValues+Today.swift in Sources */,
 				A30007 /* NotificationService.swift in Sources */,
 				A30008 /* NudgeService.swift in Sources */,
+			A30009 /* HabitIntents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -742,7 +744,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Habitual/Resources/Habitual.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 9;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Habitual/Resources/Info.plist;
@@ -778,7 +780,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Habitual/Resources/Habitual.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 9;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Habitual/Resources/Info.plist;
@@ -812,7 +814,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = HabitualWatch/Resources/HabitualWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 9;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Habitual;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -836,7 +838,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = HabitualWatch/Resources/HabitualWatch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 9;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Habitual;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -859,7 +861,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = HabitualWidgets/Resources/HabitualWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 9;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HabitualWidgets/Resources/Info.plist;
@@ -883,7 +885,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = HabitualWidgets/Resources/HabitualWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 9;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = HabitualWidgets/Resources/Info.plist;
@@ -905,8 +907,9 @@
 		G40001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = HabitualWatch/Resources/HabitualComplications.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 9;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "HabitualWatch/Resources/HabitualComplications-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Habitual Complications";
@@ -925,8 +928,9 @@
 		G40002 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = HabitualWatch/Resources/HabitualComplications.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 9;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "HabitualWatch/Resources/HabitualComplications-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Habitual Complications";

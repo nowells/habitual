@@ -1,5 +1,5 @@
+import AppIntents
 import CoreData
-import Intents
 import SwiftUI
 import WidgetKit
 
@@ -59,7 +59,21 @@ struct HabitWidgetProvider: TimelineProvider {
 
         let now = Date()
         let habitSnapshots = habits.prefix(6).map { habit in
-            HabitSnapshot(
+            // Build period-level data for the mini heatmap.
+            // For daily habits each period is one day; for weekly/monthly
+            // each period is one week/month — matching the main app's rendering.
+            let periods: [WidgetPeriod]
+            if habit.goalPeriod == .daily {
+                periods = habit.heatmapData(months: 2).flatMap { $0 }.map { day in
+                    WidgetPeriod(completionCount: day.isFuture ? 0 : Int(day.value), isFuture: day.isFuture)
+                }
+            } else {
+                periods = habit.periodHeatmapData(months: 2).map { period in
+                    WidgetPeriod(completionCount: period.completionCount, isFuture: period.isFuture)
+                }
+            }
+
+            return HabitSnapshot(
                 id: habit.id,
                 name: habit.name,
                 icon: habit.icon,
@@ -71,7 +85,7 @@ struct HabitWidgetProvider: TimelineProvider {
                 goalFrequency: habit.goalFrequency,
                 currentStreak: habit.currentStreak,
                 completionRate: habit.completionRate,
-                recentCompletions: habit.heatmapData(months: 2).flatMap { $0 }.map { $0.isCompleted }
+                recentPeriods: periods
             )
         }
 
@@ -105,19 +119,25 @@ struct HabitWidgetEntry: TimelineEntry {
             HabitSnapshot(
                 id: UUID(), name: "Exercise", icon: "figure.run", colorRed: 0.35, colorGreen: 0.65, colorBlue: 0.85,
                 isPeriodComplete: true, periodCompletions: 1, goalFrequency: 1, currentStreak: 7, completionRate: 0.85,
-                recentCompletions: []),
+                recentPeriods: []),
             HabitSnapshot(
                 id: UUID(), name: "Read", icon: "book.fill", colorRed: 0.95, colorGreen: 0.55, colorBlue: 0.20,
                 isPeriodComplete: false, periodCompletions: 0, goalFrequency: 1, currentStreak: 3, completionRate: 0.60,
-                recentCompletions: []),
+                recentPeriods: []),
             HabitSnapshot(
                 id: UUID(), name: "Meditate", icon: "brain.head.profile", colorRed: 0.65, colorGreen: 0.35,
                 colorBlue: 0.90, isPeriodComplete: true, periodCompletions: 3, goalFrequency: 3, currentStreak: 12,
-                completionRate: 0.75, recentCompletions: []),
+                completionRate: 0.75, recentPeriods: []),
         ],
         totalHabits: 3,
         completedToday: 2
     )
+}
+
+/// One period's worth of completion data for the widget mini heatmap.
+struct WidgetPeriod {
+    let completionCount: Int
+    let isFuture: Bool
 }
 
 struct HabitSnapshot: Identifiable {
@@ -132,7 +152,7 @@ struct HabitSnapshot: Identifiable {
     let goalFrequency: Int
     let currentStreak: Int
     let completionRate: Double
-    let recentCompletions: [Bool]
+    let recentPeriods: [WidgetPeriod]
 
     var color: Color {
         Color(red: colorRed, green: colorGreen, blue: colorBlue)
@@ -343,14 +363,8 @@ struct LargeHabitWidget: View {
                             .fontWeight(.medium)
                             .lineLimit(1)
 
-                        // Mini heatmap dots (last 14 days)
-                        HStack(spacing: 2) {
-                            ForEach(0..<min(14, habit.recentCompletions.count), id: \.self) { idx in
-                                Circle()
-                                    .fill(habit.recentCompletions[idx] ? habit.color : Color.systemGray5)
-                                    .frame(width: 6, height: 6)
-                            }
-                        }
+                        // Mini heatmap dots — last 14 periods with pie-fill progress
+                        WidgetMiniHeatmap(habit: habit)
                     }
 
                     Spacer()
@@ -389,6 +403,101 @@ struct LargeHabitWidget: View {
             }
         }
         .padding()
+    }
+}
+
+// MARK: - Widget Mini Heatmap (with pie-fill progress)
+
+/// Renders the last 14 periods as small dots with pie-fill progress,
+/// matching the main app's `PieProgressFill` rendering.
+struct WidgetMiniHeatmap: View {
+    let habit: HabitSnapshot
+    private let dotSize: CGFloat = 6
+
+    var body: some View {
+        let periods = Array(habit.recentPeriods.suffix(14))
+        HStack(spacing: 2) {
+            ForEach(periods.indices, id: \.self) { idx in
+                let period = periods[idx]
+                if period.isFuture {
+                    Circle()
+                        .fill(Color.clear)
+                        .frame(width: dotSize, height: dotSize)
+                } else if period.completionCount <= 0 {
+                    Circle()
+                        .fill(Color.systemGray5)
+                        .frame(width: dotSize, height: dotSize)
+                } else {
+                    WidgetPieDot(
+                        completionCount: period.completionCount,
+                        goalFrequency: habit.goalFrequency,
+                        color: habit.color,
+                        size: dotSize
+                    )
+                }
+            }
+        }
+    }
+}
+
+/// A tiny pie-fill dot for the widget heatmap, mirroring PieProgressFill.
+struct WidgetPieDot: View {
+    let completionCount: Int
+    let goalFrequency: Int
+    let color: Color
+    let size: CGFloat
+
+    private var fraction: Double {
+        guard goalFrequency > 0 else { return 0 }
+        let remainder = completionCount % goalFrequency
+        if remainder == 0 && completionCount > 0 { return 1.0 }
+        return Double(remainder) / Double(goalFrequency)
+    }
+
+    private var isOverGoal: Bool {
+        goalFrequency > 0 && completionCount > goalFrequency
+    }
+
+    var body: some View {
+        ZStack {
+            // Background circle
+            Circle()
+                .fill(Color.systemGray5)
+                .frame(width: size, height: size)
+
+            // If fully completed or over-completed, solid fill
+            if completionCount >= goalFrequency {
+                Circle()
+                    .fill(isOverGoal ? color.opacity(0.85) : color)
+                    .frame(width: size, height: size)
+            } else {
+                // Partial pie wedge
+                PieWedge(fraction: fraction)
+                    .fill(color)
+                    .frame(width: size, height: size)
+                    .clipShape(Circle())
+            }
+        }
+    }
+}
+
+/// A simple pie-wedge shape for partial completion.
+struct PieWedge: Shape {
+    let fraction: Double
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        path.move(to: center)
+        path.addArc(
+            center: center,
+            radius: max(rect.width, rect.height),
+            startAngle: .degrees(-90),
+            endAngle: .degrees(-90 + 360 * fraction),
+            clockwise: false
+        )
+        path.closeSubpath()
+        return path
     }
 }
 
@@ -497,8 +606,17 @@ struct HabitualWidgetEntryView: View {
 
 // MARK: - Single Habit Widget
 
-struct SingleHabitWidgetProvider: IntentTimelineProvider {
-    typealias Intent = SingleHabitIntent
+/// Widget configuration intent — lets the user choose which habit to display.
+struct SelectHabitIntent: WidgetConfigurationIntent {
+    static let title: LocalizedStringResource = "Select Habit"
+    static let description = IntentDescription("Choose which habit to display on the widget.")
+
+    @Parameter(title: "Habit")
+    var habit: HabitAppEntity?
+}
+
+struct SingleHabitWidgetProvider: AppIntentTimelineProvider {
+    typealias Intent = SelectHabitIntent
     typealias Entry = SingleHabitEntry
 
     let persistenceController = PersistenceController.shared
@@ -507,24 +625,19 @@ struct SingleHabitWidgetProvider: IntentTimelineProvider {
         SingleHabitEntry.placeholder
     }
 
-    func getSnapshot(
-        for configuration: SingleHabitIntent, in context: Context, completion: @escaping (SingleHabitEntry) -> Void
-    ) {
-        completion(fetchEntry())
+    func snapshot(for configuration: SelectHabitIntent, in context: Context) async -> SingleHabitEntry {
+        await fetchEntry(for: configuration)
     }
 
-    func getTimeline(
-        for configuration: SingleHabitIntent, in context: Context,
-        completion: @escaping (Timeline<SingleHabitEntry>) -> Void
-    ) {
-        let entry = fetchEntry()
-        let calendar = Calendar.current
-        let tomorrow = calendar.startOfDay(for: calendar.date(byAdding: .day, value: 1, to: Date()) ?? Date())
-        let timeline = Timeline(entries: [entry], policy: .after(tomorrow))
-        completion(timeline)
+    func timeline(for configuration: SelectHabitIntent, in context: Context) async -> Timeline<SingleHabitEntry> {
+        let entry = await fetchEntry(for: configuration)
+        let tomorrow = Calendar.current.startOfDay(
+            for: Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date())
+        return Timeline(entries: [entry], policy: .after(tomorrow))
     }
 
-    private func fetchEntry() -> SingleHabitEntry {
+    @MainActor
+    private func fetchEntry(for configuration: SelectHabitIntent) -> SingleHabitEntry {
         let context = persistenceController.container.viewContext
         let request: NSFetchRequest<CDHabit> = CDHabit.fetchRequest()
         request.predicate = NSPredicate(format: "isArchived == NO")
@@ -532,10 +645,17 @@ struct SingleHabitWidgetProvider: IntentTimelineProvider {
             NSSortDescriptor(keyPath: \CDHabit.sortOrder, ascending: true),
             NSSortDescriptor(keyPath: \CDHabit.createdAt, ascending: false),
         ]
-        request.fetchLimit = 1
         let habits = (try? context.fetch(request))?.map { $0.toHabit() } ?? []
 
-        guard let habit = habits.first else {
+        // Use the selected habit, or fall back to the first active habit
+        let habit: Habit?
+        if let selectedID = configuration.habit?.id {
+            habit = habits.first { $0.id == selectedID }
+        } else {
+            habit = habits.first
+        }
+
+        guard let habit else {
             return .placeholder
         }
 
@@ -604,15 +724,12 @@ struct HeatmapDay {
     let isFuture: Bool
 }
 
-// Placeholder intent - in a real project this would be defined in an Intent Definition file
-class SingleHabitIntent: INIntent {}
-
 struct SingleHabitWidget: Widget {
     let kind: String = "SingleHabitWidget"
 
     var body: some WidgetConfiguration {
-        IntentConfiguration(
-            kind: kind, intent: SingleHabitIntent.self, provider: SingleHabitWidgetProvider()
+        AppIntentConfiguration(
+            kind: kind, intent: SelectHabitIntent.self, provider: SingleHabitWidgetProvider()
         ) { entry in
             SingleHabitWidgetView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)

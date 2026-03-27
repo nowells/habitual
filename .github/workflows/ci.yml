@@ -14,6 +14,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # ── Lint & Format Check ────────────────────────────────────────────
+  lint-format:
+    name: Lint & Format Check
+    runs-on: macos-15
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install tools
+        run: brew install swiftlint swift-format
+
+      - name: Check formatting
+        run: |
+          swift-format lint --recursive \
+            Habitual/Sources \
+            HabitualWatch/Sources \
+            HabitualWidgets/Sources \
+            Tests
+
+      - name: Run SwiftLint
+        run: swiftlint lint --strict
+
   # ── Unit & Integration Tests ─────────────────────────────────────────
   unit-tests:
     name: Unit & Integration Tests
@@ -229,12 +253,16 @@ jobs:
   # ── Status Gate ──────────────────────────────────────────────────────
   ci-pass:
     name: CI Pass
-    needs: [unit-tests, snapshot-tests, build-check]
+    needs: [lint-format, unit-tests, snapshot-tests, build-check]
     runs-on: ubuntu-latest
     if: always()
     steps:
       - name: Check results
         run: |
+          if [ "${{ needs.lint-format.result }}" != "success" ]; then
+            echo "Lint & format check failed"
+            exit 1
+          fi
           if [ "${{ needs.unit-tests.result }}" != "success" ]; then
             echo "Unit tests failed"
             exit 1
