@@ -330,6 +330,12 @@ extension Habit {
         return completions.contains { calendar.startOfDay(for: $0.date) == targetDay }
     }
 
+    /// Number of completions logged on a specific day (not the whole period)
+    func completionsOnDay(_ date: Date, calendar: Calendar = .current) -> Int {
+        let targetDay = calendar.startOfDay(for: date)
+        return completions.filter { calendar.startOfDay(for: $0.date) == targetDay }.count
+    }
+
     func completionValue(for date: Date) -> Double {
         let calendar = Calendar.current
         let targetDay = calendar.startOfDay(for: date)

@@ -39,16 +39,22 @@ private struct DrawKit {
         ellipse(&ctx, x: x, y: y, w: r * 2, h: r * 2, color: color)
     }
 
-    static func roundedRect(_ ctx: inout GraphicsContext, x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat, radius: CGFloat, color: Color) {
+    static func roundedRect(
+        _ ctx: inout GraphicsContext, x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat, radius: CGFloat, color: Color
+    ) {
         let rect = CGRect(x: x - w / 2, y: y - h / 2, width: w, height: h)
         ctx.fill(RoundedRectangle(cornerRadius: radius).path(in: rect), with: .color(color))
     }
 
     /// Draw an arc/smile path
-    static func smile(_ ctx: inout GraphicsContext, centerX: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat, color: Color, lineWidth: CGFloat = 2) {
+    static func smile(
+        _ ctx: inout GraphicsContext, centerX: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat, color: Color,
+        lineWidth: CGFloat = 2
+    ) {
         var path = Path()
-        path.addArc(center: CGPoint(x: centerX, y: y), radius: width / 2,
-                     startAngle: .degrees(10), endAngle: .degrees(170), clockwise: false)
+        path.addArc(
+            center: CGPoint(x: centerX, y: y), radius: width / 2,
+            startAngle: .degrees(10), endAngle: .degrees(170), clockwise: false)
         ctx.stroke(path, with: .color(color), lineWidth: lineWidth)
     }
 
@@ -68,7 +74,10 @@ private struct DrawKit {
     }
 
     /// Draw standard cute eyes — two ovals with white highlights
-    static func cuteEyes(_ ctx: inout GraphicsContext, leftX: CGFloat, rightX: CGFloat, y: CGFloat, eyeW: CGFloat, eyeH: CGFloat, mood: MascotMood) {
+    static func cuteEyes(
+        _ ctx: inout GraphicsContext, leftX: CGFloat, rightX: CGFloat, y: CGFloat, eyeW: CGFloat, eyeH: CGFloat,
+        mood: MascotMood
+    ) {
         let pupilColor = Color(red: 0.15, green: 0.1, blue: 0.1)
         let highlightColor = Color.white
 
@@ -114,13 +123,16 @@ private struct DrawKit {
         case .excited, .celebrating:
             openMouth(&ctx, x: x, y: y, w: size * 0.9, h: size * 0.7)
         case .happy:
-            smile(&ctx, centerX: x, y: y - size * 0.1, width: size * 0.8, height: size * 0.3, color: dark, lineWidth: 2.5)
+            smile(
+                &ctx, centerX: x, y: y - size * 0.1, width: size * 0.8, height: size * 0.3, color: dark, lineWidth: 2.5)
         case .encouraging:
             // Small "o" mouth
             ellipse(&ctx, x: x, y: y, w: size * 0.35, h: size * 0.4, color: dark)
         case .relaxed:
             // Gentle wavy smile
-            smile(&ctx, centerX: x, y: y - size * 0.15, width: size * 0.55, height: size * 0.15, color: dark, lineWidth: 2)
+            smile(
+                &ctx, centerX: x, y: y - size * 0.15, width: size * 0.55, height: size * 0.15, color: dark, lineWidth: 2
+            )
         }
     }
 
@@ -163,26 +175,31 @@ enum DragonRenderer {
         // Flame on tail tip
         let flameColor = Color(red: 1.0, green: 0.5, blue: 0.15)
         DrawKit.circle(&ctx, x: tailEnd.x + s * 0.02, y: tailEnd.y - s * 0.02, r: s * 0.045, color: flameColor)
-        DrawKit.circle(&ctx, x: tailEnd.x + s * 0.01, y: tailEnd.y - s * 0.04, r: s * 0.03, color: Color(red: 1.0, green: 0.85, blue: 0.2))
+        DrawKit.circle(
+            &ctx, x: tailEnd.x + s * 0.01, y: tailEnd.y - s * 0.04, r: s * 0.03,
+            color: Color(red: 1.0, green: 0.85, blue: 0.2))
 
         // Left wing
-        DrawKit.triangle(&ctx,
-                         p1: CGPoint(x: cx - s * 0.22, y: cy - s * 0.05),
-                         p2: CGPoint(x: cx - s * 0.42, y: cy - s * 0.28),
-                         p3: CGPoint(x: cx - s * 0.12, y: cy - s * 0.12),
-                         color: wingColor)
-        DrawKit.triangle(&ctx,
-                         p1: CGPoint(x: cx - s * 0.22, y: cy - s * 0.05),
-                         p2: CGPoint(x: cx - s * 0.36, y: cy - s * 0.22),
-                         p3: CGPoint(x: cx - s * 0.15, y: cy - s * 0.08),
-                         color: wingColor.opacity(0.7))
+        DrawKit.triangle(
+            &ctx,
+            p1: CGPoint(x: cx - s * 0.22, y: cy - s * 0.05),
+            p2: CGPoint(x: cx - s * 0.42, y: cy - s * 0.28),
+            p3: CGPoint(x: cx - s * 0.12, y: cy - s * 0.12),
+            color: wingColor)
+        DrawKit.triangle(
+            &ctx,
+            p1: CGPoint(x: cx - s * 0.22, y: cy - s * 0.05),
+            p2: CGPoint(x: cx - s * 0.36, y: cy - s * 0.22),
+            p3: CGPoint(x: cx - s * 0.15, y: cy - s * 0.08),
+            color: wingColor.opacity(0.7))
 
         // Right wing
-        DrawKit.triangle(&ctx,
-                         p1: CGPoint(x: cx + s * 0.22, y: cy - s * 0.05),
-                         p2: CGPoint(x: cx + s * 0.42, y: cy - s * 0.28),
-                         p3: CGPoint(x: cx + s * 0.12, y: cy - s * 0.12),
-                         color: wingColor)
+        DrawKit.triangle(
+            &ctx,
+            p1: CGPoint(x: cx + s * 0.22, y: cy - s * 0.05),
+            p2: CGPoint(x: cx + s * 0.42, y: cy - s * 0.28),
+            p3: CGPoint(x: cx + s * 0.12, y: cy - s * 0.12),
+            color: wingColor)
 
         // Body
         DrawKit.ellipse(&ctx, x: cx, y: cy + s * 0.05, w: s * 0.52, h: s * 0.48, color: bodyColor)
@@ -194,16 +211,18 @@ enum DragonRenderer {
         DrawKit.ellipse(&ctx, x: cx, y: cy - s * 0.16, w: s * 0.44, h: s * 0.38, color: bodyColor)
 
         // Horns
-        DrawKit.triangle(&ctx,
-                         p1: CGPoint(x: cx - s * 0.12, y: cy - s * 0.32),
-                         p2: CGPoint(x: cx - s * 0.16, y: cy - s * 0.45),
-                         p3: CGPoint(x: cx - s * 0.06, y: cy - s * 0.32),
-                         color: hornColor)
-        DrawKit.triangle(&ctx,
-                         p1: CGPoint(x: cx + s * 0.12, y: cy - s * 0.32),
-                         p2: CGPoint(x: cx + s * 0.16, y: cy - s * 0.45),
-                         p3: CGPoint(x: cx + s * 0.06, y: cy - s * 0.32),
-                         color: hornColor)
+        DrawKit.triangle(
+            &ctx,
+            p1: CGPoint(x: cx - s * 0.12, y: cy - s * 0.32),
+            p2: CGPoint(x: cx - s * 0.16, y: cy - s * 0.45),
+            p3: CGPoint(x: cx - s * 0.06, y: cy - s * 0.32),
+            color: hornColor)
+        DrawKit.triangle(
+            &ctx,
+            p1: CGPoint(x: cx + s * 0.12, y: cy - s * 0.32),
+            p2: CGPoint(x: cx + s * 0.16, y: cy - s * 0.45),
+            p3: CGPoint(x: cx + s * 0.06, y: cy - s * 0.32),
+            color: hornColor)
 
         // Nostrils
         DrawKit.circle(&ctx, x: cx - s * 0.04, y: cy - s * 0.1, r: s * 0.02, color: darkGreen)
@@ -221,7 +240,8 @@ enum DragonRenderer {
         // Eyes
         let eyeY = cy - s * 0.18
         let eyeSpacing = s * 0.1
-        DrawKit.cuteEyes(&ctx, leftX: cx - eyeSpacing, rightX: cx + eyeSpacing, y: eyeY, eyeW: s * 0.08, eyeH: s * 0.09, mood: mood)
+        DrawKit.cuteEyes(
+            &ctx, leftX: cx - eyeSpacing, rightX: cx + eyeSpacing, y: eyeY, eyeW: s * 0.08, eyeH: s * 0.09, mood: mood)
 
         // Mouth
         DrawKit.moodMouth(&ctx, x: cx, y: cy - s * 0.06, size: s * 0.14, mood: mood)
@@ -281,44 +301,56 @@ enum CatRenderer {
         // Ears — triangles with inner pink
         let earPink = Color(red: 1.0, green: 0.7, blue: 0.72)
         // Left ear
-        DrawKit.triangle(&ctx,
-                         p1: CGPoint(x: cx - s * 0.2, y: cy - s * 0.22),
-                         p2: CGPoint(x: cx - s * 0.2, y: cy - s * 0.44),
-                         p3: CGPoint(x: cx - s * 0.06, y: cy - s * 0.26),
-                         color: bodyColor)
-        DrawKit.triangle(&ctx,
-                         p1: CGPoint(x: cx - s * 0.17, y: cy - s * 0.24),
-                         p2: CGPoint(x: cx - s * 0.18, y: cy - s * 0.39),
-                         p3: CGPoint(x: cx - s * 0.09, y: cy - s * 0.27),
-                         color: earPink)
+        DrawKit.triangle(
+            &ctx,
+            p1: CGPoint(x: cx - s * 0.2, y: cy - s * 0.22),
+            p2: CGPoint(x: cx - s * 0.2, y: cy - s * 0.44),
+            p3: CGPoint(x: cx - s * 0.06, y: cy - s * 0.26),
+            color: bodyColor)
+        DrawKit.triangle(
+            &ctx,
+            p1: CGPoint(x: cx - s * 0.17, y: cy - s * 0.24),
+            p2: CGPoint(x: cx - s * 0.18, y: cy - s * 0.39),
+            p3: CGPoint(x: cx - s * 0.09, y: cy - s * 0.27),
+            color: earPink)
         // Right ear
-        DrawKit.triangle(&ctx,
-                         p1: CGPoint(x: cx + s * 0.2, y: cy - s * 0.22),
-                         p2: CGPoint(x: cx + s * 0.2, y: cy - s * 0.44),
-                         p3: CGPoint(x: cx + s * 0.06, y: cy - s * 0.26),
-                         color: bodyColor)
-        DrawKit.triangle(&ctx,
-                         p1: CGPoint(x: cx + s * 0.17, y: cy - s * 0.24),
-                         p2: CGPoint(x: cx + s * 0.18, y: cy - s * 0.39),
-                         p3: CGPoint(x: cx + s * 0.09, y: cy - s * 0.27),
-                         color: earPink)
+        DrawKit.triangle(
+            &ctx,
+            p1: CGPoint(x: cx + s * 0.2, y: cy - s * 0.22),
+            p2: CGPoint(x: cx + s * 0.2, y: cy - s * 0.44),
+            p3: CGPoint(x: cx + s * 0.06, y: cy - s * 0.26),
+            color: bodyColor)
+        DrawKit.triangle(
+            &ctx,
+            p1: CGPoint(x: cx + s * 0.17, y: cy - s * 0.24),
+            p2: CGPoint(x: cx + s * 0.18, y: cy - s * 0.39),
+            p3: CGPoint(x: cx + s * 0.09, y: cy - s * 0.27),
+            color: earPink)
 
         // Forehead stripes
-        DrawKit.line(&ctx, from: CGPoint(x: cx - s * 0.04, y: cy - s * 0.28), to: CGPoint(x: cx - s * 0.06, y: cy - s * 0.22), color: stripeColor, lineWidth: 2)
-        DrawKit.line(&ctx, from: CGPoint(x: cx, y: cy - s * 0.3), to: CGPoint(x: cx, y: cy - s * 0.22), color: stripeColor, lineWidth: 2)
-        DrawKit.line(&ctx, from: CGPoint(x: cx + s * 0.04, y: cy - s * 0.28), to: CGPoint(x: cx + s * 0.06, y: cy - s * 0.22), color: stripeColor, lineWidth: 2)
+        DrawKit.line(
+            &ctx, from: CGPoint(x: cx - s * 0.04, y: cy - s * 0.28), to: CGPoint(x: cx - s * 0.06, y: cy - s * 0.22),
+            color: stripeColor, lineWidth: 2)
+        DrawKit.line(
+            &ctx, from: CGPoint(x: cx, y: cy - s * 0.3), to: CGPoint(x: cx, y: cy - s * 0.22), color: stripeColor,
+            lineWidth: 2)
+        DrawKit.line(
+            &ctx, from: CGPoint(x: cx + s * 0.04, y: cy - s * 0.28), to: CGPoint(x: cx + s * 0.06, y: cy - s * 0.22),
+            color: stripeColor, lineWidth: 2)
 
         // Eyes
         let eyeY = cy - s * 0.15
-        DrawKit.cuteEyes(&ctx, leftX: cx - s * 0.1, rightX: cx + s * 0.1, y: eyeY, eyeW: s * 0.08, eyeH: s * 0.09, mood: mood)
+        DrawKit.cuteEyes(
+            &ctx, leftX: cx - s * 0.1, rightX: cx + s * 0.1, y: eyeY, eyeW: s * 0.08, eyeH: s * 0.09, mood: mood)
 
         // Nose — tiny pink triangle
         let noseY = cy - s * 0.06
-        DrawKit.triangle(&ctx,
-                         p1: CGPoint(x: cx, y: noseY - s * 0.02),
-                         p2: CGPoint(x: cx - s * 0.02, y: noseY + s * 0.01),
-                         p3: CGPoint(x: cx + s * 0.02, y: noseY + s * 0.01),
-                         color: earPink)
+        DrawKit.triangle(
+            &ctx,
+            p1: CGPoint(x: cx, y: noseY - s * 0.02),
+            p2: CGPoint(x: cx - s * 0.02, y: noseY + s * 0.01),
+            p3: CGPoint(x: cx + s * 0.02, y: noseY + s * 0.01),
+            color: earPink)
 
         // Mouth
         DrawKit.moodMouth(&ctx, x: cx, y: cy - s * 0.01, size: s * 0.12, mood: mood)
@@ -327,13 +359,25 @@ enum CatRenderer {
         let whiskerColor = Color(red: 0.4, green: 0.35, blue: 0.3)
         let whiskerY = cy - s * 0.04
         // Left whiskers
-        DrawKit.line(&ctx, from: CGPoint(x: cx - s * 0.08, y: whiskerY - s * 0.02), to: CGPoint(x: cx - s * 0.28, y: whiskerY - s * 0.06), color: whiskerColor, lineWidth: 1.2)
-        DrawKit.line(&ctx, from: CGPoint(x: cx - s * 0.08, y: whiskerY), to: CGPoint(x: cx - s * 0.28, y: whiskerY), color: whiskerColor, lineWidth: 1.2)
-        DrawKit.line(&ctx, from: CGPoint(x: cx - s * 0.08, y: whiskerY + s * 0.02), to: CGPoint(x: cx - s * 0.28, y: whiskerY + s * 0.06), color: whiskerColor, lineWidth: 1.2)
+        DrawKit.line(
+            &ctx, from: CGPoint(x: cx - s * 0.08, y: whiskerY - s * 0.02),
+            to: CGPoint(x: cx - s * 0.28, y: whiskerY - s * 0.06), color: whiskerColor, lineWidth: 1.2)
+        DrawKit.line(
+            &ctx, from: CGPoint(x: cx - s * 0.08, y: whiskerY), to: CGPoint(x: cx - s * 0.28, y: whiskerY),
+            color: whiskerColor, lineWidth: 1.2)
+        DrawKit.line(
+            &ctx, from: CGPoint(x: cx - s * 0.08, y: whiskerY + s * 0.02),
+            to: CGPoint(x: cx - s * 0.28, y: whiskerY + s * 0.06), color: whiskerColor, lineWidth: 1.2)
         // Right whiskers
-        DrawKit.line(&ctx, from: CGPoint(x: cx + s * 0.08, y: whiskerY - s * 0.02), to: CGPoint(x: cx + s * 0.28, y: whiskerY - s * 0.06), color: whiskerColor, lineWidth: 1.2)
-        DrawKit.line(&ctx, from: CGPoint(x: cx + s * 0.08, y: whiskerY), to: CGPoint(x: cx + s * 0.28, y: whiskerY), color: whiskerColor, lineWidth: 1.2)
-        DrawKit.line(&ctx, from: CGPoint(x: cx + s * 0.08, y: whiskerY + s * 0.02), to: CGPoint(x: cx + s * 0.28, y: whiskerY + s * 0.06), color: whiskerColor, lineWidth: 1.2)
+        DrawKit.line(
+            &ctx, from: CGPoint(x: cx + s * 0.08, y: whiskerY - s * 0.02),
+            to: CGPoint(x: cx + s * 0.28, y: whiskerY - s * 0.06), color: whiskerColor, lineWidth: 1.2)
+        DrawKit.line(
+            &ctx, from: CGPoint(x: cx + s * 0.08, y: whiskerY), to: CGPoint(x: cx + s * 0.28, y: whiskerY),
+            color: whiskerColor, lineWidth: 1.2)
+        DrawKit.line(
+            &ctx, from: CGPoint(x: cx + s * 0.08, y: whiskerY + s * 0.02),
+            to: CGPoint(x: cx + s * 0.28, y: whiskerY + s * 0.06), color: whiskerColor, lineWidth: 1.2)
 
         // Blush
         DrawKit.blush(&ctx, leftX: cx - s * 0.16, rightX: cx + s * 0.16, y: cy - s * 0.06, r: s * 0.04)
@@ -383,7 +427,8 @@ enum CapybaraRenderer {
 
         // Eyes — capybara has small eyes set wide apart
         let eyeY = cy - s * 0.18
-        DrawKit.cuteEyes(&ctx, leftX: cx - s * 0.1, rightX: cx + s * 0.1, y: eyeY, eyeW: s * 0.065, eyeH: s * 0.07, mood: mood)
+        DrawKit.cuteEyes(
+            &ctx, leftX: cx - s * 0.1, rightX: cx + s * 0.1, y: eyeY, eyeW: s * 0.065, eyeH: s * 0.07, mood: mood)
 
         // Nose — big oval
         DrawKit.ellipse(&ctx, x: cx, y: cy - s * 0.06, w: s * 0.1, h: s * 0.06, color: noseColor)
@@ -395,10 +440,13 @@ enum CapybaraRenderer {
             DrawKit.roundedRect(&ctx, x: cx - s * 0.02, y: cy, w: s * 0.03, h: s * 0.04, radius: 1, color: .white)
             DrawKit.roundedRect(&ctx, x: cx + s * 0.02, y: cy, w: s * 0.03, h: s * 0.04, radius: 1, color: .white)
         } else if mood == .happy || mood == .encouraging {
-            DrawKit.smile(&ctx, centerX: cx, y: cy + s * 0.0, width: s * 0.1, height: s * 0.04, color: darkBrown, lineWidth: 2)
+            DrawKit.smile(
+                &ctx, centerX: cx, y: cy + s * 0.0, width: s * 0.1, height: s * 0.04, color: darkBrown, lineWidth: 2)
         } else {
             // Relaxed — very gentle smile
-            DrawKit.smile(&ctx, centerX: cx, y: cy - s * 0.01, width: s * 0.07, height: s * 0.02, color: darkBrown, lineWidth: 1.5)
+            DrawKit.smile(
+                &ctx, centerX: cx, y: cy - s * 0.01, width: s * 0.07, height: s * 0.02, color: darkBrown, lineWidth: 1.5
+            )
         }
 
         // Blush
@@ -412,11 +460,15 @@ enum CapybaraRenderer {
         if mood == .relaxed {
             var leafPath = Path()
             leafPath.move(to: CGPoint(x: cx + s * 0.02, y: cy - s * 0.32))
-            leafPath.addQuadCurve(to: CGPoint(x: cx + s * 0.12, y: cy - s * 0.42), control: CGPoint(x: cx + s * 0.12, y: cy - s * 0.32))
-            leafPath.addQuadCurve(to: CGPoint(x: cx + s * 0.02, y: cy - s * 0.32), control: CGPoint(x: cx + s * 0.02, y: cy - s * 0.42))
+            leafPath.addQuadCurve(
+                to: CGPoint(x: cx + s * 0.12, y: cy - s * 0.42), control: CGPoint(x: cx + s * 0.12, y: cy - s * 0.32))
+            leafPath.addQuadCurve(
+                to: CGPoint(x: cx + s * 0.02, y: cy - s * 0.32), control: CGPoint(x: cx + s * 0.02, y: cy - s * 0.42))
             ctx.fill(leafPath, with: .color(Color(red: 0.4, green: 0.75, blue: 0.35)))
             // Stem
-            DrawKit.line(&ctx, from: CGPoint(x: cx + s * 0.02, y: cy - s * 0.32), to: CGPoint(x: cx + s * 0.0, y: cy - s * 0.28), color: Color(red: 0.35, green: 0.6, blue: 0.3), lineWidth: 1.5)
+            DrawKit.line(
+                &ctx, from: CGPoint(x: cx + s * 0.02, y: cy - s * 0.32), to: CGPoint(x: cx + s * 0.0, y: cy - s * 0.28),
+                color: Color(red: 0.35, green: 0.6, blue: 0.3), lineWidth: 1.5)
         }
     }
 }
@@ -468,14 +520,19 @@ enum DogRenderer {
 
         // Eyes
         let eyeY = cy - s * 0.17
-        DrawKit.cuteEyes(&ctx, leftX: cx - s * 0.1, rightX: cx + s * 0.1, y: eyeY, eyeW: s * 0.08, eyeH: s * 0.09, mood: mood)
+        DrawKit.cuteEyes(
+            &ctx, leftX: cx - s * 0.1, rightX: cx + s * 0.1, y: eyeY, eyeW: s * 0.08, eyeH: s * 0.09, mood: mood)
 
         // Eyebrows (expressive!)
         let browColor = darkBrown
         if mood == .encouraging {
             // Worried/determined brows — angled inward
-            DrawKit.line(&ctx, from: CGPoint(x: cx - s * 0.15, y: cy - s * 0.25), to: CGPoint(x: cx - s * 0.06, y: cy - s * 0.23), color: browColor, lineWidth: 2.5)
-            DrawKit.line(&ctx, from: CGPoint(x: cx + s * 0.15, y: cy - s * 0.25), to: CGPoint(x: cx + s * 0.06, y: cy - s * 0.23), color: browColor, lineWidth: 2.5)
+            DrawKit.line(
+                &ctx, from: CGPoint(x: cx - s * 0.15, y: cy - s * 0.25),
+                to: CGPoint(x: cx - s * 0.06, y: cy - s * 0.23), color: browColor, lineWidth: 2.5)
+            DrawKit.line(
+                &ctx, from: CGPoint(x: cx + s * 0.15, y: cy - s * 0.25),
+                to: CGPoint(x: cx + s * 0.06, y: cy - s * 0.23), color: browColor, lineWidth: 2.5)
         }
 
         // Nose
@@ -489,7 +546,8 @@ enum DogRenderer {
         } else if mood == .encouraging {
             DrawKit.ellipse(&ctx, x: cx, y: cy + s * 0.01, w: s * 0.04, h: s * 0.05, color: noseColor)
         } else {
-            DrawKit.smile(&ctx, centerX: cx, y: cy - s * 0.0, width: s * 0.08, height: s * 0.03, color: noseColor, lineWidth: 2)
+            DrawKit.smile(
+                &ctx, centerX: cx, y: cy - s * 0.0, width: s * 0.08, height: s * 0.03, color: noseColor, lineWidth: 2)
         }
 
         // Blush
@@ -504,7 +562,8 @@ enum DogRenderer {
 
         // Collar
         let collarY = cy - s * 0.0
-        DrawKit.ellipse(&ctx, x: cx, y: collarY, w: s * 0.32, h: s * 0.04, color: Color(red: 0.85, green: 0.25, blue: 0.25))
+        DrawKit.ellipse(
+            &ctx, x: cx, y: collarY, w: s * 0.32, h: s * 0.04, color: Color(red: 0.85, green: 0.25, blue: 0.25))
         // Tag
         DrawKit.circle(&ctx, x: cx, y: collarY + s * 0.03, r: s * 0.025, color: Color(red: 0.95, green: 0.8, blue: 0.2))
     }
