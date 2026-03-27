@@ -162,7 +162,6 @@ struct EditHabitView: View {
                 Text("Smart Nudges")
             } footer: {
                 Text(
-                    // swiftlint:disable:next line_length
                     "A nudge fires if you haven't logged this habit by the nudge time. Streak-at-risk alerts appear when you have 3+ days in a row."
                 )
             }
