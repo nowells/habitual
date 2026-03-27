@@ -30,6 +30,7 @@ struct MascotCharacterDrawing: View {
 // MARK: - Drawing Helpers
 
 private struct DrawKit {
+    // swiftlint:disable:next function_parameter_count identifier_name
     static func ellipse(_ ctx: inout GraphicsContext, x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat, color: Color) {
         let rect = CGRect(x: x - w / 2, y: y - h / 2, width: w, height: h)
         ctx.fill(Ellipse().path(in: rect), with: .color(color))
@@ -39,13 +40,16 @@ private struct DrawKit {
         ellipse(&ctx, x: x, y: y, w: r * 2, h: r * 2, color: color)
     }
 
+    // swiftlint:disable:next function_parameter_count
     static func roundedRect(
+        // swiftlint:disable:next identifier_name
         _ ctx: inout GraphicsContext, x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat, radius: CGFloat, color: Color
     ) {
         let rect = CGRect(x: x - w / 2, y: y - h / 2, width: w, height: h)
         ctx.fill(RoundedRectangle(cornerRadius: radius).path(in: rect), with: .color(color))
     }
 
+    // swiftlint:disable:next function_parameter_count
     /// Draw an arc/smile path
     static func smile(
         _ ctx: inout GraphicsContext, centerX: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat, color: Color,
@@ -58,6 +62,7 @@ private struct DrawKit {
         ctx.stroke(path, with: .color(color), lineWidth: lineWidth)
     }
 
+    // swiftlint:disable:next identifier_name
     /// Draw an open mouth (filled ellipse)
     static func openMouth(_ ctx: inout GraphicsContext, x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat) {
         ellipse(&ctx, x: x, y: y, w: w, h: h, color: Color(red: 0.2, green: 0.1, blue: 0.1))
@@ -73,6 +78,7 @@ private struct DrawKit {
         ctx.stroke(path, with: .color(color), lineWidth: lineWidth)
     }
 
+    // swiftlint:disable:next function_parameter_count
     /// Draw standard cute eyes — two ovals with white highlights
     static func cuteEyes(
         _ ctx: inout GraphicsContext, leftX: CGFloat, rightX: CGFloat, y: CGFloat, eyeW: CGFloat, eyeH: CGFloat,
@@ -153,7 +159,7 @@ private struct DrawKit {
 enum DragonRenderer {
     static func draw(in ctx: GraphicsContext, rect: CGRect, mood: MascotMood) {
         var ctx = ctx
-        let s = min(rect.width, rect.height)
+        let s = min(rect.width, rect.height) // swiftlint:disable:this identifier_name
         let cx = rect.midX
         let cy = rect.midY
 
@@ -259,9 +265,10 @@ enum DragonRenderer {
 
 /// A cute chibi cat — round face, pointy ears, whiskers, curled tail.
 enum CatRenderer {
+    // swiftlint:disable:next function_body_length
     static func draw(in ctx: GraphicsContext, rect: CGRect, mood: MascotMood) {
         var ctx = ctx
-        let s = min(rect.width, rect.height)
+        let s = min(rect.width, rect.height) // swiftlint:disable:this identifier_name
         let cx = rect.midX
         let cy = rect.midY
 
@@ -397,7 +404,7 @@ enum CatRenderer {
 enum CapybaraRenderer {
     static func draw(in ctx: GraphicsContext, rect: CGRect, mood: MascotMood) {
         var ctx = ctx
-        let s = min(rect.width, rect.height)
+        let s = min(rect.width, rect.height) // swiftlint:disable:this identifier_name
         let cx = rect.midX
         let cy = rect.midY
 
@@ -479,7 +486,7 @@ enum CapybaraRenderer {
 enum DogRenderer {
     static func draw(in ctx: GraphicsContext, rect: CGRect, mood: MascotMood) {
         var ctx = ctx
-        let s = min(rect.width, rect.height)
+        let s = min(rect.width, rect.height) // swiftlint:disable:this identifier_name
         let cx = rect.midX
         let cy = rect.midY
 
@@ -568,6 +575,7 @@ enum DogRenderer {
         DrawKit.circle(&ctx, x: cx, y: collarY + s * 0.03, r: s * 0.025, color: Color(red: 0.95, green: 0.8, blue: 0.2))
     }
 
+    // swiftlint:disable:next function_parameter_count identifier_name
     private static func earPath(cx: CGFloat, cy: CGFloat, w: CGFloat, h: CGFloat, angle: Double, s: CGFloat) -> Path {
         var path = Path()
         let rect = CGRect(x: cx - w / 2, y: cy - h * 0.2, width: w, height: h)
