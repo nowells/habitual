@@ -10,6 +10,7 @@ struct ContentView: View {
     @State private var lastSuccessfulSync: Date?
     @State private var syncErrorMessage: String?
     @State private var showSyncErrorAlert = false
+    @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appTheme") private var appTheme: String = "system"
     private let relativeSyncFormatter: RelativeDateTimeFormatter = {
         let formatter = RelativeDateTimeFormatter()
@@ -117,6 +118,11 @@ struct ContentView: View {
                 }
             }
         }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                habitStore.forceRefresh()
+            }
+        }
         .preferredColorScheme(colorScheme)
         .alert(
             "Sync Failed",
@@ -185,7 +191,7 @@ struct ContentView: View {
         isSyncing = true
         do {
             try await CloudSyncService.shared.forceSync()
-            habitStore.fetchHabits()
+            habitStore.forceRefresh()
             lastSuccessfulSync = Date()
         } catch {
             let message = error.localizedDescription

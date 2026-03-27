@@ -50,12 +50,21 @@ class HabitStore: ObservableObject {
     }
 
     private func handleRemoteChange() {
-        // automaticallyMergesChangesFromParent is already true, so the
-        // viewContext has merged the CloudKit import. We only need to
-        // re-fetch our value-type array and clean up any sync duplicates.
-        // Avoid refreshAllObjects() here — it re-faults every object,
-        // which combined with the auto-merge causes a double UI update
-        // that can make lists appear to have duplicates momentarily.
+        // Re-fault every registered object so the next fetch reads the
+        // latest values from the persistent store — which now includes
+        // the CloudKit import.  Without this the viewContext row cache
+        // can serve stale property values, causing the UI to diverge
+        // from other devices even after a successful sync.
+        viewContext.refreshAllObjects()
+        deduplicateCompletions()
+        fetchHabits()
+        scheduleWidgetReload()
+    }
+
+    /// Full refresh from the persistent store — called after manual sync
+    /// and when the app returns to the foreground.
+    func forceRefresh() {
+        viewContext.refreshAllObjects()
         deduplicateCompletions()
         fetchHabits()
         scheduleWidgetReload()
@@ -91,6 +100,7 @@ class HabitStore: ObservableObject {
         cdHabit.goalPeriod = habit.goalPeriod.rawValue
         cdHabit.reminderTime = habit.reminderTime
         cdHabit.sortOrder = Int16(habits.count)
+        cdHabit.updatedAt = Date()
 
         save()
         fetchHabits()
@@ -99,6 +109,7 @@ class HabitStore: ObservableObject {
     func updateHabit(_ habit: Habit) {
         guard let cdHabit = fetchCDHabit(by: habit.id) else { return }
         cdHabit.update(from: habit)
+        cdHabit.updatedAt = Date()
         save()
         fetchHabits()
     }
@@ -117,6 +128,7 @@ class HabitStore: ObservableObject {
     func archiveHabit(_ habit: Habit) {
         guard let cdHabit = fetchCDHabit(by: habit.id) else { return }
         cdHabit.isArchived = true
+        cdHabit.updatedAt = Date()
         save()
         fetchHabits()
     }
@@ -124,6 +136,7 @@ class HabitStore: ObservableObject {
     func unarchiveHabit(_ habit: Habit) {
         guard let cdHabit = fetchCDHabit(by: habit.id) else { return }
         cdHabit.isArchived = false
+        cdHabit.updatedAt = Date()
         save()
         fetchHabits()
     }
@@ -230,9 +243,11 @@ class HabitStore: ObservableObject {
         var reordered = activeHabits
         reordered.move(fromOffsets: source, toOffset: destination)
 
+        let now = Date()
         for (index, habit) in reordered.enumerated() {
             if let cdHabit = fetchCDHabit(by: habit.id) {
                 cdHabit.sortOrder = Int16(index)
+                cdHabit.updatedAt = now
             }
         }
 

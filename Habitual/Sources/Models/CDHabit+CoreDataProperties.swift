@@ -19,6 +19,7 @@ extension CDHabit {
     @NSManaged public var name: String?
     @NSManaged public var reminderTime: Date?
     @NSManaged public var sortOrder: Int16
+    @NSManaged public var updatedAt: Date?
     @NSManaged public var completions: NSSet?
 }
 

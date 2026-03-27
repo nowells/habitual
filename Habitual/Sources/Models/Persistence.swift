@@ -60,6 +60,7 @@ struct PersistenceController {
         let hName = attr("name", .stringAttributeType, default: "")
         let hReminder = attr("reminderTime", .dateAttributeType, optional: true)
         let hSortOrder = attr("sortOrder", .integer16AttributeType, default: Int16(0))
+        let hUpdatedAt = attr("updatedAt", .dateAttributeType, optional: true)
 
         // — CDCompletion —
         let completion = NSEntityDescription()
@@ -94,7 +95,7 @@ struct PersistenceController {
         habit.properties = [
             hColorBlue, hColorGreen, hColorRed, hCreatedAt,
             hGoalFreq, hGoalPeriod, hDesc, hIcon,
-            hId, hIsArchived, hName, hReminder, hSortOrder,
+            hId, hIsArchived, hName, hReminder, hSortOrder, hUpdatedAt,
             completionsRel,
         ]
         completion.properties = [cCreatedAt, cDate, cDeviceID, cId, cNote, cValue, habitRel]
