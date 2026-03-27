@@ -72,12 +72,23 @@ struct WatchHabitRow: View {
 
             Button(action: {
                 withAnimation {
-                    habitStore.toggleTodayCompletion(for: currentHabit)
+                    habitStore.addCompletion(for: currentHabit, on: Date())
                 }
             }) {
-                Image(systemName: currentHabit.isCompletedOn(date: Date()) ? "checkmark.circle.fill" : "circle")
-                    .font(.title3)
-                    .foregroundStyle(currentHabit.isCompletedOn(date: Date()) ? currentHabit.color : .gray)
+                if currentHabit.isPeriodComplete(for: Date()) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(currentHabit.color)
+                } else if currentHabit.goalFrequency > 1 && currentHabit.completionsInPeriod(containing: Date()) > 0 {
+                    Text("\(currentHabit.completionsInPeriod(containing: Date()))/\(currentHabit.goalFrequency)")
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .foregroundStyle(currentHabit.color)
+                } else {
+                    Image(systemName: "circle")
+                        .font(.title3)
+                        .foregroundStyle(.gray)
+                }
             }
             .buttonStyle(.plain)
         }
@@ -100,7 +111,7 @@ struct WatchHabitDetailView: View {
                 // Icon and toggle
                 Button(action: {
                     withAnimation {
-                        habitStore.toggleTodayCompletion(for: currentHabit)
+                        habitStore.addCompletion(for: currentHabit, on: Date())
                     }
                 }) {
                     VStack(spacing: 8) {
@@ -108,11 +119,24 @@ struct WatchHabitDetailView: View {
                             .font(.largeTitle)
                             .foregroundStyle(currentHabit.color)
 
-                        Image(systemName: currentHabit.isCompletedOn(date: Date()) ? "checkmark.circle.fill" : "circle")
-                            .font(.title)
-                            .foregroundStyle(currentHabit.isCompletedOn(date: Date()) ? .green : .gray)
+                        if currentHabit.isPeriodComplete(for: Date()) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.title)
+                                .foregroundStyle(.green)
+                        } else if currentHabit.goalFrequency > 1 {
+                            Text(
+                                "\(currentHabit.completionsInPeriod(containing: Date()))/\(currentHabit.goalFrequency)"
+                            )
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundStyle(currentHabit.color)
+                        } else {
+                            Image(systemName: "circle")
+                                .font(.title)
+                                .foregroundStyle(.gray)
+                        }
 
-                        Text(currentHabit.isCompletedOn(date: Date()) ? "Completed" : "Tap to Complete")
+                        Text(currentHabit.isPeriodComplete(for: Date()) ? "Completed" : "Tap to Add")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -128,10 +152,21 @@ struct WatchHabitDetailView: View {
 
                 // Stats
                 VStack(spacing: 8) {
-                    WatchStatRow(icon: "flame.fill", label: "Streak", value: "\(currentHabit.currentStreak) days", color: .orange)
-                    WatchStatRow(icon: "trophy.fill", label: "Best", value: "\(currentHabit.longestStreak) days", color: .yellow)
-                    WatchStatRow(icon: "checkmark", label: "Total", value: "\(currentHabit.totalCompletions)", color: currentHabit.color)
-                    WatchStatRow(icon: "chart.line.uptrend.xyaxis", label: "Rate", value: "\(Int(currentHabit.completionRate * 100))%", color: .green)
+                    WatchStatRow(
+                        icon: "flame.fill", label: "Streak",
+                        value: "\(currentHabit.currentStreak) \(currentHabit.goalPeriod.periodLabelPlural)",
+                        color: .orange)
+                    WatchStatRow(
+                        icon: "trophy.fill", label: "Best",
+                        value: "\(currentHabit.longestStreak) \(currentHabit.goalPeriod.periodLabelPlural)",
+                        color: .yellow)
+                    WatchStatRow(
+                        icon: "checkmark", label: "Total",
+                        value: "\(currentHabit.totalCompletions) \(currentHabit.goalPeriod.periodLabelPlural)",
+                        color: currentHabit.color)
+                    WatchStatRow(
+                        icon: "chart.line.uptrend.xyaxis", label: "Rate",
+                        value: "\(Int(currentHabit.completionRate * 100))%", color: .green)
                 }
             }
             .padding(.horizontal)

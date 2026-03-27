@@ -1,5 +1,6 @@
-import XCTest
 import CoreData
+import XCTest
+
 @testable import HabitualCore
 
 /// Integration tests that validate complete user workflows end-to-end.
@@ -89,13 +90,14 @@ final class HabitWorkflowTests: XCTestCase {
 
     func testEditHabitWorkflow() {
         // 1. Create habit
-        store.addHabit(Habit(
-            name: "Exercise",
-            icon: "star.fill",
-            colorComponents: (red: 0.35, green: 0.65, blue: 0.85),
-            goalFrequency: 1,
-            goalPeriod: .daily
-        ))
+        store.addHabit(
+            Habit(
+                name: "Exercise",
+                icon: "star.fill",
+                colorComponents: (red: 0.35, green: 0.65, blue: 0.85),
+                goalFrequency: 1,
+                goalPeriod: .daily
+            ))
 
         // 2. Add some completions
         store.toggleTodayCompletion(for: store.habits.first!)
@@ -158,7 +160,8 @@ final class HabitWorkflowTests: XCTestCase {
 
         // Search by name
         store.searchText = "morning"
-        XCTAssertEqual(store.filteredHabits.count, 2, "Should find 'Morning Exercise' and 'Meditate' (morning mindfulness)")
+        XCTAssertEqual(
+            store.filteredHabits.count, 2, "Should find 'Morning Exercise' and 'Meditate' (morning mindfulness)")
 
         // Search by description
         store.searchText = "cardio"

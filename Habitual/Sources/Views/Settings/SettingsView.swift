@@ -1,11 +1,12 @@
 import SwiftUI
+import UserNotifications
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage("appTheme") private var appTheme: String = "system"
-    @AppStorage("heatmapMonths") private var heatmapMonths: Int = 4
     @AppStorage("showCompletionAnimations") private var showCompletionAnimations: Bool = true
-    @AppStorage("startOfWeek") private var startOfWeek: Int = 1 // 1 = Sunday (Calendar default)
+    @AppStorage("startOfWeek") private var startOfWeek: Int = 1  // 1 = Sunday (Calendar default)
+    @State private var notificationStatus: UNAuthorizationStatus = .notDetermined
 
     var body: some View {
         Form {
@@ -17,12 +18,6 @@ struct SettingsView: View {
                     Text("Dark").tag("dark")
                 }
 
-                Picker("Heatmap Range", selection: $heatmapMonths) {
-                    Text("3 Months").tag(3)
-                    Text("4 Months").tag(4)
-                    Text("6 Months").tag(6)
-                    Text("12 Months").tag(12)
-                }
             }
 
             // Behavior
@@ -37,9 +32,13 @@ struct SettingsView: View {
             }
 
             // Notifications
-            Section("Notifications") {
-                Button("Request Notification Permission") {
-                    NotificationService.shared.requestPermission()
+            if shouldShowNotificationPrompt {
+                Section("Notifications") {
+                    Button("Allow Notifications") {
+                        NotificationService.shared.requestPermission { _ in
+                            Task { await refreshNotificationStatus() }
+                        }
+                    }
                 }
             }
 
@@ -77,15 +76,34 @@ struct SettingsView: View {
         }
         .navigationTitle("Settings")
         #if os(macOS)
-        .formStyle(.grouped)
+            .formStyle(.grouped)
         #elseif os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Done") { dismiss() }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
             }
-        }
         #endif
+        .task {
+            await refreshNotificationStatus()
+        }
+    }
+
+    private var shouldShowNotificationPrompt: Bool {
+        switch notificationStatus {
+        case .authorized, .provisional, .ephemeral:
+            return false
+        default:
+            return true
+        }
+    }
+
+    private func refreshNotificationStatus() async {
+        let status = await NotificationService.shared.authorizationStatus()
+        await MainActor.run {
+            notificationStatus = status
+        }
     }
 }
 

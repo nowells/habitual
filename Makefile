@@ -1,4 +1,4 @@
-.PHONY: lint lint-fix format format-check test test-snapshot test-snapshot-record test-all build help
+.PHONY: lint lint-fix format format-check test test-snapshot test-snapshot-record test-all build build-ios build-mac bump release release-ios release-mac help
 
 # ── Linting ──────────────────────────────────────────────────────────────────
 
@@ -39,17 +39,45 @@ test-all: test test-snapshot
 
 # ── Build ────────────────────────────────────────────────────────────────────
 
-build:
+XCODEBUILD_FLAGS = \
+	-project Habitual.xcodeproj \
+	-scheme Habitual \
+	-configuration Debug \
+	CODE_SIGN_IDENTITY="" \
+	CODE_SIGNING_REQUIRED=NO \
+	CODE_SIGNING_ALLOWED=NO \
+	ONLY_ACTIVE_ARCH=YES \
+	GCC_TREAT_WARNINGS_AS_ERRORS=YES
+
+build: build-ios build-mac
+
+build-ios:
+	@echo "🍎 Building for iOS..."
 	set -o pipefail && xcodebuild build \
-		-project Habitual.xcodeproj \
-		-scheme Habitual \
-		-destination "platform=iOS Simulator,name=iPhone 16 Pro" \
-		-configuration Debug \
-		CODE_SIGN_IDENTITY="" \
-		CODE_SIGNING_REQUIRED=NO \
-		CODE_SIGNING_ALLOWED=NO \
-		ONLY_ACTIVE_ARCH=YES \
+		$(XCODEBUILD_FLAGS) \
+		-destination "generic/platform=iOS Simulator" \
 		| xcpretty
+
+build-mac:
+	@echo "🖥️  Building for Mac Catalyst..."
+	set -o pipefail && xcodebuild build \
+		$(XCODEBUILD_FLAGS) \
+		-destination "generic/platform=macOS,variant=Mac Catalyst" \
+		| xcpretty
+
+# ── Release ──────────────────────────────────────────────────────────────────
+
+bump:
+	@./scripts/release.sh --bump-only
+
+release:
+	@./scripts/release.sh
+
+release-ios:
+	@./scripts/release.sh --ios-only
+
+release-mac:
+	@./scripts/release.sh --mac-only
 
 # ── Help ─────────────────────────────────────────────────────────────────────
 
@@ -71,4 +99,12 @@ help:
 	@echo "  test-all             Run unit + snapshot tests"
 	@echo ""
 	@echo "Building:"
-	@echo "  build                Build for iOS Simulator (requires xcpretty)"
+	@echo "  build                Build iOS + Mac Catalyst (warnings as errors)"
+	@echo "  build-ios            Build for iOS only"
+	@echo "  build-mac            Build for Mac Catalyst only"
+	@echo ""
+	@echo "Release:"
+	@echo "  bump                 Bump build number only"
+	@echo "  release              Bump + archive + upload iOS & Mac to App Store Connect"
+	@echo "  release-ios          Bump + archive + upload iOS only"
+	@echo "  release-mac          Bump + archive + upload Mac Catalyst only"

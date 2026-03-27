@@ -1,6 +1,7 @@
-import XCTest
-import SwiftUI
 import SnapshotTesting
+import SwiftUI
+import XCTest
+
 @testable import HabitualCore
 
 final class HeatmapSnapshotTests: SnapshotTestCase {
@@ -142,7 +143,7 @@ final class HeatmapSnapshotTests: SnapshotTestCase {
     // MARK: - HeatmapCell
 
     func testHeatmapCell_Completed() {
-        let day = DayData(date: Date(), value: 1.0, isFuture: false)
+        let day = DayData(date: Date(), value: 1.0, isFuture: false, isPadding: false)
         let view = HeatmapCell(day: day, color: .blue, size: 24)
             .padding(8)
             .background(Color.systemBackground)
@@ -151,7 +152,7 @@ final class HeatmapSnapshotTests: SnapshotTestCase {
     }
 
     func testHeatmapCell_Empty() {
-        let day = DayData(date: Date(), value: 0.0, isFuture: false)
+        let day = DayData(date: Date(), value: 0.0, isFuture: false, isPadding: false)
         let view = HeatmapCell(day: day, color: .blue, size: 24)
             .padding(8)
             .background(Color.systemBackground)
@@ -161,7 +162,7 @@ final class HeatmapSnapshotTests: SnapshotTestCase {
 
     func testHeatmapCell_Future() {
         let futureDate = Calendar.current.date(byAdding: .day, value: 5, to: Date())!
-        let day = DayData(date: futureDate, value: 0.0, isFuture: true)
+        let day = DayData(date: futureDate, value: 0.0, isFuture: true, isPadding: false)
         let view = HeatmapCell(day: day, color: .blue, size: 24)
             .padding(8)
             .background(Color.systemBackground)
@@ -170,7 +171,7 @@ final class HeatmapSnapshotTests: SnapshotTestCase {
     }
 
     func testHeatmapCell_PartialValue() {
-        let day = DayData(date: Date(), value: 0.5, isFuture: false)
+        let day = DayData(date: Date(), value: 0.5, isFuture: false, isPadding: false)
         let view = HeatmapCell(day: day, color: .green, size: 24)
             .padding(8)
             .background(Color.systemBackground)

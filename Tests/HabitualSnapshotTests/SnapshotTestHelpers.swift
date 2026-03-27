@@ -1,41 +1,42 @@
 import SnapshotTesting
 import SwiftUI
 import XCTest
+
 @testable import HabitualCore
 
 #if os(macOS)
-import AppKit
+    import AppKit
 
-/// macOS compatibility shim for SwiftUI snapshot testing.
-/// swift-snapshot-testing only provides `.image(layout:)` for iOS/tvOS.
-/// This extension bridges SwiftUI views to NSView-based snapshotting on macOS.
-extension Snapshotting where Value: SwiftUI.View, Format == NSImage {
-    static func image(
-        precision: Float = 1,
-        perceptualPrecision: Float = 1,
-        layout: SwiftUISnapshotLayout = .sizeThatFits
-    ) -> Self {
-        Snapshotting<NSView, NSImage>
-            .image(precision: precision, perceptualPrecision: perceptualPrecision)
-            .pullback { (view: Value) -> NSView in
-                let hostingView = NSHostingView(rootView: view)
-                switch layout {
-                case .sizeThatFits:
-                    hostingView.frame.size = hostingView.fittingSize
-                case let .fixed(width, height):
-                    hostingView.frame = CGRect(x: 0, y: 0, width: width, height: height)
-                default:
-                    hostingView.frame.size = hostingView.fittingSize
+    /// macOS compatibility shim for SwiftUI snapshot testing.
+    /// swift-snapshot-testing only provides `.image(layout:)` for iOS/tvOS.
+    /// This extension bridges SwiftUI views to NSView-based snapshotting on macOS.
+    extension Snapshotting where Value: SwiftUI.View, Format == NSImage {
+        static func image(
+            precision: Float = 1,
+            perceptualPrecision: Float = 1,
+            layout: SwiftUISnapshotLayout = .sizeThatFits
+        ) -> Self {
+            Snapshotting<NSView, NSImage>
+                .image(precision: precision, perceptualPrecision: perceptualPrecision)
+                .pullback { (view: Value) -> NSView in
+                    let hostingView = NSHostingView(rootView: view)
+                    switch layout {
+                    case .sizeThatFits:
+                        hostingView.frame.size = hostingView.fittingSize
+                    case let .fixed(width, height):
+                        hostingView.frame = CGRect(x: 0, y: 0, width: width, height: height)
+                    default:
+                        hostingView.frame.size = hostingView.fittingSize
+                    }
+                    hostingView.layoutSubtreeIfNeeded()
+                    // NSTableView-backed views (List) populate cells asynchronously.
+                    // A brief runloop drain ensures rows are rendered before capture.
+                    RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.05))
+                    hostingView.layoutSubtreeIfNeeded()
+                    return hostingView
                 }
-                hostingView.layoutSubtreeIfNeeded()
-                // NSTableView-backed views (List) populate cells asynchronously.
-                // A brief runloop drain ensures rows are rendered before capture.
-                RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.05))
-                hostingView.layoutSubtreeIfNeeded()
-                return hostingView
-            }
+        }
     }
-}
 #endif
 
 /// Base class for snapshot tests that respects the SNAPSHOT_RECORD environment variable.
@@ -203,20 +204,20 @@ struct SnapshotContainer<Content: View>: View {
 
     var body: some View {
         #if os(macOS)
-        // On macOS, Form defaults to a two-column label+control layout.
-        // .formStyle(.grouped) forces iOS-style full-width rows so snapshots
-        // look consistent with the intended mobile UI.
-        content
-            .environment(\.today, TestData.referenceDate)
-            .formStyle(.grouped)
-            .frame(width: width, height: height)
-            .background(Color.systemBackground)
+            // On macOS, Form defaults to a two-column label+control layout.
+            // .formStyle(.grouped) forces iOS-style full-width rows so snapshots
+            // look consistent with the intended mobile UI.
+            content
+                .environment(\.today, TestData.referenceDate)
+                .formStyle(.grouped)
+                .frame(width: width, height: height)
+                .background(Color.systemBackground)
         #else
-        content
-            .environment(\.today, TestData.referenceDate)
-            .frame(width: width)
-            .frame(height: height)
-            .background(Color.systemBackground)
+            content
+                .environment(\.today, TestData.referenceDate)
+                .frame(width: width)
+                .frame(height: height)
+                .background(Color.systemBackground)
         #endif
     }
 }

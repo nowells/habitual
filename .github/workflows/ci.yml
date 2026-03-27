@@ -17,7 +17,7 @@ jobs:
   # ── Unit & Integration Tests ─────────────────────────────────────────
   unit-tests:
     name: Unit & Integration Tests
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 20
 
     steps:
@@ -26,15 +26,11 @@ jobs:
 
       - name: Select Xcode
         run: |
-          if [ -d "/Applications/Xcode_15.3.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_15.3.app/Contents/Developer
-          else
-            XCODE_PATH=$(ls -d /Applications/Xcode_15.*.app 2>/dev/null | sort -V | tail -1)
-            if [ -z "$XCODE_PATH" ]; then
-              XCODE_PATH=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
-            fi
-            sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
+          XCODE_PATH=$(ls -d /Applications/Xcode_16.*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$XCODE_PATH" ]; then
+            XCODE_PATH=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
           fi
+          sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
           xcodebuild -version
 
       - name: Cache SPM packages
@@ -68,7 +64,7 @@ jobs:
   # ── Visual Regression (Snapshot) Tests ───────────────────────────────
   snapshot-tests:
     name: Visual Regression Tests
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 25
     permissions:
       contents: write
@@ -92,15 +88,11 @@ jobs:
 
       - name: Select Xcode
         run: |
-          if [ -d "/Applications/Xcode_15.3.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_15.3.app/Contents/Developer
-          else
-            XCODE_PATH=$(ls -d /Applications/Xcode_15.*.app 2>/dev/null | sort -V | tail -1)
-            if [ -z "$XCODE_PATH" ]; then
-              XCODE_PATH=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
-            fi
-            sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
+          XCODE_PATH=$(ls -d /Applications/Xcode_16.*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$XCODE_PATH" ]; then
+            XCODE_PATH=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
           fi
+          sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
           xcodebuild -version
 
       - name: Cache SPM packages
@@ -201,7 +193,7 @@ jobs:
   # ── Build Validation ─────────────────────────────────────────────────
   build-check:
     name: Build Check (iOS)
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 15
 
     steps:
@@ -210,17 +202,11 @@ jobs:
 
       - name: Select Xcode
         run: |
-          # Use Xcode 15.3 if available, otherwise fall back to latest 15.x
-          if [ -d "/Applications/Xcode_15.3.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_15.3.app/Contents/Developer
-          else
-            XCODE_PATH=$(ls -d /Applications/Xcode_15.*.app 2>/dev/null | sort -V | tail -1)
-            if [ -z "$XCODE_PATH" ]; then
-              XCODE_PATH=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
-            fi
-            echo "Xcode 15.3 not found, using: $XCODE_PATH"
-            sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
+          XCODE_PATH=$(ls -d /Applications/Xcode_16.*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$XCODE_PATH" ]; then
+            XCODE_PATH=$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -1)
           fi
+          sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
           xcodebuild -version
 
       - name: Install xcpretty
@@ -232,7 +218,7 @@ jobs:
           xcodebuild build \
             -project Habitual.xcodeproj \
             -scheme Habitual \
-            -destination "platform=iOS Simulator,name=iPhone 15 Pro" \
+            -destination "platform=iOS Simulator,name=iPhone 16 Pro" \
             -configuration Debug \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \

@@ -1,0 +1,16 @@
+disabled_rules:
+  - force_unwrapping
+  - force_try
+  - force_cast
+
+type_body_length:
+  warning: 800
+  error: 1200
+
+file_length:
+  warning: 1000
+  error: 1500
+
+function_body_length:
+  warning: 150
+  error: 250

@@ -1,12 +1,21 @@
 import SwiftUI
 
 struct ContentView: View {
-    @Environment(\.managedObjectContext) private var viewContext
     @StateObject private var habitStore: HabitStore
     @State private var showingAddHabit = false
     @State private var showingSettings = false
     @State private var showingArchive = false
+    @State private var selectedHabit: Habit?
+    @State private var isSyncing = false
+    @State private var lastSuccessfulSync: Date?
+    @State private var syncErrorMessage: String?
+    @State private var showSyncErrorAlert = false
     @AppStorage("appTheme") private var appTheme: String = "system"
+    private let relativeSyncFormatter: RelativeDateTimeFormatter = {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return formatter
+    }()
 
     init() {
         let context = PersistenceController.shared.container.viewContext
@@ -26,34 +35,49 @@ struct ContentView: View {
             .searchable(text: $habitStore.searchText, prompt: "Search habits")
             .toolbar {
                 #if os(iOS)
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Menu {
-                        Button(action: { showingSettings = true }) {
-                            Label("Settings", systemImage: "gear")
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Menu {
+                            Button {
+                                Task { await triggerManualSync() }
+                            } label: {
+                                Label("Sync Now", systemImage: "arrow.clockwise")
+                            }
+                            .disabled(isSyncing)
+
+                            Button(action: { showingSettings = true }) {
+                                Label("Settings", systemImage: "gear")
+                            }
+                            Button(action: { showingArchive = true }) {
+                                Label("Archive", systemImage: "archivebox")
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
                         }
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: { showingAddHabit = true }) {
+                            Image(systemName: "plus")
+                        }
+                    }
+                #else
+                    ToolbarItem {
+                        Button(action: {
+                            Task { await triggerManualSync() }
+                        }) {
+                            Label("Sync", systemImage: "arrow.clockwise")
+                        }
+                        .disabled(isSyncing)
+                    }
+                    ToolbarItem {
+                        Button(action: { showingAddHabit = true }) {
+                            Image(systemName: "plus")
+                        }
+                    }
+                    ToolbarItem {
                         Button(action: { showingArchive = true }) {
                             Label("Archive", systemImage: "archivebox")
                         }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
                     }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showingAddHabit = true }) {
-                        Image(systemName: "plus")
-                    }
-                }
-                #else
-                ToolbarItem {
-                    Button(action: { showingAddHabit = true }) {
-                        Image(systemName: "plus")
-                    }
-                }
-                ToolbarItem {
-                    Button(action: { showingArchive = true }) {
-                        Label("Archive", systemImage: "archivebox")
-                    }
-                }
                 #endif
             }
             .sheet(isPresented: $showingAddHabit) {
@@ -61,17 +85,17 @@ struct ContentView: View {
                     AddHabitView(habitStore: habitStore)
                 }
                 #if os(macOS)
-                .frame(minWidth: 520, minHeight: 620)
+                    .frame(minWidth: 520, minHeight: 620)
                 #endif
             }
             .sheet(isPresented: $showingSettings) {
                 #if os(iOS)
-                NavigationStack {
-                    SettingsView()
-                }
+                    NavigationStack {
+                        SettingsView()
+                    }
                 #else
-                SettingsView()
-                    .frame(minWidth: 400, minHeight: 300)
+                    SettingsView()
+                        .frame(minWidth: 400, minHeight: 300)
                 #endif
             }
             .sheet(isPresented: $showingArchive) {
@@ -79,25 +103,52 @@ struct ContentView: View {
                     ArchiveView(habitStore: habitStore)
                 }
                 #if os(macOS)
-                .frame(minWidth: 400, minHeight: 300)
+                    .frame(minWidth: 400, minHeight: 300)
                 #endif
+            }
+            .navigationDestination(
+                isPresented: Binding(
+                    get: { selectedHabit != nil },
+                    set: { if !$0 { selectedHabit = nil } }
+                )
+            ) {
+                if let habit = selectedHabit {
+                    HabitDetailView(habit: habit, habitStore: habitStore)
+                }
             }
         }
         .preferredColorScheme(colorScheme)
+        .alert(
+            "Sync Failed",
+            isPresented: $showSyncErrorAlert,
+            presenting: syncErrorMessage
+        ) { _ in
+            Button("OK", role: .cancel) {}
+        } message: { message in
+            Text(message)
+        }
     }
 
     private var habitListView: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
+                syncStatusView
+
                 ForEach(habitStore.filteredHabits) { habit in
-                    NavigationLink(destination: HabitDetailView(habit: habit, habitStore: habitStore)) {
-                        HabitCardView(habit: habit, habitStore: habitStore)
-                    }
-                    .buttonStyle(.plain)
+                    HabitCardView(
+                        habit: habit, habitStore: habitStore,
+                        onNavigate: {
+                            selectedHabit = habit
+                        })
                 }
             }
             .padding()
         }
+        #if os(iOS)
+            .refreshable {
+                await triggerManualSync()
+            }
+        #endif
     }
 
     private var colorScheme: ColorScheme? {
@@ -106,6 +157,43 @@ struct ContentView: View {
         case "dark": return .dark
         default: return nil
         }
+    }
+
+    @ViewBuilder
+    private var syncStatusView: some View {
+        if isSyncing {
+            Label("Syncing with iCloud…", systemImage: "arrow.clockwise")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 4)
+        } else if let lastSuccessfulSync {
+            Label(
+                "Last synced \(relativeSyncFormatter.localizedString(for: lastSuccessfulSync, relativeTo: Date()))",
+                systemImage: "checkmark.icloud"
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 4)
+        }
+    }
+
+    @MainActor
+    private func triggerManualSync() async {
+        if isSyncing { return }
+        isSyncing = true
+        do {
+            try await CloudSyncService.shared.forceSync()
+            habitStore.fetchHabits()
+            lastSuccessfulSync = Date()
+        } catch {
+            let message = error.localizedDescription
+            syncErrorMessage = message
+            showSyncErrorAlert = true
+            NotificationService.shared.notifySyncFailure(message: message)
+        }
+        isSyncing = false
     }
 }
 

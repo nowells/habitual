@@ -1,5 +1,6 @@
-import XCTest
 import CoreData
+import XCTest
+
 @testable import HabitualCore
 
 final class PersistenceTests: XCTestCase {
@@ -114,7 +115,8 @@ final class PersistenceTests: XCTestCase {
         try! context.save()
 
         // Completions should also be deleted (cascade)
-        let completionRequest: NSFetchRequest<CDCompletion> = CDCompletion.fetchRequest() as! NSFetchRequest<CDCompletion>
+        let completionRequest: NSFetchRequest<CDCompletion> =
+            CDCompletion.fetchRequest() as! NSFetchRequest<CDCompletion>
         let completions = try! context.fetch(completionRequest)
         XCTAssertEqual(completions.count, 0, "Completions should be cascade-deleted with habit")
     }

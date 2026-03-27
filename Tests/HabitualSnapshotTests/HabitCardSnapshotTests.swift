@@ -1,6 +1,7 @@
-import XCTest
-import SwiftUI
 import SnapshotTesting
+import SwiftUI
+import XCTest
+
 @testable import HabitualCore
 
 final class HabitCardSnapshotTests: SnapshotTestCase {

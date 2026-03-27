@@ -1,9 +1,10 @@
-import SwiftUI
 import CoreData
+import SwiftUI
+
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #elseif canImport(AppKit)
-import AppKit
+    import AppKit
 #endif
 
 // MARK: - Habit Value Type
@@ -44,6 +45,65 @@ struct Habit: Identifiable, Equatable {
             case .weekly: return "week"
             case .monthly: return "month"
             }
+        }
+
+        var periodLabelPlural: String {
+            switch self {
+            case .daily: return "days"
+            case .weekly: return "weeks"
+            case .monthly: return "months"
+            }
+        }
+
+        /// Returns the start date of the period containing the given date
+        func periodStart(for date: Date, calendar: Calendar = .current) -> Date {
+            switch self {
+            case .daily:
+                return calendar.startOfDay(for: date)
+            case .weekly:
+                var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
+                components.weekday = calendar.firstWeekday
+                return calendar.date(from: components) ?? calendar.startOfDay(for: date)
+            case .monthly:
+                let components = calendar.dateComponents([.year, .month], from: date)
+                return calendar.date(from: components) ?? calendar.startOfDay(for: date)
+            }
+        }
+
+        /// Returns the end date (exclusive) of the period containing the given date
+        func periodEnd(for date: Date, calendar: Calendar = .current) -> Date {
+            let start = periodStart(for: date, calendar: calendar)
+            switch self {
+            case .daily:
+                return calendar.date(byAdding: .day, value: 1, to: start) ?? start
+            case .weekly:
+                return calendar.date(byAdding: .weekOfYear, value: 1, to: start) ?? start
+            case .monthly:
+                return calendar.date(byAdding: .month, value: 1, to: start) ?? start
+            }
+        }
+
+        /// Calendar component for stepping through periods
+        var calendarComponent: Calendar.Component {
+            switch self {
+            case .daily: return .day
+            case .weekly: return .weekOfYear
+            case .monthly: return .month
+            }
+        }
+
+        /// Short label for period legends in heatmaps
+        func legendLabel(for date: Date, calendar: Calendar = .current) -> String {
+            let formatter = DateFormatter()
+            switch self {
+            case .daily:
+                formatter.dateFormat = "MMM d"
+            case .weekly:
+                formatter.dateFormat = "MMM d"
+            case .monthly:
+                formatter.dateFormat = "MMM"
+            }
+            return formatter.string(from: date)
         }
     }
 
@@ -159,64 +219,109 @@ extension CDCompletion {
 extension Habit {
     var currentStreak: Int { currentStreak(asOf: Date()) }
 
+    /// Streak of consecutive periods where the goal was met.
+    /// For daily habits this counts days; for weekly/monthly it counts weeks/months.
     func currentStreak(asOf today: Date) -> Int {
         let calendar = Calendar.current
-        let todayStart = calendar.startOfDay(for: today)
-        let completionDates = Set(completions.map { calendar.startOfDay(for: $0.date) })
 
         var streak = 0
-        var checkDate = todayStart
+        var periodStart = goalPeriod.periodStart(for: today, calendar: calendar)
 
-        // Check if today is completed, if not start from yesterday
-        if !completionDates.contains(checkDate) {
-            guard let yesterday = calendar.date(byAdding: .day, value: -1, to: checkDate) else { return 0 }
-            checkDate = yesterday
+        // If the current period's goal isn't met yet, start checking from the previous period
+        if !isPeriodComplete(for: periodStart, calendar: calendar) {
+            guard let prev = calendar.date(byAdding: goalPeriod.calendarComponent, value: -1, to: periodStart) else {
+                return 0
+            }
+            periodStart = goalPeriod.periodStart(for: prev, calendar: calendar)
         }
 
-        while completionDates.contains(checkDate) {
+        while isPeriodComplete(for: periodStart, calendar: calendar) {
             streak += 1
-            guard let previousDay = calendar.date(byAdding: .day, value: -1, to: checkDate) else { break }
-            checkDate = previousDay
+            guard let prev = calendar.date(byAdding: goalPeriod.calendarComponent, value: -1, to: periodStart) else {
+                break
+            }
+            periodStart = goalPeriod.periodStart(for: prev, calendar: calendar)
         }
 
         return streak
     }
 
-    var longestStreak: Int {
+    /// Longest run of consecutive periods where the goal was met.
+    var longestStreak: Int { longestStreak(asOf: Date()) }
+
+    func longestStreak(asOf today: Date) -> Int {
         let calendar = Calendar.current
-        let sortedDates = completions.map { calendar.startOfDay(for: $0.date) }.sorted()
-        let uniqueDates = Array(Set(sortedDates)).sorted()
+        guard !completions.isEmpty else { return 0 }
 
-        guard !uniqueDates.isEmpty else { return 0 }
+        // Find the range of periods to check: from createdAt to today
+        let startDate = calendar.startOfDay(for: createdAt)
+        let todayStart = calendar.startOfDay(for: today)
+        var periodStart = goalPeriod.periodStart(for: startDate, calendar: calendar)
+        let endPeriod = goalPeriod.periodEnd(for: todayStart, calendar: calendar)
 
-        var longest = 1
-        var current = 1
+        var longest = 0
+        var current = 0
 
-        for i in 1..<uniqueDates.count {
-            let daysBetween = calendar.dateComponents([.day], from: uniqueDates[i - 1], to: uniqueDates[i]).day ?? 0
-            if daysBetween == 1 {
+        while periodStart < endPeriod {
+            if isPeriodComplete(for: periodStart, calendar: calendar) {
                 current += 1
                 longest = max(longest, current)
-            } else if daysBetween > 1 {
-                current = 1
+            } else {
+                current = 0
             }
+            guard let next = calendar.date(byAdding: goalPeriod.calendarComponent, value: 1, to: periodStart) else {
+                break
+            }
+            periodStart = goalPeriod.periodStart(for: next, calendar: calendar)
         }
 
         return longest
     }
 
-    var totalCompletions: Int {
-        completions.count
+    /// Number of periods where the goal was fully met.
+    var totalCompletions: Int { totalCompletions(asOf: Date()) }
+
+    func totalCompletions(asOf today: Date) -> Int {
+        let calendar = Calendar.current
+        guard !completions.isEmpty else { return 0 }
+
+        // Group completions by their period start date and count periods that met the goal
+        var periodCounts: [Date: Int] = [:]
+        for completion in completions {
+            let periodStart = goalPeriod.periodStart(for: completion.date, calendar: calendar)
+            periodCounts[periodStart, default: 0] += 1
+        }
+
+        return periodCounts.values.filter { $0 >= goalFrequency }.count
     }
 
     var completionRate: Double { completionRate(asOf: Date()) }
 
+    /// Fraction of elapsed periods where the goal was met (0.0–1.0).
     func completionRate(asOf today: Date) -> Double {
         let calendar = Calendar.current
         let startDate = calendar.startOfDay(for: createdAt)
         let todayStart = calendar.startOfDay(for: today)
-        let totalDays = max(1, (calendar.dateComponents([.day], from: startDate, to: todayStart).day ?? 0) + 1)
-        return Double(totalCompletions) / Double(totalDays)
+
+        var periodStart = goalPeriod.periodStart(for: startDate, calendar: calendar)
+        let endPeriod = goalPeriod.periodEnd(for: todayStart, calendar: calendar)
+
+        var totalPeriods = 0
+        var completedPeriods = 0
+
+        while periodStart < endPeriod {
+            totalPeriods += 1
+            if isPeriodComplete(for: periodStart, calendar: calendar) {
+                completedPeriods += 1
+            }
+            guard let next = calendar.date(byAdding: goalPeriod.calendarComponent, value: 1, to: periodStart) else {
+                break
+            }
+            periodStart = goalPeriod.periodStart(for: next, calendar: calendar)
+        }
+
+        guard totalPeriods > 0 else { return 0 }
+        return Double(completedPeriods) / Double(totalPeriods)
     }
 
     func isCompletedOn(date: Date) -> Bool {
@@ -228,13 +333,77 @@ extension Habit {
     func completionValue(for date: Date) -> Double {
         let calendar = Calendar.current
         let targetDay = calendar.startOfDay(for: date)
-        return completions
+        return
+            completions
             .filter { calendar.startOfDay(for: $0.date) == targetDay }
             .reduce(0) { $0 + $1.value }
     }
 
-    /// Returns a grid of completion data for the heatmap, organized by weeks
-    func heatmapData(months: Int = 4, today: Date = Date()) -> [[DayData]] {
+    /// Number of completions within the period containing the given date
+    func completionsInPeriod(containing date: Date, calendar: Calendar = .current) -> Int {
+        let start = goalPeriod.periodStart(for: date, calendar: calendar)
+        let end = goalPeriod.periodEnd(for: date, calendar: calendar)
+        return completions.filter { completion in
+            let day = calendar.startOfDay(for: completion.date)
+            return day >= start && day < end
+        }.count
+    }
+
+    /// Progress ratio for the period containing the given date (can exceed 1.0)
+    func periodProgress(for date: Date, calendar: Calendar = .current) -> Double {
+        guard goalFrequency > 0 else { return 0 }
+        return Double(completionsInPeriod(containing: date, calendar: calendar)) / Double(goalFrequency)
+    }
+
+    /// Whether the goal is fully met for the period containing the given date
+    func isPeriodComplete(for date: Date, calendar: Calendar = .current) -> Bool {
+        completionsInPeriod(containing: date, calendar: calendar) >= goalFrequency
+    }
+
+    /// Returns period-based heatmap data: one entry per period going back N months
+    /// and forward by `forwardPeriods` additional periods past the current one.
+    func periodHeatmapData(months: Int = 4, forwardPeriods: Int = 0, today: Date = Date()) -> [PeriodData] {
+        let calendar = Calendar.current
+        let todayStart = calendar.startOfDay(for: today)
+        guard let startDate = calendar.date(byAdding: .month, value: -months, to: todayStart) else { return [] }
+
+        let firstPeriodStart = goalPeriod.periodStart(for: startDate, calendar: calendar)
+
+        // End date: end of current period + forwardPeriods more periods
+        var endDate = goalPeriod.periodEnd(for: todayStart, calendar: calendar)
+        for _ in 0..<forwardPeriods {
+            endDate = goalPeriod.periodEnd(for: endDate, calendar: calendar)
+        }
+
+        var periods: [PeriodData] = []
+        var current = firstPeriodStart
+
+        while current < endDate {
+            let end = goalPeriod.periodEnd(for: current, calendar: calendar)
+            let count = completions.filter { completion in
+                let day = calendar.startOfDay(for: completion.date)
+                return day >= current && day < end
+            }.count
+            let isFuture = current > todayStart
+            let isCurrentPeriod = current <= todayStart && end > todayStart
+            periods.append(
+                PeriodData(
+                    periodStart: current,
+                    periodEnd: end,
+                    completionCount: count,
+                    goalFrequency: goalFrequency,
+                    isFuture: isFuture,
+                    isCurrentPeriod: isCurrentPeriod
+                ))
+            current = end
+        }
+
+        return periods
+    }
+
+    /// Returns a grid of completion data for the heatmap, organized by weeks.
+    /// Extends `forwardDays` days past today to show upcoming empty slots.
+    func heatmapData(months: Int = 4, forwardDays: Int = 0, today: Date = Date()) -> [[DayData]] {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: today)
         guard let startDate = calendar.date(byAdding: .month, value: -months, to: today) else { return [] }
@@ -244,6 +413,8 @@ extension Habit {
         let daysToSubtract = weekday - calendar.firstWeekday
         guard let alignedStart = calendar.date(byAdding: .day, value: -daysToSubtract, to: startDate) else { return [] }
 
+        let endDate = calendar.date(byAdding: .day, value: forwardDays, to: today) ?? today
+
         let completionDates = Dictionary(
             grouping: completions,
             by: { calendar.startOfDay(for: $0.date) }
@@ -252,15 +423,13 @@ extension Habit {
         var weeks: [[DayData]] = []
         var currentDate = alignedStart
 
-        while currentDate <= today {
+        while currentDate <= endDate {
             var week: [DayData] = []
             for _ in 0..<7 {
-                if currentDate <= today && currentDate >= alignedStart {
-                    let value = completionDates[currentDate] ?? 0
-                    week.append(DayData(date: currentDate, value: value, isFuture: currentDate > today))
-                } else {
-                    week.append(DayData(date: currentDate, value: 0, isFuture: true))
-                }
+                let isPadding = currentDate < alignedStart
+                let isFuture = !isPadding && currentDate > today
+                let value = (!isPadding && !isFuture) ? (completionDates[currentDate] ?? 0) : 0
+                week.append(DayData(date: currentDate, value: value, isFuture: isFuture, isPadding: isPadding))
                 guard let nextDay = calendar.date(byAdding: .day, value: 1, to: currentDate) else { break }
                 currentDate = nextDay
             }
@@ -277,9 +446,43 @@ struct DayData: Identifiable {
     let id = UUID()
     let date: Date
     let value: Double
+    /// True when this date is after today (an upcoming empty slot to show)
     let isFuture: Bool
+    /// True when this date is outside the history window (padding to align the week grid — hide the cell)
+    let isPadding: Bool
 
     var isCompleted: Bool { value > 0 }
+}
+
+// MARK: - Period Data for Period Heatmap
+
+struct PeriodData: Identifiable {
+    let id = UUID()
+    let periodStart: Date
+    let periodEnd: Date
+    let completionCount: Int
+    let goalFrequency: Int
+    let isFuture: Bool
+    let isCurrentPeriod: Bool
+
+    /// Progress ratio (can exceed 1.0 for over-completion)
+    var progress: Double {
+        guard goalFrequency > 0 else { return 0 }
+        return Double(completionCount) / Double(goalFrequency)
+    }
+
+    var isComplete: Bool { completionCount >= goalFrequency }
+
+    /// Number of full rotations (0 = incomplete first ring, 1 = one full ring, etc.)
+    var fullRotations: Int { goalFrequency > 0 ? completionCount / goalFrequency : 0 }
+
+    /// Fractional progress within the current rotation (0.0 to 1.0)
+    var currentRotationProgress: Double {
+        guard goalFrequency > 0 else { return 0 }
+        let remainder = completionCount % goalFrequency
+        if remainder == 0 && completionCount > 0 { return 1.0 }
+        return Double(remainder) / Double(goalFrequency)
+    }
 }
 
 // MARK: - Preset Colors
@@ -340,11 +543,11 @@ struct HabitIcon {
 
     private static func isSymbolAvailable(_ symbolName: String) -> Bool {
         #if canImport(UIKit)
-        return UIImage(systemName: symbolName) != nil
+            return UIImage(systemName: symbolName) != nil
         #elseif canImport(AppKit)
-        return NSImage(systemSymbolName: symbolName, accessibilityDescription: nil) != nil
+            return NSImage(systemSymbolName: symbolName, accessibilityDescription: nil) != nil
         #else
-        return true
+            return true
         #endif
     }
 

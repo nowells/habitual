@@ -12,6 +12,9 @@
           "aarch64-darwin",
           "x86_64-darwin"
         ]
+      },
+      "xcpretty": {
+        "pkg-path": "xcpretty"
       }
     },
     "hook": {},
@@ -190,6 +193,122 @@
         "out": "/nix/store/96plzwc3bvdrk8wh2d7236g058lr0bga-swiftlint-0.62.1"
       },
       "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "xcpretty",
+      "broken": false,
+      "derivation": "/nix/store/kra5sa2ayks6y3bpibrrr9b2v292qsrb-xcpretty-0.4.1.drv",
+      "description": "Flexible and fast xcodebuild formatter",
+      "install_id": "xcpretty",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "name": "xcpretty-0.4.1",
+      "pname": "xcpretty",
+      "rev": "6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "rev_count": 967235,
+      "rev_date": "2026-03-21T15:16:39Z",
+      "scrape_date": "2026-03-25T15:46:52.430482Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.4.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/pmvbpn2pk54alqizp2w0ikgzjx2v6vdi-xcpretty-0.4.1"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "xcpretty",
+      "broken": false,
+      "derivation": "/nix/store/7i8pyqyayb5abiqlcjycz3n9i076znha-xcpretty-0.4.1.drv",
+      "description": "Flexible and fast xcodebuild formatter",
+      "install_id": "xcpretty",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "name": "xcpretty-0.4.1",
+      "pname": "xcpretty",
+      "rev": "6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "rev_count": 967235,
+      "rev_date": "2026-03-21T15:16:39Z",
+      "scrape_date": "2026-03-25T16:28:20.585796Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.4.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/7qia2p3pywvskzkn59s39hcibdkrrna9-xcpretty-0.4.1"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "xcpretty",
+      "broken": false,
+      "derivation": "/nix/store/4qpvl91b6xlg1xm7djqgmnvv0c91xf1v-xcpretty-0.4.1.drv",
+      "description": "Flexible and fast xcodebuild formatter",
+      "install_id": "xcpretty",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "name": "xcpretty-0.4.1",
+      "pname": "xcpretty",
+      "rev": "6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "rev_count": 967235,
+      "rev_date": "2026-03-21T15:16:39Z",
+      "scrape_date": "2026-03-25T17:05:37.795772Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.4.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/10drjymq332wx0vn6pphhimspvvi8hkv-xcpretty-0.4.1"
+      },
+      "system": "x86_64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "xcpretty",
+      "broken": false,
+      "derivation": "/nix/store/qrfqb3if9mwz65vq9sqazcmw6axs128z-xcpretty-0.4.1.drv",
+      "description": "Flexible and fast xcodebuild formatter",
+      "install_id": "xcpretty",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "name": "xcpretty-0.4.1",
+      "pname": "xcpretty",
+      "rev": "6c9a78c09ff4d6c21d0319114873508a6ec01655",
+      "rev_count": 967235,
+      "rev_date": "2026-03-21T15:16:39Z",
+      "scrape_date": "2026-03-25T17:51:00.288359Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "0.4.1",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/8yj37acq3yxys9ry2hgbpknfrrshqciz-xcpretty-0.4.1"
+      },
+      "system": "x86_64-linux",
       "group": "toplevel",
       "priority": 5
     }

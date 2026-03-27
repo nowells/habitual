@@ -1,6 +1,6 @@
-import WidgetKit
-import SwiftUI
 import CoreData
+import SwiftUI
+import WidgetKit
 
 // MARK: - Watch Complications using WidgetKit
 
@@ -17,6 +17,8 @@ struct HabitualComplicationProvider: TimelineProvider {
             habitName: "Exercise",
             habitIcon: "figure.run",
             isCompleted: false,
+            periodCompletions: 0,
+            goalFrequency: 1,
             streak: 7,
             completionRate: 0.85,
             colorRed: 0.35,
@@ -49,7 +51,9 @@ struct HabitualComplicationProvider: TimelineProvider {
             date: Date(),
             habitName: habit.name,
             habitIcon: habit.icon,
-            isCompleted: habit.isCompletedOn(date: Date()),
+            isCompleted: habit.isPeriodComplete(for: Date()),
+            periodCompletions: habit.completionsInPeriod(containing: Date()),
+            goalFrequency: habit.goalFrequency,
             streak: habit.currentStreak,
             completionRate: habit.completionRate,
             colorRed: habit.colorComponents.red,
@@ -89,6 +93,8 @@ struct HabitComplicationEntry: TimelineEntry {
     let habitName: String
     let habitIcon: String
     let isCompleted: Bool
+    let periodCompletions: Int
+    let goalFrequency: Int
     let streak: Int
     let completionRate: Double
     let colorRed: Double
@@ -98,6 +104,8 @@ struct HabitComplicationEntry: TimelineEntry {
     var color: Color {
         Color(red: colorRed, green: colorGreen, blue: colorBlue)
     }
+
+    var isMultiFrequency: Bool { goalFrequency > 1 }
 }
 
 // MARK: - Complication Views
@@ -118,6 +126,11 @@ struct HabitualCircularComplication: View {
                     Image(systemName: "checkmark")
                         .font(.caption2)
                         .foregroundStyle(.green)
+                } else if entry.isMultiFrequency && entry.periodCompletions > 0 {
+                    Text("\(entry.periodCompletions)/\(entry.goalFrequency)")
+                        .font(.system(size: 9))
+                        .fontWeight(.bold)
+                        .foregroundStyle(entry.color)
                 } else {
                     Text("\(entry.streak)")
                         .font(.caption2)
@@ -143,12 +156,24 @@ struct HabitualRectangularComplication: View {
                     .lineLimit(1)
 
                 HStack(spacing: 4) {
-                    Image(systemName: entry.isCompleted ? "checkmark.circle.fill" : "circle")
-                        .font(.caption2)
-                        .foregroundStyle(entry.isCompleted ? .green : .gray)
-
-                    Text(entry.isCompleted ? "Done" : "Pending")
-                        .font(.caption2)
+                    if entry.isCompleted {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.green)
+                        Text("Done")
+                            .font(.caption2)
+                    } else if entry.isMultiFrequency && entry.periodCompletions > 0 {
+                        Text("\(entry.periodCompletions)/\(entry.goalFrequency)")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundStyle(entry.color)
+                    } else {
+                        Image(systemName: "circle")
+                            .font(.caption2)
+                            .foregroundStyle(.gray)
+                        Text("Pending")
+                            .font(.caption2)
+                    }
 
                     Text("·")
 
@@ -213,12 +238,12 @@ struct HabitualComplicationWidget: Widget {
         .configurationDisplayName("Habitual")
         .description("Track your habits at a glance.")
         #if os(watchOS)
-        .supportedFamilies([
-            .accessoryCircular,
-            .accessoryRectangular,
-            .accessoryInline,
-            .accessoryCorner,
-        ])
+            .supportedFamilies([
+                .accessoryCircular,
+                .accessoryRectangular,
+                .accessoryInline,
+                .accessoryCorner,
+            ])
         #endif
     }
 }

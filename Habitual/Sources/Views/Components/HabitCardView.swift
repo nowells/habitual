@@ -3,6 +3,7 @@ import SwiftUI
 struct HabitCardView: View {
     let habit: Habit
     @ObservedObject var habitStore: HabitStore
+    var onNavigate: (() -> Void)?
 
     @Environment(\.today) private var today
 
@@ -12,29 +13,35 @@ struct HabitCardView: View {
     private let calendar = Calendar.current
 
     private var isCompletedToday: Bool { habit.isCompletedOn(date: today) }
+    private var periodCompletions: Int { habit.completionsInPeriod(containing: today) }
+    private var isPeriodGoalMet: Bool { habit.isPeriodComplete(for: today) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header
             HStack {
-                HabitIcon.image(habit.icon)
-                    .font(.title3)
-                    .foregroundStyle(habit.color)
+                HStack {
+                    HabitIcon.image(habit.icon)
+                        .font(.title3)
+                        .foregroundStyle(habit.color)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(habit.name)
-                        .font(.headline)
-                        .foregroundStyle(.primary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(habit.name)
+                            .font(.headline)
+                            .foregroundStyle(.primary)
 
-                    if !habit.description.isEmpty {
-                        Text(habit.description)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                        if !habit.description.isEmpty {
+                            Text(habit.description)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
                     }
-                }
 
-                Spacer()
+                    Spacer()
+                }
+                .contentShape(Rectangle())
+                .onTapGesture { onNavigate?() }
 
                 // Mini mascot reaction (shown briefly after completion)
                 if showMascotReaction {
@@ -42,13 +49,15 @@ struct HabitCardView: View {
                         .transition(.scale.combined(with: .opacity))
                 }
 
-                // Quick complete button for today
-                Button(action: {
-                    withAnimation(.spring(duration: 0.3, bounce: 0.5)) {
-                        habitStore.toggleTodayCompletion(for: habit)
-                    }
-                    // Show mascot reaction when completing (not uncompleting)
-                    if !isCompletedToday {
+                // Quick check-in button: tap = add, long press = remove
+                RadialCheckInButton(
+                    habit: habit,
+                    today: today,
+                    size: 40,
+                    onTap: {
+                        withAnimation(.spring(duration: 0.3, bounce: 0.5)) {
+                            habitStore.addCompletion(for: habit, on: today)
+                        }
                         let streak = habit.currentStreak(asOf: today)
                         reactionMascot = Mascot.forStreak(streak + 1, completed: true)
                         withAnimation(.spring(duration: 0.4, bounce: 0.5)) {
@@ -58,20 +67,20 @@ struct HabitCardView: View {
                             try? await Task.sleep(nanoseconds: 1_800_000_000)
                             withAnimation { showMascotReaction = false }
                         }
+                    },
+                    onLongPress: {
+                        withAnimation(.spring(duration: 0.3, bounce: 0.3)) {
+                            habitStore.removeLastCompletion(for: habit, on: today)
+                        }
                     }
-                }) {
-                    Image(systemName: isCompletedToday ? "checkmark.circle.fill" : "circle")
-                        .font(.title2)
-                        .foregroundStyle(isCompletedToday ? habit.color : Color.systemGray3)
-                        .scaleEffect(isCompletedToday ? 1.1 : 1.0)
-                        .animation(.spring(duration: 0.3, bounce: 0.6), value: isCompletedToday)
-                }
-                .buttonStyle(.plain)
+                )
             }
 
-            // Compact Heatmap Grid
-            CompactHeatmapView(habit: habit)
+            // Compact Period Heatmap Grid
+            CompactPeriodHeatmapView(habit: habit)
                 .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+                .onTapGesture { onNavigate?() }
 
             // Stats Row
             HStack(spacing: 16) {
@@ -107,6 +116,8 @@ struct HabitCardView: View {
                     .background(Color.systemGray6)
                     .clipShape(Capsule())
             }
+            .contentShape(Rectangle())
+            .onTapGesture { onNavigate?() }
         }
         .padding()
         .background {
@@ -117,16 +128,20 @@ struct HabitCardView: View {
         .overlay {
             RoundedRectangle(cornerRadius: 16)
                 .strokeBorder(
-                    isCompletedToday ? habit.color.opacity(0.4) : Color.systemGray5,
-                    lineWidth: isCompletedToday ? 1.5 : 0.5
+                    isPeriodGoalMet ? habit.color.opacity(0.4) : Color.systemGray5,
+                    lineWidth: isPeriodGoalMet ? 1.5 : 0.5
                 )
+                .allowsHitTesting(false)
         }
         .contextMenu {
-            Button(action: { habitStore.toggleTodayCompletion(for: habit) }) {
-                Label(
-                    isCompletedToday ? "Unmark Today" : "Complete Today",
-                    systemImage: isCompletedToday ? "xmark.circle" : "checkmark.circle"
-                )
+            Button(action: { habitStore.addCompletion(for: habit, on: today) }) {
+                Label("Add Completion", systemImage: "plus.circle")
+            }
+
+            if periodCompletions > 0 {
+                Button(action: { habitStore.removeLastCompletion(for: habit, on: today) }) {
+                    Label("Remove Last Completion", systemImage: "minus.circle")
+                }
             }
 
             Divider()
@@ -150,9 +165,9 @@ struct StatBadge: View {
 
     var body: some View {
         HStack(spacing: 4) {
-                    HabitIcon.image(icon)
-                        .font(.caption2)
-                        .foregroundStyle(color)
+            HabitIcon.image(icon)
+                .font(.caption2)
+                .foregroundStyle(color)
             Text(value)
                 .font(.caption)
                 .fontWeight(.semibold)

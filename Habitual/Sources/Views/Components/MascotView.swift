@@ -3,26 +3,26 @@ import SwiftUI
 // MARK: - Mascot Character
 
 enum Mascot: CaseIterable {
-    case dragon    // epic milestone celebration (7+ streak)
-    case cat       // daily win & encouragement (1–6 streak)
+    case dragon  // epic milestone celebration (7+ streak)
+    case cat  // daily win & encouragement (1–6 streak)
     case capybara  // zen rest-day / new habit starter
-    case dog       // energetic new-habit welcome
+    case dog  // energetic new-habit welcome
 
     var emoji: String {
         switch self {
-        case .dragon:   return "🐉"
-        case .cat:      return "🐱"
+        case .dragon: return "🐉"
+        case .cat: return "🐱"
         case .capybara: return "🦫"
-        case .dog:      return "🐶"
+        case .dog: return "🐶"
         }
     }
 
     var name: String {
         switch self {
-        case .dragon:   return "Ryū"      // 龍
-        case .cat:      return "Neko"     // 猫
+        case .dragon: return "Ryū"  // 龍
+        case .cat: return "Neko"  // 猫
         case .capybara: return "Kapiiko"  // カピーコ
-        case .dog:      return "Wanko"    // わんこ
+        case .dog: return "Wanko"  // わんこ
         }
     }
 
@@ -38,29 +38,29 @@ enum Mascot: CaseIterable {
 // MARK: - Mascot Mood
 
 enum MascotMood {
-    case excited     // 大興奮！ — just completed, high streak
-    case happy       // うれしい — good progress
-    case encouraging // がんばれ — not done yet, gentle push
-    case relaxed     // のんびり — rest / chill day
-    case celebrating // おめでとう — milestone hit
+    case excited  // 大興奮！ — just completed, high streak
+    case happy  // うれしい — good progress
+    case encouraging  // がんばれ — not done yet, gentle push
+    case relaxed  // のんびり — rest / chill day
+    case celebrating  // おめでとう — milestone hit
 
     var exclamation: String {
         switch self {
-        case .excited:      return "すごい！"      // Amazing!
-        case .happy:        return "やったね！"     // You did it!
-        case .encouraging:  return "がんばれ！"     // Do your best!
-        case .relaxed:      return "のんびり〜"     // Easy does it~
-        case .celebrating:  return "おめでとう！"   // Congratulations!
+        case .excited: return "すごい！"  // Amazing!
+        case .happy: return "やったね！"  // You did it!
+        case .encouraging: return "がんばれ！"  // Do your best!
+        case .relaxed: return "のんびり〜"  // Easy does it~
+        case .celebrating: return "おめでとう！"  // Congratulations!
         }
     }
 
     var englishSubtitle: String {
         switch self {
-        case .excited:      return "Amazing!"
-        case .happy:        return "You did it!"
-        case .encouraging:  return "You've got this!"
-        case .relaxed:      return "Take it easy~"
-        case .celebrating:  return "Congratulations!"
+        case .excited: return "Amazing!"
+        case .happy: return "You did it!"
+        case .encouraging: return "You've got this!"
+        case .relaxed: return "Take it easy~"
+        case .celebrating: return "Congratulations!"
         }
     }
 }
@@ -120,7 +120,8 @@ struct MascotEmojiView: View {
             case .excited, .celebrating:
                 // Big pop, double left-right wiggle, spring settle
                 withAnimation(.spring(response: 0.20, dampingFraction: 0.35)) {
-                    scale = 1.30; rotation = 14
+                    scale = 1.30
+                    rotation = 14
                 }
                 try? await Task.sleep(nanoseconds: 190_000_000)
                 withAnimation(.spring(response: 0.18, dampingFraction: 0.40)) {
@@ -132,7 +133,8 @@ struct MascotEmojiView: View {
                 }
                 try? await Task.sleep(nanoseconds: 150_000_000)
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.60)) {
-                    scale = 1.0; rotation = 0
+                    scale = 1.0
+                    rotation = 0
                 }
 
             case .happy:
@@ -205,18 +207,18 @@ struct SpeechBubbleView: View {
     private var bubbleColor: Color {
         switch mood {
         case .excited, .celebrating: return Color(red: 1.0, green: 0.95, blue: 0.80)
-        case .happy:                  return Color(red: 0.90, green: 1.0, blue: 0.90)
-        case .encouraging:            return Color(red: 0.90, green: 0.93, blue: 1.0)
-        case .relaxed:                return Color(red: 0.95, green: 0.95, blue: 0.95)
+        case .happy: return Color(red: 0.90, green: 1.0, blue: 0.90)
+        case .encouraging: return Color(red: 0.90, green: 0.93, blue: 1.0)
+        case .relaxed: return Color(red: 0.95, green: 0.95, blue: 0.95)
         }
     }
 
     private var borderColor: Color {
         switch mood {
         case .excited, .celebrating: return .orange
-        case .happy:                  return .green
-        case .encouraging:            return .blue
-        case .relaxed:                return .gray
+        case .happy: return .green
+        case .encouraging: return .blue
+        case .relaxed: return .gray
         }
     }
 
@@ -267,7 +269,7 @@ struct MascotCelebrationView: View {
                 particle.shape
                     .foregroundStyle(particle.color)
                     .font(.system(size: particle.size))
-                    .position(x: particle.x, y: particle.y)
+                    .position(x: particle.posX, y: particle.posY)
                     .opacity(animating ? 0 : 1)
                     .offset(y: animating ? -180 : 0)
                     .animation(
@@ -328,11 +330,11 @@ struct MascotCelebrationView: View {
 
     private var celebrationMessage: String {
         switch streakCount {
-        case 7:   return "\(mascot.name) is so proud of you! 🌟"
-        case 14:  return "Two weeks of consistency! \(mascot.name) does a happy dance!"
-        case 21:  return "21 days — it's a habit now! \(mascot.name) is amazed!"
-        case 30:  return "A full month! \(mascot.name) bows deeply. 🙇"
-        default:  return "\(mascot.name) is cheering you on!"
+        case 7: return "\(mascot.name) is so proud of you! 🌟"
+        case 14: return "Two weeks of consistency! \(mascot.name) does a happy dance!"
+        case 21: return "21 days — it's a habit now! \(mascot.name) is amazed!"
+        case 30: return "A full month! \(mascot.name) bows deeply. 🙇"
+        default: return "\(mascot.name) is cheering you on!"
         }
     }
 }
@@ -342,18 +344,18 @@ struct MascotCelebrationView: View {
 struct MangaSpeedLinesView: View {
     var body: some View {
         GeometryReader { geo in
-            let cx = geo.size.width / 2
-            let cy = geo.size.height / 2
+            let centerX = geo.size.width / 2
+            let centerY = geo.size.height / 2
             Canvas { context, size in
                 let lineCount = 24
-                for i in 0..<lineCount {
-                    let angle = Double(i) / Double(lineCount) * .pi * 2
+                for index in 0..<lineCount {
+                    let angle = Double(index) / Double(lineCount) * .pi * 2
                     let length = max(size.width, size.height) * 0.7
-                    let x2 = cx + cos(angle) * length
-                    let y2 = cy + sin(angle) * length
+                    let endX = centerX + cos(angle) * length
+                    let endY = centerY + sin(angle) * length
                     var path = Path()
-                    path.move(to: CGPoint(x: cx, y: cy))
-                    path.addLine(to: CGPoint(x: x2, y: y2))
+                    path.move(to: CGPoint(x: centerX, y: centerY))
+                    path.addLine(to: CGPoint(x: endX, y: endY))
                     context.stroke(path, with: .color(.orange), lineWidth: 2)
                 }
             }
@@ -365,8 +367,8 @@ struct MangaSpeedLinesView: View {
 
 struct SparkleParticle: Identifiable {
     let id = UUID()
-    let x: CGFloat
-    let y: CGFloat
+    let posX: CGFloat
+    let posY: CGFloat
     let size: CGFloat
     let color: Color
 
@@ -379,8 +381,8 @@ struct SparkleParticle: Identifiable {
         let colors: [Color] = [.yellow, .orange, .pink, .cyan, .green]
         return (0..<count).map { _ in
             SparkleParticle(
-                x: CGFloat.random(in: 40...340),
-                y: CGFloat.random(in: 100...600),
+                posX: CGFloat.random(in: 40...340),
+                posY: CGFloat.random(in: 100...600),
                 size: CGFloat.random(in: 14...28),
                 color: colors.randomElement() ?? .yellow
             )
@@ -394,74 +396,77 @@ struct SparkleParticle: Identifiable {
 /// so the fill and stroke are seamless (no visible joint between body and tail).
 struct SpeechBubbleShape: Shape {
     var cornerRadius: CGFloat = 16
-    var tailOutset: CGFloat = 8   // how far the tail tip extends left of the body
+    var tailOutset: CGFloat = 8  // how far the tail tip extends left of the body
     var tailHeight: CGFloat = 10  // vertical height of the tail triangle
 
     func path(in rect: CGRect) -> Path {
-        let r = min(cornerRadius, rect.height / 2)
+        let radius = min(cornerRadius, rect.height / 2)
         let left = tailOutset
 
-        var p = Path()
+        var path = Path()
         // Top edge (after top-left arc)
-        p.move(to: CGPoint(x: left + r, y: 0))
-        p.addLine(to: CGPoint(x: rect.maxX - r, y: 0))
+        path.move(to: CGPoint(x: left + radius, y: 0))
+        path.addLine(to: CGPoint(x: rect.maxX - radius, y: 0))
         // Top-right arc
-        p.addArc(center: CGPoint(x: rect.maxX - r, y: r),
-                 radius: r, startAngle: .degrees(-90), endAngle: .degrees(0), clockwise: false)
+        path.addArc(
+            center: CGPoint(x: rect.maxX - radius, y: radius),
+            radius: radius, startAngle: .degrees(-90), endAngle: .degrees(0), clockwise: false)
         // Right edge
-        p.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - r))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - radius))
         // Bottom-right arc
-        p.addArc(center: CGPoint(x: rect.maxX - r, y: rect.maxY - r),
-                 radius: r, startAngle: .degrees(0), endAngle: .degrees(90), clockwise: false)
+        path.addArc(
+            center: CGPoint(x: rect.maxX - radius, y: rect.maxY - radius),
+            radius: radius, startAngle: .degrees(0), endAngle: .degrees(90), clockwise: false)
         // Bottom edge — no bottom-left arc; tail starts here
-        p.addLine(to: CGPoint(x: left, y: rect.maxY))
+        path.addLine(to: CGPoint(x: left, y: rect.maxY))
         // Tail: tip → reconnect
-        p.addLine(to: CGPoint(x: 0, y: rect.maxY))
-        p.addLine(to: CGPoint(x: left, y: rect.maxY - tailHeight))
+        path.addLine(to: CGPoint(x: 0, y: rect.maxY))
+        path.addLine(to: CGPoint(x: left, y: rect.maxY - tailHeight))
         // Left edge up
-        p.addLine(to: CGPoint(x: left, y: r))
+        path.addLine(to: CGPoint(x: left, y: radius))
         // Top-left arc
-        p.addArc(center: CGPoint(x: left + r, y: r),
-                 radius: r, startAngle: .degrees(180), endAngle: .degrees(-90), clockwise: false)
-        p.closeSubpath()
-        return p
+        path.addArc(
+            center: CGPoint(x: left + radius, y: radius),
+            radius: radius, startAngle: .degrees(180), endAngle: .degrees(-90), clockwise: false)
+        path.closeSubpath()
+        return path
     }
 }
 
 // MARK: - Preview
 
 #if !os(macOS)
-#Preview("Mascot Emoji — All Characters") {
-    VStack(spacing: 24) {
-        HStack(spacing: 20) {
-            ForEach(Mascot.allCases, id: \.name) { mascot in
-                VStack(spacing: 6) {
-                    MascotEmojiView(mascot: mascot, mood: .excited, size: 80)
-                    Text(mascot.name)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+    #Preview("Mascot Emoji — All Characters") {
+        VStack(spacing: 24) {
+            HStack(spacing: 20) {
+                ForEach(Mascot.allCases, id: \.name) { mascot in
+                    VStack(spacing: 6) {
+                        MascotEmojiView(mascot: mascot, mood: .excited, size: 80)
+                        Text(mascot.name)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
+
+            Divider()
+
+            MascotBannerView(
+                mascot: .dragon,
+                mood: .excited,
+                message: "You're on a 7-day streak! Nothing can stop you!"
+            )
+            MascotBannerView(
+                mascot: .cat,
+                mood: .encouraging,
+                message: "Still time today — Neko believes in you!"
+            )
+            MascotBannerView(
+                mascot: .capybara,
+                mood: .relaxed,
+                message: "Every journey starts with one step. No rush!"
+            )
         }
-
-        Divider()
-
-        MascotBannerView(
-            mascot: .dragon,
-            mood: .excited,
-            message: "You're on a 7-day streak! Nothing can stop you!"
-        )
-        MascotBannerView(
-            mascot: .cat,
-            mood: .encouraging,
-            message: "Still time today — Neko believes in you!"
-        )
-        MascotBannerView(
-            mascot: .capybara,
-            mood: .relaxed,
-            message: "Every journey starts with one step. No rush!"
-        )
+        .padding()
     }
-    .padding()
-}
 #endif

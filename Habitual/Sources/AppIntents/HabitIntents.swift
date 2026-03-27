@@ -57,6 +57,7 @@ extension Habit {
 struct LogHabitIntent: AppIntent {
     static let title: LocalizedStringResource = "Log Habit"
     static let description = IntentDescription(
+        // swiftlint:disable:next line_length
         "Mark a habit as complete for today. Use with Shortcuts automations to log habits on a schedule or when triggered by a location, focus mode, or other event.",
         categoryName: "Habit Tracking"
     )
@@ -81,7 +82,8 @@ struct LogHabitIntent: AppIntent {
         // Re-fetch to get updated streak
         let updated = store.activeHabits.first(where: { $0.id == match.id })
         let streak = updated?.currentStreak ?? 0
-        let streakMsg = streak > 1 ? " That's \(streak) days in a row!" : ""
+        let unit = match.goalPeriod.periodLabelPlural
+        let streakMsg = streak > 1 ? " That's \(streak) \(unit) in a row!" : ""
         return .result(dialog: "Logged \(match.name)!\(streakMsg)")
     }
 }
@@ -92,6 +94,7 @@ struct LogHabitIntent: AppIntent {
 struct CheckHabitStatusIntent: AppIntent {
     static let title: LocalizedStringResource = "Check Habit Status"
     static let description = IntentDescription(
+        // swiftlint:disable:next line_length
         "Find out if a habit is already logged for today. Use in Shortcuts to skip a reminder if you've already completed the habit.",
         categoryName: "Habit Tracking"
     )
@@ -113,10 +116,11 @@ struct CheckHabitStatusIntent: AppIntent {
         if isDone {
             return .result(
                 value: true,
-                dialog: "\(match.name) is done today! You're on a \(streak)-day streak."
+                dialog: "\(match.name) is done today! You're on a \(streak)-\(match.goalPeriod.periodLabel) streak."
             )
         } else {
-            let nudge = streak >= 3 ? " You have a \(streak)-day streak — don't break it!" : ""
+            let nudge =
+                streak >= 3 ? " You have a \(streak)-\(match.goalPeriod.periodLabel) streak — don't break it!" : ""
             return .result(
                 value: false,
                 dialog: "\(match.name) isn't logged yet today.\(nudge)"

@@ -1,25 +1,27 @@
-import WidgetKit
-import SwiftUI
 import CoreData
+import Intents
+import SwiftUI
+import WidgetKit
+
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 // MARK: - Platform Colors
 
-private extension Color {
-    static var systemGray3: Color {
+extension Color {
+    fileprivate static var systemGray3: Color {
         #if canImport(UIKit)
-        Color(UIColor.systemGray3)
+            Color(UIColor.systemGray3)
         #else
-        Color.gray.opacity(0.45)
+            Color.gray.opacity(0.45)
         #endif
     }
-    static var systemGray5: Color {
+    fileprivate static var systemGray5: Color {
         #if canImport(UIKit)
-        Color(UIColor.systemGray5)
+            Color(UIColor.systemGray5)
         #else
-        Color.gray.opacity(0.18)
+            Color.gray.opacity(0.18)
         #endif
     }
 }
@@ -55,6 +57,7 @@ struct HabitWidgetProvider: TimelineProvider {
         ]
         let habits = (try? context.fetch(request))?.map { $0.toHabit() } ?? []
 
+        let now = Date()
         let habitSnapshots = habits.prefix(6).map { habit in
             HabitSnapshot(
                 id: habit.id,
@@ -63,14 +66,16 @@ struct HabitWidgetProvider: TimelineProvider {
                 colorRed: habit.colorComponents.red,
                 colorGreen: habit.colorComponents.green,
                 colorBlue: habit.colorComponents.blue,
-                isCompletedToday: habit.isCompletedOn(date: Date()),
+                isPeriodComplete: habit.isPeriodComplete(for: now),
+                periodCompletions: habit.completionsInPeriod(containing: now),
+                goalFrequency: habit.goalFrequency,
                 currentStreak: habit.currentStreak,
                 completionRate: habit.completionRate,
                 recentCompletions: habit.heatmapData(months: 2).flatMap { $0 }.map { $0.isCompleted }
             )
         }
 
-        let completedCount = habits.filter { $0.isCompletedOn(date: Date()) }.count
+        let completedCount = habits.filter { $0.isPeriodComplete(for: now) }.count
 
         return HabitWidgetEntry(
             date: Date(),
@@ -97,9 +102,18 @@ struct HabitWidgetEntry: TimelineEntry {
     static let placeholder = HabitWidgetEntry(
         date: Date(),
         habits: [
-            HabitSnapshot(id: UUID(), name: "Exercise", icon: "figure.run", colorRed: 0.35, colorGreen: 0.65, colorBlue: 0.85, isCompletedToday: true, currentStreak: 7, completionRate: 0.85, recentCompletions: []),
-            HabitSnapshot(id: UUID(), name: "Read", icon: "book.fill", colorRed: 0.95, colorGreen: 0.55, colorBlue: 0.20, isCompletedToday: false, currentStreak: 3, completionRate: 0.60, recentCompletions: []),
-            HabitSnapshot(id: UUID(), name: "Meditate", icon: "brain.head.profile", colorRed: 0.65, colorGreen: 0.35, colorBlue: 0.90, isCompletedToday: true, currentStreak: 12, completionRate: 0.75, recentCompletions: []),
+            HabitSnapshot(
+                id: UUID(), name: "Exercise", icon: "figure.run", colorRed: 0.35, colorGreen: 0.65, colorBlue: 0.85,
+                isPeriodComplete: true, periodCompletions: 1, goalFrequency: 1, currentStreak: 7, completionRate: 0.85,
+                recentCompletions: []),
+            HabitSnapshot(
+                id: UUID(), name: "Read", icon: "book.fill", colorRed: 0.95, colorGreen: 0.55, colorBlue: 0.20,
+                isPeriodComplete: false, periodCompletions: 0, goalFrequency: 1, currentStreak: 3, completionRate: 0.60,
+                recentCompletions: []),
+            HabitSnapshot(
+                id: UUID(), name: "Meditate", icon: "brain.head.profile", colorRed: 0.65, colorGreen: 0.35,
+                colorBlue: 0.90, isPeriodComplete: true, periodCompletions: 3, goalFrequency: 3, currentStreak: 12,
+                completionRate: 0.75, recentCompletions: []),
         ],
         totalHabits: 3,
         completedToday: 2
@@ -113,7 +127,9 @@ struct HabitSnapshot: Identifiable {
     let colorRed: Double
     let colorGreen: Double
     let colorBlue: Double
-    let isCompletedToday: Bool
+    let isPeriodComplete: Bool
+    let periodCompletions: Int
+    let goalFrequency: Int
     let currentStreak: Int
     let completionRate: Double
     let recentCompletions: [Bool]
@@ -121,6 +137,9 @@ struct HabitSnapshot: Identifiable {
     var color: Color {
         Color(red: colorRed, green: colorGreen, blue: colorBlue)
     }
+
+    /// Whether this habit has multi-frequency goal (e.g. 3x/day)
+    var isMultiFrequency: Bool { goalFrequency > 1 }
 }
 
 // MARK: - Small Widget
@@ -174,7 +193,7 @@ struct SmallHabitWidget: View {
                 ForEach(entry.habits.prefix(4)) { habit in
                     HabitIcon.image(habit.icon)
                         .font(.caption)
-                        .foregroundStyle(habit.isCompletedToday ? habit.color : .gray)
+                        .foregroundStyle(habit.isPeriodComplete ? habit.color : .gray)
                 }
                 Spacer()
             }
@@ -205,9 +224,22 @@ struct MediumHabitWidget: View {
             // Habit list
             ForEach(entry.habits.prefix(3)) { habit in
                 HStack(spacing: 8) {
-                    Image(systemName: habit.isCompletedToday ? "checkmark.circle.fill" : "circle")
-                        .font(.body)
-                        .foregroundStyle(habit.isCompletedToday ? habit.color : Color.systemGray3)
+                    if habit.isPeriodComplete {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.body)
+                            .foregroundStyle(habit.color)
+                    } else if habit.isMultiFrequency && habit.periodCompletions > 0 {
+                        // Show partial progress for multi-frequency habits
+                        Text("\(habit.periodCompletions)/\(habit.goalFrequency)")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundStyle(habit.color)
+                            .frame(width: 22)
+                    } else {
+                        Image(systemName: "circle")
+                            .font(.body)
+                            .foregroundStyle(Color.systemGray3)
+                    }
 
                     HabitIcon.image(habit.icon)
                         .font(.caption)
@@ -284,9 +316,21 @@ struct LargeHabitWidget: View {
             // Habit rows with mini heatmaps
             ForEach(entry.habits.prefix(5)) { habit in
                 HStack(spacing: 8) {
-                    Image(systemName: habit.isCompletedToday ? "checkmark.circle.fill" : "circle")
-                        .font(.body)
-                        .foregroundStyle(habit.isCompletedToday ? habit.color : Color.systemGray3)
+                    if habit.isPeriodComplete {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.body)
+                            .foregroundStyle(habit.color)
+                    } else if habit.isMultiFrequency && habit.periodCompletions > 0 {
+                        Text("\(habit.periodCompletions)/\(habit.goalFrequency)")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundStyle(habit.color)
+                            .frame(width: 22)
+                    } else {
+                        Image(systemName: "circle")
+                            .font(.body)
+                            .foregroundStyle(Color.systemGray3)
+                    }
 
                     HabitIcon.image(habit.icon)
                         .font(.caption)
@@ -383,7 +427,7 @@ struct AccessoryRectangularHabitWidget: View {
 
             ForEach(entry.habits.prefix(2)) { habit in
                 HStack(spacing: 4) {
-                    Image(systemName: habit.isCompletedToday ? "checkmark.circle.fill" : "circle")
+                    Image(systemName: habit.isPeriodComplete ? "checkmark.circle.fill" : "circle")
                         .font(.caption2)
                     Text(habit.name)
                         .font(.caption2)
@@ -438,12 +482,12 @@ struct HabitualWidgetEntryView: View {
         case .systemLarge:
             LargeHabitWidget(entry: entry)
         #if !os(macOS)
-        case .accessoryCircular:
-            AccessoryCircularHabitWidget(entry: entry)
-        case .accessoryRectangular:
-            AccessoryRectangularHabitWidget(entry: entry)
-        case .accessoryInline:
-            AccessoryInlineHabitWidget(entry: entry)
+            case .accessoryCircular:
+                AccessoryCircularHabitWidget(entry: entry)
+            case .accessoryRectangular:
+                AccessoryRectangularHabitWidget(entry: entry)
+            case .accessoryInline:
+                AccessoryInlineHabitWidget(entry: entry)
         #endif
         default:
             MediumHabitWidget(entry: entry)
@@ -463,11 +507,16 @@ struct SingleHabitWidgetProvider: IntentTimelineProvider {
         SingleHabitEntry.placeholder
     }
 
-    func getSnapshot(for configuration: SingleHabitIntent, in context: Context, completion: @escaping (SingleHabitEntry) -> Void) {
+    func getSnapshot(
+        for configuration: SingleHabitIntent, in context: Context, completion: @escaping (SingleHabitEntry) -> Void
+    ) {
         completion(fetchEntry())
     }
 
-    func getTimeline(for configuration: SingleHabitIntent, in context: Context, completion: @escaping (Timeline<SingleHabitEntry>) -> Void) {
+    func getTimeline(
+        for configuration: SingleHabitIntent, in context: Context,
+        completion: @escaping (Timeline<SingleHabitEntry>) -> Void
+    ) {
         let entry = fetchEntry()
         let calendar = Calendar.current
         let tomorrow = calendar.startOfDay(for: calendar.date(byAdding: .day, value: 1, to: Date()) ?? Date())
@@ -504,7 +553,9 @@ struct SingleHabitWidgetProvider: IntentTimelineProvider {
             colorRed: habit.colorComponents.red,
             colorGreen: habit.colorComponents.green,
             colorBlue: habit.colorComponents.blue,
-            isCompletedToday: habit.isCompletedOn(date: Date()),
+            isPeriodComplete: habit.isPeriodComplete(for: Date()),
+            periodCompletions: habit.completionsInPeriod(containing: Date()),
+            goalFrequency: habit.goalFrequency,
             currentStreak: habit.currentStreak,
             completionRate: habit.completionRate,
             heatmapDays: heatmapValues
@@ -519,7 +570,9 @@ struct SingleHabitEntry: TimelineEntry {
     let colorRed: Double
     let colorGreen: Double
     let colorBlue: Double
-    let isCompletedToday: Bool
+    let isPeriodComplete: Bool
+    let periodCompletions: Int
+    let goalFrequency: Int
     let currentStreak: Int
     let completionRate: Double
     let heatmapDays: [HeatmapDay]
@@ -528,6 +581,8 @@ struct SingleHabitEntry: TimelineEntry {
         Color(red: colorRed, green: colorGreen, blue: colorBlue)
     }
 
+    var isMultiFrequency: Bool { goalFrequency > 1 }
+
     static let placeholder = SingleHabitEntry(
         date: Date(),
         habitName: "Exercise",
@@ -535,7 +590,9 @@ struct SingleHabitEntry: TimelineEntry {
         colorRed: 0.35,
         colorGreen: 0.65,
         colorBlue: 0.85,
-        isCompletedToday: false,
+        isPeriodComplete: false,
+        periodCompletions: 0,
+        goalFrequency: 1,
         currentStreak: 5,
         completionRate: 0.72,
         heatmapDays: []
@@ -550,13 +607,13 @@ struct HeatmapDay {
 // Placeholder intent - in a real project this would be defined in an Intent Definition file
 class SingleHabitIntent: INIntent {}
 
-import Intents
-
 struct SingleHabitWidget: Widget {
     let kind: String = "SingleHabitWidget"
 
     var body: some WidgetConfiguration {
-        IntentConfiguration(kind: kind, intent: SingleHabitIntent.self, provider: SingleHabitWidgetProvider()) { entry in
+        IntentConfiguration(
+            kind: kind, intent: SingleHabitIntent.self, provider: SingleHabitWidgetProvider()
+        ) { entry in
             SingleHabitWidgetView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
         }
@@ -581,8 +638,18 @@ struct SingleHabitWidgetView: View {
                     .fontWeight(.semibold)
                     .lineLimit(1)
                 Spacer()
-                Image(systemName: entry.isCompletedToday ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(entry.isCompletedToday ? .green : .gray)
+                if entry.isPeriodComplete {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                } else if entry.isMultiFrequency && entry.periodCompletions > 0 {
+                    Text("\(entry.periodCompletions)/\(entry.goalFrequency)")
+                        .font(.caption2)
+                        .fontWeight(.bold)
+                        .foregroundStyle(entry.color)
+                } else {
+                    Image(systemName: "circle")
+                        .foregroundStyle(.gray)
+                }
             }
 
             if family == .systemMedium {

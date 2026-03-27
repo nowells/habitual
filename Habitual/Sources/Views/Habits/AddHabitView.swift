@@ -10,10 +10,14 @@ struct AddHabitView: View {
     @State private var selectedColor = HabitColor.presets[0]
     @State private var goalFrequency = 1
     @State private var goalPeriod: Habit.GoalPeriod = .daily
-    @State private var reminderEnabled = false
-    @State private var reminderTime = Calendar.current.date(from: DateComponents(hour: 9, minute: 0)) ?? Date()
     @State private var nudgeEnabled = false
     @State private var nudgeTime = NudgeSettings.defaultNudgeTime
+    @State private var periodStartEnabled = false
+    @State private var periodStartTime = Calendar.current.date(from: DateComponents(hour: 8, minute: 0)) ?? Date()
+    @State private var periodMidEnabled = false
+    @State private var periodMidTime = Calendar.current.date(from: DateComponents(hour: 12, minute: 0)) ?? Date()
+    @State private var periodEndEnabled = false
+    @State private var periodEndTime = Calendar.current.date(from: DateComponents(hour: 20, minute: 0)) ?? Date()
 
     var body: some View {
         Form {
@@ -85,18 +89,32 @@ struct AddHabitView: View {
                 Text("How often do you want to do this? Example: 3x / week means at least 3 times per week.")
             }
 
-            // MARK: Notifications — Reminders + Smart Nudges combined
+            // MARK: Reminders
 
             Section {
-                Toggle("Daily Reminder", isOn: $reminderEnabled)
-                if reminderEnabled {
-                    DatePicker(
-                        "Time",
-                        selection: $reminderTime,
-                        displayedComponents: .hourAndMinute
-                    )
+                Toggle(periodStartLabel, isOn: $periodStartEnabled)
+                if periodStartEnabled {
+                    DatePicker("Time", selection: $periodStartTime, displayedComponents: .hourAndMinute)
                 }
 
+                Toggle(periodMidLabel, isOn: $periodMidEnabled)
+                if periodMidEnabled {
+                    DatePicker("Time", selection: $periodMidTime, displayedComponents: .hourAndMinute)
+                }
+
+                Toggle(periodEndLabel, isOn: $periodEndEnabled)
+                if periodEndEnabled {
+                    DatePicker("Time", selection: $periodEndTime, displayedComponents: .hourAndMinute)
+                }
+            } header: {
+                Text(reminderSectionHeader)
+            } footer: {
+                Text(periodReminderFooter)
+            }
+
+            // MARK: Smart Nudges
+
+            Section {
                 Toggle("Smart Nudges", isOn: $nudgeEnabled)
                 if nudgeEnabled {
                     DatePicker(
@@ -106,20 +124,19 @@ struct AddHabitView: View {
                     )
                 }
             } header: {
-                Text("Notifications")
+                Text("Smart Nudges")
             } footer: {
-                if nudgeEnabled {
-                    Text("A nudge fires if you haven't logged this habit by the nudge time. Streak-at-risk alerts appear when you have 3+ days in a row.")
-                } else {
-                    Text("Reminders fire at a fixed time each day. Smart nudges are context-aware and adapt to your streak.")
-                }
+                Text(
+                    // swiftlint:disable:next line_length
+                    "A nudge fires if you haven't logged this habit by the nudge time. Streak-at-risk alerts appear when you have 3+ days in a row."
+                )
             }
         }
         .navigationTitle("New Habit")
         #if os(macOS)
-        .formStyle(.grouped)
+            .formStyle(.grouped)
         #elseif os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.inline)
         #endif
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
@@ -135,6 +152,49 @@ struct AddHabitView: View {
         }
     }
 
+    private var periodStartLabel: String {
+        switch goalPeriod {
+        case .daily: return "Morning Reminder"
+        case .weekly: return "Start of Week"
+        case .monthly: return "Start of Month"
+        }
+    }
+
+    private var periodMidLabel: String {
+        switch goalPeriod {
+        case .daily: return "Midday Check-in"
+        case .weekly: return "Mid-Week Check-in"
+        case .monthly: return "Mid-Month Check-in"
+        }
+    }
+
+    private var periodEndLabel: String {
+        switch goalPeriod {
+        case .daily: return "Evening Reminder"
+        case .weekly: return "End of Week Reminder"
+        case .monthly: return "End of Month Reminder"
+        }
+    }
+
+    private var reminderSectionHeader: String {
+        switch goalPeriod {
+        case .daily: return "Daily Reminders"
+        case .weekly: return "Weekly Reminders"
+        case .monthly: return "Monthly Reminders"
+        }
+    }
+
+    private var periodReminderFooter: String {
+        switch goalPeriod {
+        case .daily:
+            return "Get reminded at the start, middle, and end of each day to hit your goal."
+        case .weekly:
+            return "Get reminded at the start of the week, mid-week, and before the week ends."
+        case .monthly:
+            return "Get reminded at the start, middle, and end of each month."
+        }
+    }
+
     private func addHabit() {
         let habit = Habit(
             name: name.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -143,18 +203,25 @@ struct AddHabitView: View {
             color: selectedColor.color,
             colorComponents: (red: selectedColor.red, green: selectedColor.green, blue: selectedColor.blue),
             goalFrequency: goalFrequency,
-            goalPeriod: goalPeriod,
-            reminderTime: reminderEnabled ? reminderTime : nil
+            goalPeriod: goalPeriod
         )
 
         habitStore.addHabit(habit)
 
-        if reminderEnabled {
-            NotificationService.shared.scheduleReminder(for: habit)
-        }
-
         let nudgeSettings = NudgeSettings(isEnabled: nudgeEnabled, nudgeTime: nudgeTime)
         NudgeService.apply(nudgeSettings, for: habit)
+
+        let anyReminderEnabled = periodStartEnabled || periodMidEnabled || periodEndEnabled
+        let periodSettings = PeriodReminderSettings(
+            isEnabled: anyReminderEnabled,
+            startReminderTime: periodStartTime,
+            startReminderEnabled: periodStartEnabled,
+            midReminderTime: periodMidTime,
+            midReminderEnabled: periodMidEnabled,
+            endReminderTime: periodEndTime,
+            endReminderEnabled: periodEndEnabled
+        )
+        NudgeService.applyPeriodSettings(periodSettings, for: habit)
 
         dismiss()
     }

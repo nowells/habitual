@@ -1,6 +1,7 @@
-import XCTest
-import SwiftUI
 import SnapshotTesting
+import SwiftUI
+import XCTest
+
 @testable import HabitualCore
 
 final class DetailViewSnapshotTests: SnapshotTestCase {
@@ -71,14 +72,19 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
 
     func testStatsGrid_Light() {
         let view = SnapshotContainer(width: 390) {
-            LazyVGrid(columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible()),
-            ], spacing: 12) {
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible()),
+                    GridItem(.flexible()),
+                ], spacing: 12
+            ) {
                 StatCard(title: "Current Streak", value: "7", subtitle: "days", icon: "flame.fill", color: .orange)
                 StatCard(title: "Longest Streak", value: "23", subtitle: "days", icon: "trophy.fill", color: .yellow)
-                StatCard(title: "Total", value: "156", subtitle: "completions", icon: "checkmark.circle.fill", color: .blue)
-                StatCard(title: "Success Rate", value: "85%", subtitle: "overall", icon: "chart.line.uptrend.xyaxis", color: .green)
+                StatCard(
+                    title: "Total", value: "156", subtitle: "completions", icon: "checkmark.circle.fill", color: .blue)
+                StatCard(
+                    title: "Success Rate", value: "85%", subtitle: "overall", icon: "chart.line.uptrend.xyaxis",
+                    color: .green)
             }
             .padding()
         }
@@ -89,14 +95,19 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
 
     func testStatsGrid_Dark() {
         let view = SnapshotContainer(width: 390) {
-            LazyVGrid(columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible()),
-            ], spacing: 12) {
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible()),
+                    GridItem(.flexible()),
+                ], spacing: 12
+            ) {
                 StatCard(title: "Current Streak", value: "7", subtitle: "days", icon: "flame.fill", color: .orange)
                 StatCard(title: "Longest Streak", value: "23", subtitle: "days", icon: "trophy.fill", color: .yellow)
-                StatCard(title: "Total", value: "156", subtitle: "completions", icon: "checkmark.circle.fill", color: .blue)
-                StatCard(title: "Success Rate", value: "85%", subtitle: "overall", icon: "chart.line.uptrend.xyaxis", color: .green)
+                StatCard(
+                    title: "Total", value: "156", subtitle: "completions", icon: "checkmark.circle.fill", color: .blue)
+                StatCard(
+                    title: "Success Rate", value: "85%", subtitle: "overall", icon: "chart.line.uptrend.xyaxis",
+                    color: .green)
             }
             .padding()
         }
