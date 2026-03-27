@@ -449,6 +449,9 @@ class NotificationService {
         case .monthly:
             // Mid-month (15th or middle of the month)
             return calendar.date(byAdding: .day, value: 14, to: periodStart) ?? periodStart
+        case .yearly:
+            // Mid-year (approximately July 1st = ~182 days after start)
+            return calendar.date(byAdding: .month, value: 6, to: periodStart) ?? periodStart
         }
     }
 
@@ -465,6 +468,9 @@ class NotificationService {
         case .monthly:
             // Last 3 days of month (3 days before period end)
             return calendar.date(byAdding: .day, value: -3, to: periodEnd) ?? periodStart
+        case .yearly:
+            // Last week of year (7 days before period end)
+            return calendar.date(byAdding: .day, value: -7, to: periodEnd) ?? periodStart
         }
     }
 

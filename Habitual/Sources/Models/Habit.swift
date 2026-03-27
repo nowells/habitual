@@ -28,6 +28,7 @@ struct Habit: Identifiable, Equatable {
         case daily
         case weekly
         case monthly
+        case yearly
 
         var id: String { rawValue }
 
@@ -36,6 +37,7 @@ struct Habit: Identifiable, Equatable {
             case .daily: return "Daily"
             case .weekly: return "Weekly"
             case .monthly: return "Monthly"
+            case .yearly: return "Yearly"
             }
         }
 
@@ -44,6 +46,7 @@ struct Habit: Identifiable, Equatable {
             case .daily: return "day"
             case .weekly: return "week"
             case .monthly: return "month"
+            case .yearly: return "year"
             }
         }
 
@@ -52,6 +55,7 @@ struct Habit: Identifiable, Equatable {
             case .daily: return "days"
             case .weekly: return "weeks"
             case .monthly: return "months"
+            case .yearly: return "years"
             }
         }
 
@@ -67,6 +71,9 @@ struct Habit: Identifiable, Equatable {
             case .monthly:
                 let components = calendar.dateComponents([.year, .month], from: date)
                 return calendar.date(from: components) ?? calendar.startOfDay(for: date)
+            case .yearly:
+                let components = calendar.dateComponents([.year], from: date)
+                return calendar.date(from: components) ?? calendar.startOfDay(for: date)
             }
         }
 
@@ -80,6 +87,8 @@ struct Habit: Identifiable, Equatable {
                 return calendar.date(byAdding: .weekOfYear, value: 1, to: start) ?? start
             case .monthly:
                 return calendar.date(byAdding: .month, value: 1, to: start) ?? start
+            case .yearly:
+                return calendar.date(byAdding: .year, value: 1, to: start) ?? start
             }
         }
 
@@ -89,6 +98,7 @@ struct Habit: Identifiable, Equatable {
             case .daily: return .day
             case .weekly: return .weekOfYear
             case .monthly: return .month
+            case .yearly: return .year
             }
         }
 
@@ -102,6 +112,8 @@ struct Habit: Identifiable, Equatable {
                 formatter.dateFormat = "MMM d"
             case .monthly:
                 formatter.dateFormat = "MMM"
+            case .yearly:
+                formatter.dateFormat = "yyyy"
             }
             return formatter.string(from: date)
         }

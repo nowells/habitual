@@ -83,32 +83,37 @@ final class HabitModelTests: XCTestCase {
         XCTAssertEqual(Habit.GoalPeriod.daily.displayName, "Daily")
         XCTAssertEqual(Habit.GoalPeriod.weekly.displayName, "Weekly")
         XCTAssertEqual(Habit.GoalPeriod.monthly.displayName, "Monthly")
+        XCTAssertEqual(Habit.GoalPeriod.yearly.displayName, "Yearly")
     }
 
     func testGoalPeriodLabels() {
         XCTAssertEqual(Habit.GoalPeriod.daily.periodLabel, "day")
         XCTAssertEqual(Habit.GoalPeriod.weekly.periodLabel, "week")
         XCTAssertEqual(Habit.GoalPeriod.monthly.periodLabel, "month")
+        XCTAssertEqual(Habit.GoalPeriod.yearly.periodLabel, "year")
     }
 
     func testGoalPeriodRawValues() {
         XCTAssertEqual(Habit.GoalPeriod.daily.rawValue, "daily")
         XCTAssertEqual(Habit.GoalPeriod.weekly.rawValue, "weekly")
         XCTAssertEqual(Habit.GoalPeriod.monthly.rawValue, "monthly")
+        XCTAssertEqual(Habit.GoalPeriod.yearly.rawValue, "yearly")
     }
 
     func testGoalPeriodFromRawValue() {
         XCTAssertEqual(Habit.GoalPeriod(rawValue: "daily"), .daily)
         XCTAssertEqual(Habit.GoalPeriod(rawValue: "weekly"), .weekly)
         XCTAssertEqual(Habit.GoalPeriod(rawValue: "monthly"), .monthly)
+        XCTAssertEqual(Habit.GoalPeriod(rawValue: "yearly"), .yearly)
         XCTAssertNil(Habit.GoalPeriod(rawValue: "invalid"))
     }
 
     func testGoalPeriodAllCases() {
-        XCTAssertEqual(Habit.GoalPeriod.allCases.count, 3)
+        XCTAssertEqual(Habit.GoalPeriod.allCases.count, 4)
         XCTAssertTrue(Habit.GoalPeriod.allCases.contains(.daily))
         XCTAssertTrue(Habit.GoalPeriod.allCases.contains(.weekly))
         XCTAssertTrue(Habit.GoalPeriod.allCases.contains(.monthly))
+        XCTAssertTrue(Habit.GoalPeriod.allCases.contains(.yearly))
     }
 
     // MARK: - Current Streak Tests
