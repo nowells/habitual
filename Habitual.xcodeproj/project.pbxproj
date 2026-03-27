@@ -26,6 +26,7 @@
 		A10023 /* NudgeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10023 /* NudgeService.swift */; };
 		A10024 /* HabitIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10024 /* HabitIntents.swift */; };
 		A10025 /* MascotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10025 /* MascotView.swift */; };
+		A10032 /* MascotCharacters.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10032 /* MascotCharacters.swift */; };
 		A10026 /* EnvironmentValues+Today.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10026 /* EnvironmentValues+Today.swift */; };
 		A10027 /* RadialProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10027 /* RadialProgressView.swift */; };
 		A10028 /* PeriodHeatmapGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10028 /* PeriodHeatmapGridView.swift */; };
@@ -149,6 +150,7 @@
 		B10023 /* NudgeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NudgeService.swift; sourceTree = "<group>"; };
 		B10024 /* HabitIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitIntents.swift; sourceTree = "<group>"; };
 		B10025 /* MascotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MascotView.swift; sourceTree = "<group>"; };
+		B10032 /* MascotCharacters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MascotCharacters.swift; sourceTree = "<group>"; };
 		B10026 /* EnvironmentValues+Today.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EnvironmentValues+Today.swift"; sourceTree = "<group>"; };
 		B10027 /* RadialProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadialProgressView.swift; sourceTree = "<group>"; };
 		B10028 /* PeriodHeatmapGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodHeatmapGridView.swift; sourceTree = "<group>"; };
@@ -269,6 +271,7 @@
 				B10006 /* HeatmapGridView.swift */,
 				B10007 /* HabitCardView.swift */,
 				B10025 /* MascotView.swift */,
+				B10032 /* MascotCharacters.swift */,
 				B10027 /* RadialProgressView.swift */,
 				B10028 /* PeriodHeatmapGridView.swift */,
 			);
@@ -557,6 +560,7 @@
 				A10014 /* WidgetUpdateService.swift in Sources */,
 				A10015 /* Habitual.xcdatamodeld in Sources */,
 				A10025 /* MascotView.swift in Sources */,
+				A10032 /* MascotCharacters.swift in Sources */,
 				A10026 /* EnvironmentValues+Today.swift in Sources */,
 				A10027 /* RadialProgressView.swift in Sources */,
 				A10028 /* PeriodHeatmapGridView.swift in Sources */,
