@@ -21,6 +21,7 @@ opt_in_rules:
 
 disabled_rules:
   - trailing_whitespace  # swift-format handles this
+  - opening_brace  # swift-format handles brace placement (conflicts on multi-line conditions)
   - multiple_closures_with_trailing_closure  # conflicts with idiomatic SwiftUI
 
 line_length:
@@ -44,6 +45,9 @@ function_body_length:
 cyclomatic_complexity:
   warning: 15
   error: 20
+
+trailing_comma:
+  mandatory_comma: true
 
 large_tuple:
   warning: 3
