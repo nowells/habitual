@@ -1,4 +1,5 @@
 import SwiftUI
+import WatchKit
 
 struct WatchContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -43,6 +44,13 @@ struct WatchContentView: View {
                 }
                 .navigationTitle("Habitual")
             }
+        }
+        .onAppear {
+            // Schedule periodic background refresh for CloudKit sync
+            WKApplication.shared().scheduleBackgroundRefresh(
+                withPreferredDate: Date(timeIntervalSinceNow: 30 * 60),
+                userInfo: nil
+            ) { _ in }
         }
     }
 }
