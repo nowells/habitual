@@ -58,7 +58,7 @@ struct HabitWidgetProvider: TimelineProvider {
         let habits = (try? context.fetch(request))?.map { $0.toHabit() } ?? []
 
         let now = Date()
-        let habitSnapshots = habits.prefix(6).map { habit in
+        let habitSnapshots = habits.map { habit in
             // Build period-level data for the mini heatmap.
             // For daily habits each period is one day; for weekly/monthly
             // each period is one week/month — matching the main app's rendering.
@@ -83,17 +83,26 @@ struct HabitWidgetProvider: TimelineProvider {
                 isPeriodComplete: habit.isPeriodComplete(for: now),
                 periodCompletions: habit.completionsInPeriod(containing: now),
                 goalFrequency: habit.goalFrequency,
+                goalPeriod: habit.goalPeriod.rawValue,
                 currentStreak: habit.currentStreak,
                 completionRate: habit.completionRate,
                 recentPeriods: periods
             )
+        }
+        // Sort: incomplete habits first, then completed — within each group
+        // order by period frequency (daily → weekly → monthly → yearly).
+        .sorted { first, second in
+            if first.isPeriodComplete != second.isPeriodComplete {
+                return !first.isPeriodComplete
+            }
+            return first.periodSortOrder < second.periodSortOrder
         }
 
         let completedCount = habits.filter { $0.isPeriodComplete(for: now) }.count
 
         return HabitWidgetEntry(
             date: Date(),
-            habits: Array(habitSnapshots),
+            habits: habitSnapshots,
             totalHabits: habits.count,
             completedToday: completedCount
         )
@@ -117,17 +126,17 @@ struct HabitWidgetEntry: TimelineEntry {
         date: Date(),
         habits: [
             HabitSnapshot(
-                id: UUID(), name: "Exercise", icon: "figure.run", colorRed: 0.35, colorGreen: 0.65, colorBlue: 0.85,
-                isPeriodComplete: true, periodCompletions: 1, goalFrequency: 1, currentStreak: 7, completionRate: 0.85,
-                recentPeriods: []),
-            HabitSnapshot(
                 id: UUID(), name: "Read", icon: "book.fill", colorRed: 0.95, colorGreen: 0.55, colorBlue: 0.20,
-                isPeriodComplete: false, periodCompletions: 0, goalFrequency: 1, currentStreak: 3, completionRate: 0.60,
-                recentPeriods: []),
+                isPeriodComplete: false, periodCompletions: 0, goalFrequency: 1, goalPeriod: "daily",
+                currentStreak: 3, completionRate: 0.60, recentPeriods: []),
+            HabitSnapshot(
+                id: UUID(), name: "Exercise", icon: "figure.run", colorRed: 0.35, colorGreen: 0.65, colorBlue: 0.85,
+                isPeriodComplete: true, periodCompletions: 1, goalFrequency: 1, goalPeriod: "daily",
+                currentStreak: 7, completionRate: 0.85, recentPeriods: []),
             HabitSnapshot(
                 id: UUID(), name: "Meditate", icon: "brain.head.profile", colorRed: 0.65, colorGreen: 0.35,
-                colorBlue: 0.90, isPeriodComplete: true, periodCompletions: 3, goalFrequency: 3, currentStreak: 12,
-                completionRate: 0.75, recentPeriods: []),
+                colorBlue: 0.90, isPeriodComplete: true, periodCompletions: 3, goalFrequency: 3, goalPeriod: "daily",
+                currentStreak: 12, completionRate: 0.75, recentPeriods: []),
         ],
         totalHabits: 3,
         completedToday: 2
@@ -150,6 +159,7 @@ struct HabitSnapshot: Identifiable {
     let isPeriodComplete: Bool
     let periodCompletions: Int
     let goalFrequency: Int
+    let goalPeriod: String
     let currentStreak: Int
     let completionRate: Double
     let recentPeriods: [WidgetPeriod]
@@ -160,6 +170,17 @@ struct HabitSnapshot: Identifiable {
 
     /// Whether this habit has multi-frequency goal (e.g. 3x/day)
     var isMultiFrequency: Bool { goalFrequency > 1 }
+
+    /// Sort priority for goal period: daily first, then weekly, monthly, yearly.
+    var periodSortOrder: Int {
+        switch goalPeriod {
+        case "daily": return 0
+        case "weekly": return 1
+        case "monthly": return 2
+        case "yearly": return 3
+        default: return 4
+        }
+    }
 }
 
 // MARK: - Small Widget
@@ -168,7 +189,7 @@ struct SmallHabitWidget: View {
     let entry: HabitWidgetEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 6) {
             // Progress header
             HStack {
                 Text("Habitual")
@@ -187,16 +208,16 @@ struct SmallHabitWidget: View {
                 Spacer()
                 ZStack {
                     Circle()
-                        .stroke(Color.systemGray5, lineWidth: 6)
-                        .frame(width: 50, height: 50)
+                        .stroke(Color.systemGray5, lineWidth: 5)
+                        .frame(width: 46, height: 46)
 
                     Circle()
                         .trim(from: 0, to: entry.completionFraction)
                         .stroke(
                             Color.green,
-                            style: StrokeStyle(lineWidth: 6, lineCap: .round)
+                            style: StrokeStyle(lineWidth: 5, lineCap: .round)
                         )
-                        .frame(width: 50, height: 50)
+                        .frame(width: 46, height: 46)
                         .rotationEffect(.degrees(-90))
 
                     Text("\(Int(entry.completionFraction * 100))%")
@@ -208,17 +229,31 @@ struct SmallHabitWidget: View {
 
             Spacer()
 
-            // Habit icons row
-            HStack(spacing: 6) {
-                ForEach(entry.habits.prefix(4)) { habit in
-                    HabitIcon.image(habit.icon)
-                        .font(.caption)
-                        .foregroundStyle(habit.isPeriodComplete ? habit.color : .gray)
+            // Habit icons — show up to 8, wrapping to a second row if needed
+            let icons = Array(entry.habits.prefix(8))
+            let topRow = Array(icons.prefix(min(icons.count, 5)))
+            let bottomRow = icons.count > 5 ? Array(icons.suffix(from: 5)) : []
+
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 4) {
+                    ForEach(topRow) { habit in
+                        HabitIcon.image(habit.icon)
+                            .font(.caption2)
+                            .foregroundStyle(habit.isPeriodComplete ? habit.color : .gray)
+                    }
                 }
-                Spacer()
+                if !bottomRow.isEmpty {
+                    HStack(spacing: 4) {
+                        ForEach(bottomRow) { habit in
+                            HabitIcon.image(habit.icon)
+                                .font(.caption2)
+                                .foregroundStyle(habit.isPeriodComplete ? habit.color : .gray)
+                        }
+                    }
+                }
             }
         }
-        .padding()
+        .padding(10)
     }
 }
 

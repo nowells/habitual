@@ -94,7 +94,6 @@ struct LogHabitIntent: AppIntent {
 struct CheckHabitStatusIntent: AppIntent {
     static let title: LocalizedStringResource = "Check Habit Status"
     static let description = IntentDescription(
-        // swiftlint:disable:next line_length
         "Find out if a habit is already logged for today. Use in Shortcuts to skip a reminder if you've already completed the habit.",
         categoryName: "Habit Tracking"
     )

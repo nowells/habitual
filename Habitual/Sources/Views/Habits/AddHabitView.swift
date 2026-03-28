@@ -127,7 +127,6 @@ struct AddHabitView: View {
                 Text("Smart Nudges")
             } footer: {
                 Text(
-                    // swiftlint:disable:next line_length
                     "A nudge fires if you haven't logged this habit by the nudge time. Streak-at-risk alerts appear when you have 3+ days in a row."
                 )
             }
@@ -157,6 +156,7 @@ struct AddHabitView: View {
         case .daily: return "Morning Reminder"
         case .weekly: return "Start of Week"
         case .monthly: return "Start of Month"
+        case .yearly: return "Start of Year"
         }
     }
 
@@ -165,6 +165,7 @@ struct AddHabitView: View {
         case .daily: return "Midday Check-in"
         case .weekly: return "Mid-Week Check-in"
         case .monthly: return "Mid-Month Check-in"
+        case .yearly: return "Mid-Year Check-in"
         }
     }
 
@@ -173,6 +174,7 @@ struct AddHabitView: View {
         case .daily: return "Evening Reminder"
         case .weekly: return "End of Week Reminder"
         case .monthly: return "End of Month Reminder"
+        case .yearly: return "End of Year Reminder"
         }
     }
 
@@ -181,6 +183,7 @@ struct AddHabitView: View {
         case .daily: return "Daily Reminders"
         case .weekly: return "Weekly Reminders"
         case .monthly: return "Monthly Reminders"
+        case .yearly: return "Yearly Reminders"
         }
     }
 
@@ -192,6 +195,8 @@ struct AddHabitView: View {
             return "Get reminded at the start of the week, mid-week, and before the week ends."
         case .monthly:
             return "Get reminded at the start, middle, and end of each month."
+        case .yearly:
+            return "Get reminded at the start, middle, and end of each year."
         }
     }
 

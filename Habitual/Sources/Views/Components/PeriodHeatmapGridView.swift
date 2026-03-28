@@ -31,12 +31,13 @@ struct PeriodHeatmapGridView: View {
         self.onTapPeriod = onTapPeriod
     }
 
-    // Forward periods per type: daily = 1 week, weekly = 5 weeks (~1 month), monthly = 12 months
+    // Forward periods per type: daily = 1 week, weekly = 5 weeks (~1 month), monthly = 12 months, yearly = 3 years
     private var forwardPeriods: Int {
         switch habit.goalPeriod {
         case .daily: return 0  // forward days handled separately
         case .weekly: return 5
         case .monthly: return 12
+        case .yearly: return 3
         }
     }
 
@@ -52,6 +53,8 @@ struct PeriodHeatmapGridView: View {
             weeklyLayout
         case .monthly:
             monthlyLayout
+        case .yearly:
+            yearlyLayout
         }
     }
 
@@ -178,7 +181,32 @@ struct PeriodHeatmapGridView: View {
         }
     }
 
-    // MARK: - Period Cell (weekly/monthly)
+    // MARK: - Yearly Layout
+
+    private var yearlyLayout: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            if showLabels {
+                yearlyLabels
+            }
+
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: cellSpacing + 4) {
+                        ForEach(periodData) { period in
+                            periodCell(period, size: cellSize * 2.2)
+                        }
+                    }
+                }
+                .onAppear {
+                    if let current = periodData.first(where: { $0.isCurrentPeriod }) {
+                        proxy.scrollTo(current.id, anchor: .trailing)
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Period Cell (weekly/monthly/yearly)
 
     @ViewBuilder
     private func periodCell(_ period: PeriodData, size: CGFloat? = nil) -> some View {
@@ -338,6 +366,25 @@ struct PeriodHeatmapGridView: View {
         formatter.dateFormat = "MMM"
         return formatter.string(from: date)
     }
+
+    private var yearlyLabels: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: cellSpacing + 4) {
+                ForEach(periodData) { period in
+                    Text(yearLabel(for: period.periodStart))
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                        .frame(width: cellSize * 2.2)
+                }
+            }
+        }
+    }
+
+    private func yearLabel(for date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy"
+        return formatter.string(from: date)
+    }
 }
 
 // MARK: - Compact Period Heatmap (for cards)
@@ -366,6 +413,8 @@ struct CompactPeriodHeatmapView: View {
                 compactWeekly(availableWidth: width)
             case .monthly:
                 compactMonthly(availableWidth: width)
+            case .yearly:
+                compactYearly(availableWidth: width)
             }
         }
         .frame(height: compactHeight)
@@ -379,6 +428,8 @@ struct CompactPeriodHeatmapView: View {
             return cellSize
         case .monthly:
             return cellSize * 1.5
+        case .yearly:
+            return cellSize * 2
         }
     }
 
@@ -466,6 +517,25 @@ struct CompactPeriodHeatmapView: View {
         return HStack(spacing: monthlySpacing) {
             ForEach(visiblePeriods) { period in
                 compactPeriodCell(period, size: monthlyCellSize)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .trailing)
+    }
+
+    // MARK: - Yearly
+
+    private func compactYearly(availableWidth: CGFloat) -> some View {
+        let yearlyCellSize = cellSize * 2
+        let yearlySpacing = cellSpacing + 2
+        let columnWidth = yearlyCellSize + yearlySpacing
+        let maxPeriods = max(1, Int(availableWidth / columnWidth))
+        let backMonths = max(12, maxPeriods * 12)
+        let forwardYears = min(3, maxPeriods / 3)
+        let periods = habit.periodHeatmapData(months: backMonths, forwardPeriods: forwardYears, today: today)
+        let visiblePeriods = Array(periods.suffix(maxPeriods))
+        return HStack(spacing: yearlySpacing) {
+            ForEach(visiblePeriods) { period in
+                compactPeriodCell(period, size: yearlyCellSize)
             }
         }
         .frame(maxWidth: .infinity, alignment: .trailing)

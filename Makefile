@@ -109,7 +109,7 @@ help:
 	@echo "  build-mac            Build for Mac Catalyst only"
 	@echo ""
 	@echo "Running:"
-	@echo "  run                  Launch Mac, iPhone sim, and Watch sim in parallel"
+	@echo "  run                  Choose targets interactively, then build & launch"
 	@echo ""
 	@echo "Release:"
 	@echo "  bump                 Bump build number only"

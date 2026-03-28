@@ -6,7 +6,9 @@ extension CDCompletion {
         NSFetchRequest<CDCompletion>(entityName: "CDCompletion")
     }
 
+    @NSManaged public var createdAt: Date?
     @NSManaged public var date: Date?
+    @NSManaged public var deviceID: String?
     @NSManaged public var id: UUID?
     @NSManaged public var note: String?
     @NSManaged public var value: Double

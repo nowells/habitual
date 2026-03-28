@@ -3,6 +3,7 @@ set -eo pipefail
 
 # Launch Habitual on Mac Catalyst, iPhone Simulator, and Watch Simulator
 # in parallel with gum spinners and color-coded log output.
+# Optionally select a subset of targets via gum choose.
 
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 PROJECT="$PROJECT_DIR/Habitual.xcodeproj"
@@ -11,11 +12,44 @@ DERIVED_DATA_IOS="$PROJECT_DIR/.build/DerivedData-ios"
 DERIVED_DATA_WATCH="$PROJECT_DIR/.build/DerivedData-watch"
 LOGS_DIR=$(mktemp -d)
 
-# ── Pick simulators ──────────────────────────────────────────────────────────
+# ── Choose targets ──────────────────────────────────────────────────────────
 
-# Prefer an existing iPhone+Watch pair so iCloud account carries over.
-# Falls back to picking individually if no pair exists.
-read -r IPHONE_SIM WATCH_SIM < <(python3 -c "
+# Accept targets as arguments (e.g. ./run-all.sh mac ios) or prompt interactively.
+if [ $# -gt 0 ]; then
+    SELECTED="$*"
+else
+    SELECTED=$(gum choose --no-limit --selected "Mac,iPhone,Watch" \
+        "Mac" "iPhone" "Watch")
+fi
+
+if [ -z "$SELECTED" ]; then
+    echo "No targets selected."
+    exit 0
+fi
+
+RUN_MAC=false
+RUN_IOS=false
+RUN_WATCH=false
+
+for target in $SELECTED; do
+    case "$target" in
+        Mac|mac)     RUN_MAC=true ;;
+        iPhone|iphone|ios|iOS) RUN_IOS=true ;;
+        Watch|watch)  RUN_WATCH=true ;;
+    esac
+done
+
+# ── Pick simulators (only if needed) ────────────────────────────────────────
+
+IPHONE_SIM=""
+WATCH_SIM=""
+IPHONE_NAME=""
+WATCH_NAME=""
+
+if [ "$RUN_IOS" = true ] || [ "$RUN_WATCH" = true ]; then
+    # Prefer an existing iPhone+Watch pair so iCloud account carries over.
+    # Falls back to picking individually if no pair exists.
+    read -r IPHONE_SIM WATCH_SIM < <(python3 -c "
 import json, subprocess, sys
 
 pairs = json.loads(subprocess.check_output(
@@ -68,14 +102,19 @@ for runtime, devs in devices['devices'].items():
 print(phone or '', watch or '')
 " 2>/dev/null)
 
-IPHONE_NAME=$(xcrun simctl list devices available | grep "$IPHONE_SIM" | sed 's/(.*//' | xargs)
-WATCH_NAME=$(xcrun simctl list devices available | grep "$WATCH_SIM" | sed 's/(.*//' | xargs)
+    if [ -n "$IPHONE_SIM" ]; then
+        IPHONE_NAME=$(xcrun simctl list devices available | grep "$IPHONE_SIM" | sed 's/(.*//' | xargs)
+    fi
+    if [ -n "$WATCH_SIM" ]; then
+        WATCH_NAME=$(xcrun simctl list devices available | grep "$WATCH_SIM" | sed 's/(.*//' | xargs)
+    fi
+fi
 
 gum style --bold --foreground 212 "Habitual — Multi-Platform Runner"
 echo ""
-gum style --foreground 39  "  📱 iPhone:  $IPHONE_NAME"
-gum style --foreground 208 "  ⌚ Watch:   $WATCH_NAME"
-gum style --foreground 141 "  🖥️  Mac:     this Mac (Catalyst)"
+[ "$RUN_IOS" = true ]   && gum style --foreground 39  "  📱 iPhone:  $IPHONE_NAME"
+[ "$RUN_WATCH" = true ] && gum style --foreground 208 "  ⌚ Watch:   $WATCH_NAME"
+[ "$RUN_MAC" = true ]   && gum style --foreground 141 "  🖥️  Mac:     this Mac (Catalyst)"
 echo ""
 
 # ── Cleanup on exit ──────────────────────────────────────────────────────────
@@ -88,8 +127,12 @@ cleanup() {
     for pid in $ALL_PIDS; do
         kill "$pid" 2>/dev/null || true
     done
-    xcrun simctl terminate "$IPHONE_SIM" "com.habitual-helper.app" 2>/dev/null || true
-    xcrun simctl terminate "$WATCH_SIM" "com.habitual-helper.app.watchkitapp" 2>/dev/null || true
+    if [ "$RUN_IOS" = true ] && [ -n "$IPHONE_SIM" ]; then
+        xcrun simctl terminate "$IPHONE_SIM" "com.habitual-helper.app" 2>/dev/null || true
+    fi
+    if [ "$RUN_WATCH" = true ] && [ -n "$WATCH_SIM" ]; then
+        xcrun simctl terminate "$WATCH_SIM" "com.habitual-helper.app.watchkitapp" 2>/dev/null || true
+    fi
     wait 2>/dev/null || true
     rm -rf "$LOGS_DIR"
     gum style --foreground 46 "✅ Done."
@@ -99,14 +142,16 @@ trap cleanup EXIT INT TERM
 
 # ── Boot & pair simulators ───────────────────────────────────────────────────
 
-gum spin --spinner dot --title "Booting simulators..." -- bash -c "
-    xcrun simctl boot '$IPHONE_SIM' 2>/dev/null || true
-    xcrun simctl boot '$WATCH_SIM' 2>/dev/null || true
-"
+if [ "$RUN_IOS" = true ] || [ "$RUN_WATCH" = true ]; then
+    gum spin --spinner dot --title "Booting simulators..." -- bash -c "
+        [ '$RUN_IOS' = true ]   && xcrun simctl boot '$IPHONE_SIM' 2>/dev/null || true
+        [ '$RUN_WATCH' = true ] && xcrun simctl boot '$WATCH_SIM' 2>/dev/null || true
+    "
 
-# Pair watch with iPhone (if not already paired)
-EXISTING_PAIR=$(xcrun simctl list pairs -j 2>/dev/null \
-    | python3 -c "
+    # Pair watch with iPhone (if both are running)
+    if [ "$RUN_IOS" = true ] && [ "$RUN_WATCH" = true ]; then
+        EXISTING_PAIR=$(xcrun simctl list pairs -j 2>/dev/null \
+            | python3 -c "
 import json, sys
 data = json.load(sys.stdin)
 for pid, pair in data.get('pairs', {}).items():
@@ -116,12 +161,14 @@ for pid, pair in data.get('pairs', {}).items():
         print(pid); sys.exit()
 " 2>/dev/null || true)
 
-if [ -z "$EXISTING_PAIR" ]; then
-    gum spin --spinner dot --title "Pairing Watch with iPhone..." -- \
-        xcrun simctl pair "$WATCH_SIM" "$IPHONE_SIM" 2>/dev/null || true
-fi
+        if [ -z "$EXISTING_PAIR" ]; then
+            gum spin --spinner dot --title "Pairing Watch with iPhone..." -- \
+                xcrun simctl pair "$WATCH_SIM" "$IPHONE_SIM" 2>/dev/null || true
+        fi
+    fi
 
-open -a Simulator
+    open -a Simulator
+fi
 
 # ── Color helpers ────────────────────────────────────────────────────────────
 
@@ -164,49 +211,64 @@ run_build() {
     fi
 }
 
-run_build "$MAC_LOG" "$LOGS_DIR/mac.status" \
-    xcodebuild build \
-    -project "$PROJECT" \
-    -scheme Habitual \
-    -destination "generic/platform=macOS,variant=Mac Catalyst" \
-    -configuration Debug \
-    -allowProvisioningUpdates \
-    -derivedDataPath "$DERIVED_DATA_MAC" &
-MAC_BUILD_PID=$!
-ALL_PIDS="$ALL_PIDS $MAC_BUILD_PID"
+BUILD_PIDS=""
+BUILD_SPINNER_TARGETS=""
 
-run_build "$IOS_LOG" "$LOGS_DIR/ios.status" \
-    xcodebuild build \
-    -project "$PROJECT" \
-    -scheme Habitual \
-    -destination "platform=iOS Simulator,id=$IPHONE_SIM" \
-    -configuration Debug \
-    -allowProvisioningUpdates \
-    -derivedDataPath "$DERIVED_DATA_IOS" &
-IOS_BUILD_PID=$!
-ALL_PIDS="$ALL_PIDS $IOS_BUILD_PID"
+if [ "$RUN_MAC" = true ]; then
+    run_build "$MAC_LOG" "$LOGS_DIR/mac.status" \
+        xcodebuild build \
+        -project "$PROJECT" \
+        -scheme Habitual \
+        -destination "generic/platform=macOS,variant=Mac Catalyst" \
+        -configuration Debug \
+        -allowProvisioningUpdates \
+        -derivedDataPath "$DERIVED_DATA_MAC" &
+    MAC_BUILD_PID=$!
+    ALL_PIDS="$ALL_PIDS $MAC_BUILD_PID"
+    BUILD_PIDS="$BUILD_PIDS $MAC_BUILD_PID"
+    BUILD_SPINNER_TARGETS="${BUILD_SPINNER_TARGETS:+$BUILD_SPINNER_TARGETS, }Mac"
+fi
 
-run_build "$WATCH_LOG" "$LOGS_DIR/watch.status" \
-    xcodebuild build \
-    -project "$PROJECT" \
-    -scheme "Habitual Watch" \
-    -destination "platform=watchOS Simulator,id=$WATCH_SIM" \
-    -configuration Debug \
-    -allowProvisioningUpdates \
-    -derivedDataPath "$DERIVED_DATA_WATCH" &
-WATCH_BUILD_PID=$!
-ALL_PIDS="$ALL_PIDS $WATCH_BUILD_PID"
+if [ "$RUN_IOS" = true ]; then
+    run_build "$IOS_LOG" "$LOGS_DIR/ios.status" \
+        xcodebuild build \
+        -project "$PROJECT" \
+        -scheme Habitual \
+        -destination "platform=iOS Simulator,id=$IPHONE_SIM" \
+        -configuration Debug \
+        -allowProvisioningUpdates \
+        -derivedDataPath "$DERIVED_DATA_IOS" &
+    IOS_BUILD_PID=$!
+    ALL_PIDS="$ALL_PIDS $IOS_BUILD_PID"
+    BUILD_PIDS="$BUILD_PIDS $IOS_BUILD_PID"
+    BUILD_SPINNER_TARGETS="${BUILD_SPINNER_TARGETS:+$BUILD_SPINNER_TARGETS, }iOS"
+fi
+
+if [ "$RUN_WATCH" = true ]; then
+    run_build "$WATCH_LOG" "$LOGS_DIR/watch.status" \
+        xcodebuild build \
+        -project "$PROJECT" \
+        -scheme "Habitual Watch" \
+        -destination "platform=watchOS Simulator,id=$WATCH_SIM" \
+        -configuration Debug \
+        -allowProvisioningUpdates \
+        -derivedDataPath "$DERIVED_DATA_WATCH" &
+    WATCH_BUILD_PID=$!
+    ALL_PIDS="$ALL_PIDS $WATCH_BUILD_PID"
+    BUILD_PIDS="$BUILD_PIDS $WATCH_BUILD_PID"
+    BUILD_SPINNER_TARGETS="${BUILD_SPINNER_TARGETS:+$BUILD_SPINNER_TARGETS, }Watch"
+fi
 
 # Wait for all builds with a spinner
-gum spin --spinner dot --title "Building Mac, iOS, and Watch targets..." -- bash -c "
-    while kill -0 $MAC_BUILD_PID 2>/dev/null || kill -0 $IOS_BUILD_PID 2>/dev/null || kill -0 $WATCH_BUILD_PID 2>/dev/null; do
-        sleep 1
+gum spin --spinner dot --title "Building ${BUILD_SPINNER_TARGETS} targets..." -- bash -c "
+    for pid in $BUILD_PIDS; do
+        while kill -0 \$pid 2>/dev/null; do sleep 1; done
     done
 "
 # Ensure all builds are fully done
-wait $MAC_BUILD_PID 2>/dev/null || true
-wait $IOS_BUILD_PID 2>/dev/null || true
-wait $WATCH_BUILD_PID 2>/dev/null || true
+for pid in $BUILD_PIDS; do
+    wait "$pid" 2>/dev/null || true
+done
 
 # ── Report build results ─────────────────────────────────────────────────────
 
@@ -237,9 +299,9 @@ report_build() {
     fi
 }
 
-report_build "Mac Catalyst"    "$LOGS_DIR/mac.status"   "$MAC_LOG"
-report_build "iOS Simulator"   "$LOGS_DIR/ios.status"   "$IOS_LOG"
-report_build "Watch Simulator" "$LOGS_DIR/watch.status" "$WATCH_LOG"
+[ "$RUN_MAC" = true ]   && report_build "Mac Catalyst"    "$LOGS_DIR/mac.status"   "$MAC_LOG"
+[ "$RUN_IOS" = true ]   && report_build "iOS Simulator"   "$LOGS_DIR/ios.status"   "$IOS_LOG"
+[ "$RUN_WATCH" = true ] && report_build "Watch Simulator" "$LOGS_DIR/watch.status" "$WATCH_LOG"
 echo ""
 
 if [ "$FAILED" = true ]; then
@@ -251,24 +313,30 @@ fi
 
 gum spin --spinner dot --title "Installing & launching apps..." -- bash -c "
     # Mac: find and launch the .app
-    APP_PATH=\$(find '$DERIVED_DATA_MAC/Build/Products/Debug-maccatalyst' \
-        -name 'Habitual.app' -maxdepth 1 2>/dev/null | head -1)
-    if [ -n \"\$APP_PATH\" ]; then
-        open \"\$APP_PATH\"
+    if [ '$RUN_MAC' = true ]; then
+        APP_PATH=\$(find '$DERIVED_DATA_MAC/Build/Products/Debug-maccatalyst' \
+            -name 'Habitual.app' -maxdepth 1 2>/dev/null | head -1)
+        if [ -n \"\$APP_PATH\" ]; then
+            open \"\$APP_PATH\"
+        fi
     fi
 
     # iOS: install
-    xcrun simctl install '$IPHONE_SIM' \
-        '$DERIVED_DATA_IOS/Build/Products/Debug-iphonesimulator/Habitual.app' 2>/dev/null || true
+    if [ '$RUN_IOS' = true ]; then
+        xcrun simctl install '$IPHONE_SIM' \
+            '$DERIVED_DATA_IOS/Build/Products/Debug-iphonesimulator/Habitual.app' 2>/dev/null || true
+    fi
 
     # Watch: install
-    xcrun simctl install '$WATCH_SIM' \
-        '$DERIVED_DATA_WATCH/Build/Products/Debug-watchsimulator/Habitual Watch.app' 2>/dev/null || true
+    if [ '$RUN_WATCH' = true ]; then
+        xcrun simctl install '$WATCH_SIM' \
+            '$DERIVED_DATA_WATCH/Build/Products/Debug-watchsimulator/Habitual Watch.app' 2>/dev/null || true
+    fi
 "
 
 # Launch simulator apps
-xcrun simctl launch "$IPHONE_SIM" "com.habitual-helper.app" > /dev/null 2>&1 || true
-xcrun simctl launch "$WATCH_SIM" "com.habitual-helper.app.watchkitapp" > /dev/null 2>&1 || true
+[ "$RUN_IOS" = true ]   && xcrun simctl launch "$IPHONE_SIM" "com.habitual-helper.app" > /dev/null 2>&1 || true
+[ "$RUN_WATCH" = true ] && xcrun simctl launch "$WATCH_SIM" "com.habitual-helper.app.watchkitapp" > /dev/null 2>&1 || true
 
 gum style --bold --foreground 46 "All apps launched!"
 echo ""
@@ -277,26 +345,32 @@ echo ""
 
 # ── Stream runtime logs ──────────────────────────────────────────────────────
 
-# Mac: stream via `log stream`
-log stream \
-    --predicate 'subsystem == "com.habitual-helper.app" OR process == "Habitual"' \
-    --style compact 2>/dev/null \
-    | stream_logs "mac" "$COLOR_MAC" &
-ALL_PIDS="$ALL_PIDS $!"
+if [ "$RUN_MAC" = true ]; then
+    # Mac: stream via `log stream`
+    log stream \
+        --predicate 'subsystem == "com.habitual-helper.app" OR process == "Habitual"' \
+        --style compact 2>/dev/null \
+        | stream_logs "mac" "$COLOR_MAC" &
+    ALL_PIDS="$ALL_PIDS $!"
+fi
 
-# iOS: stream via simctl spawn
-xcrun simctl spawn "$IPHONE_SIM" log stream \
-    --predicate 'subsystem == "com.habitual-helper.app" OR process == "Habitual"' \
-    --style compact 2>/dev/null \
-    | stream_logs "ios" "$COLOR_IOS" &
-ALL_PIDS="$ALL_PIDS $!"
+if [ "$RUN_IOS" = true ]; then
+    # iOS: stream via simctl spawn
+    xcrun simctl spawn "$IPHONE_SIM" log stream \
+        --predicate 'subsystem == "com.habitual-helper.app" OR process == "Habitual"' \
+        --style compact 2>/dev/null \
+        | stream_logs "ios" "$COLOR_IOS" &
+    ALL_PIDS="$ALL_PIDS $!"
+fi
 
-# Watch: stream via simctl spawn
-xcrun simctl spawn "$WATCH_SIM" log stream \
-    --predicate 'subsystem == "com.habitual-helper.app" OR process CONTAINS "Habitual"' \
-    --style compact 2>/dev/null \
-    | stream_logs "watch" "$COLOR_WATCH" &
-ALL_PIDS="$ALL_PIDS $!"
+if [ "$RUN_WATCH" = true ]; then
+    # Watch: stream via simctl spawn
+    xcrun simctl spawn "$WATCH_SIM" log stream \
+        --predicate 'subsystem == "com.habitual-helper.app" OR process CONTAINS "Habitual"' \
+        --style compact 2>/dev/null \
+        | stream_logs "watch" "$COLOR_WATCH" &
+    ALL_PIDS="$ALL_PIDS $!"
+fi
 
 # Wait forever (until Ctrl-C)
 wait

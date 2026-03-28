@@ -60,13 +60,16 @@ struct PersistenceController {
         let hName = attr("name", .stringAttributeType, default: "")
         let hReminder = attr("reminderTime", .dateAttributeType, optional: true)
         let hSortOrder = attr("sortOrder", .integer16AttributeType, default: Int16(0))
+        let hUpdatedAt = attr("updatedAt", .dateAttributeType, optional: true)
 
         // — CDCompletion —
         let completion = NSEntityDescription()
         completion.name = "CDCompletion"
         completion.managedObjectClassName = "CDCompletion"
 
+        let cCreatedAt = attr("createdAt", .dateAttributeType, optional: true)
         let cDate = attr("date", .dateAttributeType, optional: true)
+        let cDeviceID = attr("deviceID", .stringAttributeType, optional: true)
         let cId = attr("id", .UUIDAttributeType, optional: true)
         let cNote = attr("note", .stringAttributeType, optional: true)
         let cValue = attr("value", .doubleAttributeType, default: 1.0)
@@ -92,10 +95,10 @@ struct PersistenceController {
         habit.properties = [
             hColorBlue, hColorGreen, hColorRed, hCreatedAt,
             hGoalFreq, hGoalPeriod, hDesc, hIcon,
-            hId, hIsArchived, hName, hReminder, hSortOrder,
+            hId, hIsArchived, hName, hReminder, hSortOrder, hUpdatedAt,
             completionsRel,
         ]
-        completion.properties = [cDate, cId, cNote, cValue, habitRel]
+        completion.properties = [cCreatedAt, cDate, cDeviceID, cId, cNote, cValue, habitRel]
 
         model.entities = [habit, completion]
         return model
@@ -159,6 +162,8 @@ struct PersistenceController {
                     completion.date = calendar.startOfDay(for: date)
                     completion.value = 1.0
                     completion.habit = habit
+                    completion.deviceID = DeviceIdentifier.current
+                    completion.createdAt = date
                 }
             }
         }

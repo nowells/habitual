@@ -28,6 +28,7 @@ struct Habit: Identifiable, Equatable {
         case daily
         case weekly
         case monthly
+        case yearly
 
         var id: String { rawValue }
 
@@ -36,6 +37,7 @@ struct Habit: Identifiable, Equatable {
             case .daily: return "Daily"
             case .weekly: return "Weekly"
             case .monthly: return "Monthly"
+            case .yearly: return "Yearly"
             }
         }
 
@@ -44,6 +46,7 @@ struct Habit: Identifiable, Equatable {
             case .daily: return "day"
             case .weekly: return "week"
             case .monthly: return "month"
+            case .yearly: return "year"
             }
         }
 
@@ -52,6 +55,7 @@ struct Habit: Identifiable, Equatable {
             case .daily: return "days"
             case .weekly: return "weeks"
             case .monthly: return "months"
+            case .yearly: return "years"
             }
         }
 
@@ -67,6 +71,9 @@ struct Habit: Identifiable, Equatable {
             case .monthly:
                 let components = calendar.dateComponents([.year, .month], from: date)
                 return calendar.date(from: components) ?? calendar.startOfDay(for: date)
+            case .yearly:
+                let components = calendar.dateComponents([.year], from: date)
+                return calendar.date(from: components) ?? calendar.startOfDay(for: date)
             }
         }
 
@@ -80,6 +87,8 @@ struct Habit: Identifiable, Equatable {
                 return calendar.date(byAdding: .weekOfYear, value: 1, to: start) ?? start
             case .monthly:
                 return calendar.date(byAdding: .month, value: 1, to: start) ?? start
+            case .yearly:
+                return calendar.date(byAdding: .year, value: 1, to: start) ?? start
             }
         }
 
@@ -89,6 +98,7 @@ struct Habit: Identifiable, Equatable {
             case .daily: return .day
             case .weekly: return .weekOfYear
             case .monthly: return .month
+            case .yearly: return .year
             }
         }
 
@@ -102,6 +112,8 @@ struct Habit: Identifiable, Equatable {
                 formatter.dateFormat = "MMM d"
             case .monthly:
                 formatter.dateFormat = "MMM"
+            case .yearly:
+                formatter.dateFormat = "yyyy"
             }
             return formatter.string(from: date)
         }
@@ -139,6 +151,17 @@ struct Habit: Identifiable, Equatable {
 
     static func == (lhs: Habit, rhs: Habit) -> Bool {
         lhs.id == rhs.id
+            && lhs.name == rhs.name
+            && lhs.description == rhs.description
+            && lhs.icon == rhs.icon
+            && lhs.isArchived == rhs.isArchived
+            && lhs.goalFrequency == rhs.goalFrequency
+            && lhs.goalPeriod == rhs.goalPeriod
+            && lhs.sortOrder == rhs.sortOrder
+            && lhs.colorComponents.red == rhs.colorComponents.red
+            && lhs.colorComponents.green == rhs.colorComponents.green
+            && lhs.colorComponents.blue == rhs.colorComponents.blue
+            && lhs.completions == rhs.completions
     }
 }
 
@@ -149,12 +172,25 @@ struct Completion: Identifiable, Equatable {
     var date: Date
     var value: Double
     var note: String?
+    /// Stable identifier of the device that created this completion (CRDT origin).
+    var deviceID: String?
+    /// Precise timestamp of the user action that created this completion (CRDT clock).
+    var createdAt: Date?
 
-    init(id: UUID = UUID(), date: Date, value: Double = 1.0, note: String? = nil) {
+    init(
+        id: UUID = UUID(),
+        date: Date,
+        value: Double = 1.0,
+        note: String? = nil,
+        deviceID: String? = nil,
+        createdAt: Date? = nil
+    ) {
         self.id = id
         self.date = date
         self.value = value
         self.note = note
+        self.deviceID = deviceID
+        self.createdAt = createdAt
     }
 }
 
@@ -209,7 +245,9 @@ extension CDCompletion {
             id: id ?? UUID(),
             date: date ?? Date(),
             value: value,
-            note: note
+            note: note,
+            deviceID: deviceID,
+            createdAt: createdAt
         )
     }
 }
@@ -328,6 +366,12 @@ extension Habit {
         let calendar = Calendar.current
         let targetDay = calendar.startOfDay(for: date)
         return completions.contains { calendar.startOfDay(for: $0.date) == targetDay }
+    }
+
+    /// Number of completions logged on a specific day (not the whole period)
+    func completionsOnDay(_ date: Date, calendar: Calendar = .current) -> Int {
+        let targetDay = calendar.startOfDay(for: date)
+        return completions.filter { calendar.startOfDay(for: $0.date) == targetDay }.count
     }
 
     func completionValue(for date: Date) -> Double {

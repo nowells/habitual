@@ -72,6 +72,72 @@ struct PieProgressFill: View {
     }
 }
 
+// MARK: - Circle Pie Progress Fill (for calendar day cells)
+
+/// Fills a circle like a pie/clock sweep — same logic as PieProgressFill but
+/// using a circular shape instead of a rounded rectangle. Partial completions
+/// show as a pie wedge; over-completion wraps with complementary colors.
+struct CirclePieProgressFill: View {
+    let completionCount: Int
+    let goalFrequency: Int
+    let baseColor: Color
+    let size: CGFloat
+
+    private var fullRotations: Int {
+        guard goalFrequency > 0 else { return 0 }
+        return completionCount / goalFrequency
+    }
+
+    private var currentFraction: Double {
+        guard goalFrequency > 0 else { return 0 }
+        let remainder = completionCount % goalFrequency
+        if remainder == 0 && completionCount > 0 { return 1.0 }
+        return Double(remainder) / Double(goalFrequency)
+    }
+
+    private var fillColor: Color {
+        let rotation =
+            (completionCount > 0 && completionCount % goalFrequency == 0)
+            ? fullRotations - 1
+            : fullRotations
+        return RadialProgressView.ringColor(base: baseColor, rotation: rotation)
+    }
+
+    private var baseFillColor: Color {
+        guard fullRotations > 0 else { return baseColor }
+        let rotation = max(0, fullRotations - 1)
+        return RadialProgressView.ringColor(base: baseColor, rotation: rotation)
+    }
+
+    var body: some View {
+        ZStack {
+            // Completed full rotations as solid fill
+            if fullRotations > 0 && currentFraction < 1.0 {
+                Circle()
+                    .fill(baseFillColor.opacity(0.85))
+                    .frame(width: size, height: size)
+            }
+
+            // Current rotation as a pie wedge
+            Path { path in
+                let center = CGPoint(x: size / 2, y: size / 2)
+                path.move(to: center)
+                path.addArc(
+                    center: center,
+                    radius: size,
+                    startAngle: .degrees(-90),
+                    endAngle: .degrees(-90 + 360 * currentFraction),
+                    clockwise: false
+                )
+                path.closeSubpath()
+            }
+            .fill(fillColor.opacity(0.85))
+            .frame(width: size, height: size)
+            .clipShape(Circle())
+        }
+    }
+}
+
 // MARK: - Radial Progress View (ring style — used only in check-in button)
 
 /// Renders a radial ring indicator similar to Apple Watch fitness rings.

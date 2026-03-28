@@ -78,6 +78,17 @@ struct PeriodReminderSettings: Codable, Equatable {
                 endReminderTime: cal.date(from: DateComponents(hour: 9, minute: 0)) ?? Date(),
                 endReminderEnabled: true
             )
+        case .yearly:
+            // Start: Jan 1st, Mid: Jul 1st, End: late December
+            return PeriodReminderSettings(
+                isEnabled: false,
+                startReminderTime: cal.date(from: DateComponents(hour: 9, minute: 0)) ?? Date(),
+                startReminderEnabled: true,
+                midReminderTime: cal.date(from: DateComponents(hour: 9, minute: 0)) ?? Date(),
+                midReminderEnabled: true,
+                endReminderTime: cal.date(from: DateComponents(hour: 9, minute: 0)) ?? Date(),
+                endReminderEnabled: true
+            )
         }
     }
 }
