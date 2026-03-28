@@ -31,6 +31,8 @@
 		A10027 /* RadialProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10027 /* RadialProgressView.swift */; };
 		A10028 /* PeriodHeatmapGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10028 /* PeriodHeatmapGridView.swift */; };
 		A10029 /* CloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10029 /* CloudSyncService.swift */; };
+		A10034 /* LiquidFillCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10034 /* LiquidFillCell.swift */; };
+		A30012 /* LiquidFillCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10034 /* LiquidFillCell.swift */; };
 		A10033 /* DeviceIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10033 /* DeviceIdentifier.swift */; };
 		A10030 /* Habitual Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = C20001 /* Habitual Watch.app */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A10031 /* HabitualWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C30001 /* HabitualWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -156,6 +158,7 @@
 		B10025 /* MascotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MascotView.swift; sourceTree = "<group>"; };
 		B10032 /* MascotCharacters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MascotCharacters.swift; sourceTree = "<group>"; };
 		B10033 /* DeviceIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIdentifier.swift; sourceTree = "<group>"; };
+		B10034 /* LiquidFillCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidFillCell.swift; sourceTree = "<group>"; };
 		B10026 /* EnvironmentValues+Today.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EnvironmentValues+Today.swift"; sourceTree = "<group>"; };
 		B10027 /* RadialProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RadialProgressView.swift; sourceTree = "<group>"; };
 		B10028 /* PeriodHeatmapGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodHeatmapGridView.swift; sourceTree = "<group>"; };
@@ -280,6 +283,7 @@
 				B10032 /* MascotCharacters.swift */,
 				B10027 /* RadialProgressView.swift */,
 				B10028 /* PeriodHeatmapGridView.swift */,
+				B10034 /* LiquidFillCell.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -572,6 +576,7 @@
 				A10028 /* PeriodHeatmapGridView.swift in Sources */,
 				A10029 /* CloudSyncService.swift in Sources */,
 				A10033 /* DeviceIdentifier.swift in Sources */,
+				A10034 /* LiquidFillCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -607,6 +612,7 @@
 			A30009 /* HabitIntents.swift in Sources */,
 			A30010 /* SingleHabitWidget.swift in Sources */,
 			A30011 /* DeviceIdentifier.swift in Sources */,
+			A30012 /* LiquidFillCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
