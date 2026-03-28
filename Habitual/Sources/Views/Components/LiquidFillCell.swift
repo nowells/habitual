@@ -4,24 +4,38 @@ import SwiftUI
 
 /// A unified visual cell for rendering habit completion using a liquid fill metaphor.
 /// Cells fill from the bottom like a glass, with layered intensity levels that stack
-/// as the user exceeds their goal. Used across all view surfaces: yearly grid, calendar,
-/// widgets, and watchOS complications.
+/// as the user exceeds their goal. Intensity is relative — scaled to `maxCount` so the
+/// brightest cell in the dataset is always full intensity.
+///
+/// Level boundaries align with goal multiples: a goal of 3 crosses a boundary every 3
+/// completions. The alpha for each level = `(levelNumber * goal) / maxCount`.
 struct LiquidFillCell: View {
     let count: Int
     let goal: Int
     let color: Color
     let status: CellStatus
     let size: CGFloat
+    /// The maximum count across all visible cells. Determines full intensity (alpha 1.0).
+    /// When 0 or omitted, defaults to `max(count, 1)` (absolute mode).
+    var maxCount: Int = 0
 
+    private var effectiveMax: Int { max(maxCount, count, 1) }
+
+    /// Number of full goal cycles completed
     private var fullLevels: Int { count / max(goal, 1) }
+
+    /// Fractional progress within the current goal cycle (0.0–1.0)
     private var partialProgress: CGFloat {
         CGFloat(count % max(goal, 1)) / CGFloat(max(goal, 1))
     }
 
-    private static let levelAlphas: [CGFloat] = [0.0, 0.25, 0.50, 0.75, 1.0]
-
+    /// Alpha for a given level number, scaled relative to maxCount.
+    /// Level N corresponds to `N * goal` completions.
+    /// Alpha = `(N * goal) / effectiveMax`, capped at 1.0.
     private func levelAlpha(_ level: Int) -> CGFloat {
-        Self.levelAlphas[min(level, 4)]
+        guard effectiveMax > 0 else { return 0 }
+        let levelCount = level * max(goal, 1)
+        return min(CGFloat(levelCount) / CGFloat(effectiveMax), 1.0)
     }
 
     private var cornerRadius: CGFloat {
@@ -42,11 +56,7 @@ struct LiquidFillCell: View {
             missedCell
         case .brokeStreak:
             brokeStreakCell
-        case .partial:
-            liquidFillBody
-        case .complete:
-            liquidFillBody
-        case .overComplete:
+        case .partial, .complete, .overComplete:
             liquidFillBody
         }
     }
@@ -111,25 +121,15 @@ struct LiquidFillCell: View {
             .frame(width: size, height: size)
     }
 
-    // MARK: - Broke Streak Cell
+    // MARK: - Broke Streak Cell (outline only)
 
     private var brokeStreakCell: some View {
         RoundedRectangle(cornerRadius: cornerRadius)
-            .fill(Color.red.opacity(0.07))
+            .fill(Color.clear)
             .frame(width: size, height: size)
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .strokeBorder(Color.red.opacity(0.2), lineWidth: 1)
-            )
-            .overlay(
-                // Center dot — omit at very small sizes
-                Group {
-                    if size > 14 {
-                        Circle()
-                            .fill(Color.red.opacity(0.5))
-                            .frame(width: size * 0.22, height: size * 0.22)
-                    }
-                }
+                    .strokeBorder(Color.red.opacity(0.35), lineWidth: 1)
             )
     }
 
@@ -173,8 +173,7 @@ struct CalendarLiquidFillCell: View {
     let color: Color
     let status: CellStatus
     let size: CGFloat
-
-    private var fullLevels: Int { count / max(goal, 1) }
+    var maxCount: Int = 0
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -183,7 +182,8 @@ struct CalendarLiquidFillCell: View {
                 goal: goal,
                 color: color,
                 status: status,
-                size: size
+                size: size,
+                maxCount: maxCount
             )
 
             // Day number
@@ -213,7 +213,7 @@ struct CalendarLiquidFillCell: View {
 
 // MARK: - Intensity Legend
 
-/// The "Less → More" legend strip showing the 5 intensity levels.
+/// The "Less → More" legend strip showing 5 intensity swatches.
 struct LiquidFillLegend: View {
     let color: Color
     let cellSize: CGFloat
@@ -225,7 +225,7 @@ struct LiquidFillLegend: View {
                 .foregroundStyle(.secondary)
 
             ForEach(0..<5) { level in
-                let alpha: CGFloat = [0.0, 0.25, 0.50, 0.75, 1.0][level]
+                let alpha: CGFloat = CGFloat(level) / 4.0
                 RoundedRectangle(cornerRadius: cellSize > 14 ? 2 : 1)
                     .fill(level == 0 ? Color.white.opacity(0.03) : color.opacity(alpha))
                     .frame(width: cellSize, height: cellSize)
@@ -247,9 +247,10 @@ struct LiquidFillLegend: View {
 
 // MARK: - Previews
 
-#Preview("Liquid Fill Levels") {
+#Preview("Liquid Fill — Relative Intensity") {
     VStack(spacing: 20) {
-        // Goal = 3, showing 0/3 through 12/3
+        // Goal = 3, max = 12, showing 0/3 through 12/3
+        let maxCount = 12
         HStack(spacing: 8) {
             ForEach([0, 1, 2, 3, 4, 5, 6, 9, 12], id: \.self) { count in
                 VStack(spacing: 4) {
@@ -258,10 +259,30 @@ struct LiquidFillLegend: View {
                         goal: 3,
                         color: .blue,
                         status: count == 0 ? .missed : (count < 3 ? .partial : (count == 3 ? .complete : .overComplete)),
-                        size: 32
+                        size: 32,
+                        maxCount: maxCount
                     )
                     Text("\(count)/3")
                         .font(.system(size: 9))
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+
+        // Same data but max = 3 (everything at 3 is full brightness)
+        HStack(spacing: 8) {
+            ForEach([0, 1, 2, 3], id: \.self) { count in
+                VStack(spacing: 4) {
+                    LiquidFillCell(
+                        count: count,
+                        goal: 3,
+                        color: .blue,
+                        status: count == 0 ? .missed : (count < 3 ? .partial : .complete),
+                        size: 32,
+                        maxCount: 3
+                    )
+                    Text("\(count)/3 max=3")
+                        .font(.system(size: 8))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -278,7 +299,7 @@ struct LiquidFillLegend: View {
                 Text("Today").font(.system(size: 9)).foregroundStyle(.secondary)
             }
             VStack(spacing: 4) {
-                LiquidFillCell(count: 2, goal: 3, color: .blue, status: .today, size: 32)
+                LiquidFillCell(count: 2, goal: 3, color: .blue, status: .today, size: 32, maxCount: 6)
                 Text("Today 2/3").font(.system(size: 9)).foregroundStyle(.secondary)
             }
             VStack(spacing: 4) {
@@ -288,19 +309,6 @@ struct LiquidFillLegend: View {
             VStack(spacing: 4) {
                 LiquidFillCell(count: 0, goal: 3, color: .blue, status: .brokeStreak, size: 32)
                 Text("Broke").font(.system(size: 9)).foregroundStyle(.secondary)
-            }
-        }
-
-        // Multi-color
-        HStack(spacing: 12) {
-            ForEach(
-                [(Color.blue, "Blue"), (.green, "Green"), (.orange, "Amber"), (.purple, "Purple")],
-                id: \.1
-            ) { color, name in
-                VStack(spacing: 4) {
-                    LiquidFillCell(count: 5, goal: 3, color: color, status: .overComplete, size: 32)
-                    Text(name).font(.system(size: 9)).foregroundStyle(.secondary)
-                }
             }
         }
 

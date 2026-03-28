@@ -213,6 +213,10 @@ struct WidgetHeatmapGrid: View {
     let cellSize: CGFloat = 8
     let spacing: CGFloat = 2
 
+    private var peak: Int {
+        days.map(\.count).max() ?? 0
+    }
+
     var body: some View {
         let rows = 7
         let cols = days.count / rows
@@ -229,7 +233,8 @@ struct WidgetHeatmapGrid: View {
                                 goal: goal,
                                 color: color,
                                 status: day.status,
-                                size: cellSize
+                                size: cellSize,
+                                maxCount: peak
                             )
                         }
                     }

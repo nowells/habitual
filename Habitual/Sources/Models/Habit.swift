@@ -446,12 +446,14 @@ extension Habit {
     }
 
     /// Compute the cell status for a given day based on the liquid fill spec.
+    /// `consecutiveCompletionDays` is the number of consecutive days with completions
+    /// immediately before this day. A broke streak requires at least 2 (a real streak).
     func cellStatus(
         for date: Date,
         count: Int,
         goal: Int,
         today: Date,
-        previousDayHadCompletion: Bool,
+        consecutiveCompletionDays: Int,
         calendar: Calendar = .current
     ) -> CellStatus {
         let dayStart = calendar.startOfDay(for: date)
@@ -467,7 +469,8 @@ extension Habit {
         if dayStart < habitStart {
             return .missed
         }
-        if count == 0 && previousDayHadCompletion {
+        // Broke streak requires a real streak (2+ consecutive days) that was broken
+        if count == 0 && consecutiveCompletionDays >= 2 {
             return .brokeStreak
         }
         if count == 0 {
@@ -506,7 +509,7 @@ extension Habit {
 
         var weeks: [[DayData]] = []
         var currentDate = alignedStart
-        var previousDayHadCompletion = false
+        var consecutiveCompletionDays = 0
 
         while currentDate <= endDate {
             var week: [DayData] = []
@@ -525,7 +528,7 @@ extension Habit {
                         count: count,
                         goal: goalFrequency,
                         today: today,
-                        previousDayHadCompletion: previousDayHadCompletion
+                        consecutiveCompletionDays: consecutiveCompletionDays
                     )
                 }
 
@@ -538,9 +541,13 @@ extension Habit {
                     status: status
                 ))
 
-                // Track previous day completion for broke-streak detection
+                // Track consecutive completion days for broke-streak detection
                 if !isPadding && !isFuture {
-                    previousDayHadCompletion = count > 0
+                    if count > 0 {
+                        consecutiveCompletionDays += 1
+                    } else {
+                        consecutiveCompletionDays = 0
+                    }
                 }
 
                 guard let nextDay = calendar.date(byAdding: .day, value: 1, to: currentDate) else { break }
@@ -589,6 +596,18 @@ struct DayData: Identifiable {
     let status: CellStatus
 
     var isCompleted: Bool { value > 0 }
+}
+
+// MARK: - Max Count Helpers
+
+/// Computes the maximum completion count across a grid of DayData weeks.
+func maxCount(in weeks: [[DayData]]) -> Int {
+    weeks.flatMap { $0 }.reduce(0) { max($0, $1.count) }
+}
+
+/// Computes the maximum completion count across PeriodData.
+func maxCount(in periods: [PeriodData]) -> Int {
+    periods.reduce(0) { max($0, $1.completionCount) }
 }
 
 // MARK: - Period Data for Period Heatmap

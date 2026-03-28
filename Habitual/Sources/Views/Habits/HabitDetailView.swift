@@ -414,7 +414,18 @@ struct CalendarGridView: View {
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
     private let cellSize: CGFloat = 40
 
+    /// Pre-compute counts for all visible days to derive maxCount.
+    private var dayCounts: [(date: Date, count: Int)] {
+        calendarDays.compactMap { date in
+            guard let date else { return nil }
+            return (date, habit.completionsInPeriod(containing: date))
+        }
+    }
+
     var body: some View {
+        let counts = dayCounts
+        let peak = counts.map(\.count).max() ?? 0
+
         VStack(spacing: 8) {
             // Day of week headers
             HStack {
@@ -431,7 +442,7 @@ struct CalendarGridView: View {
             LazyVGrid(columns: columns, spacing: 6) {
                 ForEach(calendarDays, id: \.self) { date in
                     if let date = date {
-                        let count = habit.completionsInPeriod(containing: date)
+                        let count = counts.first(where: { calendar.isDate($0.date, inSameDayAs: date) })?.count ?? 0
                         let status = calendarCellStatus(for: date, count: count)
                         let dayNumber = calendar.component(.day, from: date)
 
@@ -442,6 +453,7 @@ struct CalendarGridView: View {
                             color: habit.color,
                             status: status,
                             size: cellSize,
+                            maxCount: peak,
                             onTap: {
                                 if status != .future {
                                     onTapDate?(date)
@@ -519,6 +531,7 @@ struct CalendarDayCell: View {
     let color: Color
     let status: CellStatus
     let size: CGFloat
+    var maxCount: Int = 0
     let onTap: () -> Void
     var onLongPress: (() -> Void)?
 
@@ -538,7 +551,8 @@ struct CalendarDayCell: View {
                 goal: goal,
                 color: color,
                 status: status,
-                size: size
+                size: size,
+                maxCount: maxCount
             )
             .contentShape(Rectangle())
         }

@@ -451,6 +451,7 @@ struct WidgetMiniHeatmap: View {
 
     var body: some View {
         let periods = Array(habit.recentPeriods.suffix(14))
+        let peak = periods.map(\.completionCount).max() ?? 0
         HStack(spacing: 2) {
             ForEach(periods.indices, id: \.self) { idx in
                 let period = periods[idx]
@@ -466,7 +467,8 @@ struct WidgetMiniHeatmap: View {
                     goal: habit.goalFrequency,
                     color: habit.color,
                     status: status,
-                    size: dotSize
+                    size: dotSize,
+                    maxCount: peak
                 )
             }
         }

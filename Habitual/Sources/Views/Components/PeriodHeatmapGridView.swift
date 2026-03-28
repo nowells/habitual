@@ -63,6 +63,7 @@ struct PeriodHeatmapGridView: View {
     private var dailyLayout: some View {
         // 1 week of future empty slots
         let weeks = habit.heatmapData(months: months, forwardDays: 7, today: today)
+        let peak = maxCount(in: weeks)
         return VStack(alignment: .leading, spacing: 4) {
             if showLabels {
                 dailyMonthLabels(weeks: weeks)
@@ -79,7 +80,7 @@ struct PeriodHeatmapGridView: View {
                             ForEach(weeks.indices, id: \.self) { weekIndex in
                                 VStack(spacing: cellSpacing) {
                                     ForEach(weeks[weekIndex].indices, id: \.self) { dayIndex in
-                                        dailyCell(day: weeks[weekIndex][dayIndex])
+                                        dailyCell(day: weeks[weekIndex][dayIndex], maxCount: peak)
                                     }
                                 }
                                 .id(weekIndex)
@@ -99,7 +100,7 @@ struct PeriodHeatmapGridView: View {
     }
 
     @ViewBuilder
-    private func dailyCell(day: DayData) -> some View {
+    private func dailyCell(day: DayData, maxCount peak: Int) -> some View {
         if day.isPadding {
             Color.clear.frame(width: cellSize, height: cellSize)
         } else {
@@ -108,7 +109,8 @@ struct PeriodHeatmapGridView: View {
                 goal: habit.goalFrequency,
                 color: habit.color,
                 status: day.status,
-                size: cellSize
+                size: cellSize,
+                maxCount: peak
             )
         }
     }
@@ -116,7 +118,9 @@ struct PeriodHeatmapGridView: View {
     // MARK: - Weekly Layout
 
     private var weeklyLayout: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        let periods = periodData
+        let peak = maxCount(in: periods)
+        return VStack(alignment: .leading, spacing: 4) {
             if showLabels {
                 weeklyLabels
             }
@@ -124,13 +128,13 @@ struct PeriodHeatmapGridView: View {
             ScrollViewReader { proxy in
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: cellSpacing) {
-                        ForEach(periodData) { period in
-                            periodCell(period)
+                        ForEach(periods) { period in
+                            periodCell(period, maxCount: peak)
                         }
                     }
                 }
                 .onAppear {
-                    if let current = periodData.first(where: { $0.isCurrentPeriod }) {
+                    if let current = periods.first(where: { $0.isCurrentPeriod }) {
                         proxy.scrollTo(current.id, anchor: .trailing)
                     }
                 }
@@ -141,7 +145,9 @@ struct PeriodHeatmapGridView: View {
     // MARK: - Monthly Layout
 
     private var monthlyLayout: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        let periods = periodData
+        let peak = maxCount(in: periods)
+        return VStack(alignment: .leading, spacing: 4) {
             if showLabels {
                 monthlyLabels
             }
@@ -149,13 +155,13 @@ struct PeriodHeatmapGridView: View {
             ScrollViewReader { proxy in
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: cellSpacing + 2) {
-                        ForEach(periodData) { period in
-                            periodCell(period, size: cellSize * 1.8)
+                        ForEach(periods) { period in
+                            periodCell(period, size: cellSize * 1.8, maxCount: peak)
                         }
                     }
                 }
                 .onAppear {
-                    if let current = periodData.first(where: { $0.isCurrentPeriod }) {
+                    if let current = periods.first(where: { $0.isCurrentPeriod }) {
                         proxy.scrollTo(current.id, anchor: .trailing)
                     }
                 }
@@ -166,7 +172,9 @@ struct PeriodHeatmapGridView: View {
     // MARK: - Yearly Layout
 
     private var yearlyLayout: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        let periods = periodData
+        let peak = maxCount(in: periods)
+        return VStack(alignment: .leading, spacing: 4) {
             if showLabels {
                 yearlyLabels
             }
@@ -174,13 +182,13 @@ struct PeriodHeatmapGridView: View {
             ScrollViewReader { proxy in
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: cellSpacing + 4) {
-                        ForEach(periodData) { period in
-                            periodCell(period, size: cellSize * 2.2)
+                        ForEach(periods) { period in
+                            periodCell(period, size: cellSize * 2.2, maxCount: peak)
                         }
                     }
                 }
                 .onAppear {
-                    if let current = periodData.first(where: { $0.isCurrentPeriod }) {
+                    if let current = periods.first(where: { $0.isCurrentPeriod }) {
                         proxy.scrollTo(current.id, anchor: .trailing)
                     }
                 }
@@ -191,7 +199,7 @@ struct PeriodHeatmapGridView: View {
     // MARK: - Period Cell (weekly/monthly/yearly)
 
     @ViewBuilder
-    private func periodCell(_ period: PeriodData, size: CGFloat? = nil) -> some View {
+    private func periodCell(_ period: PeriodData, size: CGFloat? = nil, maxCount peak: Int = 0) -> some View {
         let effectiveSize = size ?? cellSize
         let status = periodCellStatus(period)
         LiquidFillCell(
@@ -199,7 +207,8 @@ struct PeriodHeatmapGridView: View {
             goal: period.goalFrequency,
             color: habit.color,
             status: status,
-            size: effectiveSize
+            size: effectiveSize,
+            maxCount: peak
         )
         .id(period.id)
         .onTapGesture {
@@ -424,11 +433,12 @@ struct CompactPeriodHeatmapView: View {
         let months = max(1, Int(ceil(Double(maxWeeks) / 4.33)))
         let weeks = habit.heatmapData(months: months, forwardDays: 7, today: today)
         let visibleWeeks = Array(weeks.suffix(maxWeeks))
+        let peak = maxCount(in: visibleWeeks)
         return HStack(spacing: cellSpacing) {
             ForEach(visibleWeeks.indices, id: \.self) { weekIndex in
                 VStack(spacing: cellSpacing) {
                     ForEach(visibleWeeks[weekIndex].indices, id: \.self) { dayIndex in
-                        compactDailyCell(day: visibleWeeks[weekIndex][dayIndex])
+                        compactDailyCell(day: visibleWeeks[weekIndex][dayIndex], maxCount: peak)
                     }
                 }
             }
@@ -437,7 +447,7 @@ struct CompactPeriodHeatmapView: View {
     }
 
     @ViewBuilder
-    private func compactDailyCell(day: DayData) -> some View {
+    private func compactDailyCell(day: DayData, maxCount peak: Int) -> some View {
         if day.isPadding {
             Color.clear.frame(width: cellSize, height: cellSize)
         } else {
@@ -446,7 +456,8 @@ struct CompactPeriodHeatmapView: View {
                 goal: habit.goalFrequency,
                 color: habit.color,
                 status: day.status,
-                size: cellSize
+                size: cellSize,
+                maxCount: peak
             )
         }
     }
@@ -459,9 +470,10 @@ struct CompactPeriodHeatmapView: View {
         let months = max(1, Int(ceil(Double(maxPeriods) / 4.33)))
         let periods = habit.periodHeatmapData(months: months, forwardPeriods: 5, today: today)
         let visiblePeriods = Array(periods.suffix(maxPeriods))
+        let peak = maxCount(in: visiblePeriods)
         return HStack(spacing: cellSpacing) {
             ForEach(visiblePeriods) { period in
-                compactPeriodCell(period)
+                compactPeriodCell(period, maxCount: peak)
             }
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
@@ -478,9 +490,10 @@ struct CompactPeriodHeatmapView: View {
         let forwardMonths = min(12, maxPeriods / 3)
         let periods = habit.periodHeatmapData(months: backMonths, forwardPeriods: forwardMonths, today: today)
         let visiblePeriods = Array(periods.suffix(maxPeriods))
+        let peak = maxCount(in: visiblePeriods)
         return HStack(spacing: monthlySpacing) {
             ForEach(visiblePeriods) { period in
-                compactPeriodCell(period, size: monthlyCellSize)
+                compactPeriodCell(period, size: monthlyCellSize, maxCount: peak)
             }
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
@@ -497,9 +510,10 @@ struct CompactPeriodHeatmapView: View {
         let forwardYears = min(3, maxPeriods / 3)
         let periods = habit.periodHeatmapData(months: backMonths, forwardPeriods: forwardYears, today: today)
         let visiblePeriods = Array(periods.suffix(maxPeriods))
+        let peak = maxCount(in: visiblePeriods)
         return HStack(spacing: yearlySpacing) {
             ForEach(visiblePeriods) { period in
-                compactPeriodCell(period, size: yearlyCellSize)
+                compactPeriodCell(period, size: yearlyCellSize, maxCount: peak)
             }
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
@@ -508,7 +522,7 @@ struct CompactPeriodHeatmapView: View {
     // MARK: - Period Cell
 
     @ViewBuilder
-    private func compactPeriodCell(_ period: PeriodData, size: CGFloat? = nil) -> some View {
+    private func compactPeriodCell(_ period: PeriodData, size: CGFloat? = nil, maxCount peak: Int = 0) -> some View {
         let effectiveSize = size ?? cellSize
         let status = compactPeriodStatus(period)
         LiquidFillCell(
@@ -516,7 +530,8 @@ struct CompactPeriodHeatmapView: View {
             goal: period.goalFrequency,
             color: habit.color,
             status: status,
-            size: effectiveSize
+            size: effectiveSize,
+            maxCount: peak
         )
     }
 

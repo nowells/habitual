@@ -33,9 +33,12 @@ struct HeatmapGridView: View {
     }
 
     var body: some View {
+        let weeksData = weeks
+        let peak = maxCount(in: weeksData)
+
         VStack(alignment: .leading, spacing: 4) {
             if showMonthLabels {
-                monthLabelsRow
+                monthLabelsRow(weeksData)
             }
 
             HStack(alignment: .top, spacing: cellSpacing) {
@@ -59,15 +62,16 @@ struct HeatmapGridView: View {
                 // Grid
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: cellSpacing) {
-                        ForEach(weeks.indices, id: \.self) { weekIndex in
+                        ForEach(weeksData.indices, id: \.self) { weekIndex in
                             VStack(spacing: cellSpacing) {
-                                ForEach(weeks[weekIndex].indices, id: \.self) { dayIndex in
-                                    let day = weeks[weekIndex][dayIndex]
+                                ForEach(weeksData[weekIndex].indices, id: \.self) { dayIndex in
+                                    let day = weeksData[weekIndex][dayIndex]
                                     HeatmapCell(
                                         day: day,
                                         color: habit.color,
                                         goal: habit.goalFrequency,
                                         size: cellSize,
+                                        maxCount: peak,
                                         onTap: onTapDate
                                     )
                                 }
@@ -79,12 +83,12 @@ struct HeatmapGridView: View {
         }
     }
 
-    private var monthLabelsRow: some View {
+    private func monthLabelsRow(_ weeksData: [[DayData]]) -> some View {
         HStack(spacing: 0) {
             Spacer().frame(width: 24)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 0) {
-                    ForEach(monthPositions, id: \.offset) { item in
+                    ForEach(monthPositions(weeksData), id: \.offset) { item in
                         Text(item.label)
                             .font(.system(size: 10))
                             .foregroundStyle(.secondary)
@@ -99,13 +103,12 @@ struct HeatmapGridView: View {
         let formatter = DateFormatter()
         formatter.locale = Locale.current
         let symbols = formatter.veryShortWeekdaySymbols ?? ["S", "M", "T", "W", "T", "F", "S"]
-        // Reorder based on firstWeekday
         let first = Calendar.current.firstWeekday - 1
         return Array(symbols[first...]) + Array(symbols[..<first])
     }
 
-    private var monthPositions: [(offset: Int, label: String, span: Int)] {
-        guard !weeks.isEmpty else { return [] }
+    private func monthPositions(_ weeksData: [[DayData]]) -> [(offset: Int, label: String, span: Int)] {
+        guard !weeksData.isEmpty else { return [] }
         let calendar = Calendar.current
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM"
@@ -113,7 +116,7 @@ struct HeatmapGridView: View {
         var positions: [(offset: Int, label: String, span: Int)] = []
         var lastMonth = -1
 
-        for (index, week) in weeks.enumerated() {
+        for (index, week) in weeksData.enumerated() {
             guard let firstDay = week.first else { continue }
             let month = calendar.component(.month, from: firstDay.date)
             if month != lastMonth {
@@ -125,7 +128,7 @@ struct HeatmapGridView: View {
             }
         }
         if let last = positions.last {
-            positions[positions.count - 1].span = weeks.count - last.offset
+            positions[positions.count - 1].span = weeksData.count - last.offset
         }
 
         return positions
@@ -139,6 +142,7 @@ struct HeatmapCell: View {
     let color: Color
     let goal: Int
     let size: CGFloat
+    var maxCount: Int = 0
     var onTap: ((Date) -> Void)?
 
     var body: some View {
@@ -150,7 +154,8 @@ struct HeatmapCell: View {
                 goal: goal,
                 color: color,
                 status: day.status,
-                size: size
+                size: size,
+                maxCount: maxCount
             )
             .onTapGesture {
                 if day.status != .future {
@@ -181,11 +186,14 @@ struct CompactHeatmapView: View {
     }
 
     var body: some View {
+        let weeksData = weeks
+        let peak = maxCount(in: weeksData)
+
         HStack(spacing: cellSpacing) {
-            ForEach(weeks.indices, id: \.self) { weekIndex in
+            ForEach(weeksData.indices, id: \.self) { weekIndex in
                 VStack(spacing: cellSpacing) {
-                    ForEach(weeks[weekIndex].indices, id: \.self) { dayIndex in
-                        let day = weeks[weekIndex][dayIndex]
+                    ForEach(weeksData[weekIndex].indices, id: \.self) { dayIndex in
+                        let day = weeksData[weekIndex][dayIndex]
                         if day.isPadding {
                             Color.clear.frame(width: cellSize, height: cellSize)
                         } else {
@@ -194,7 +202,8 @@ struct CompactHeatmapView: View {
                                 goal: habit.goalFrequency,
                                 color: habit.color,
                                 status: day.status,
-                                size: cellSize
+                                size: cellSize,
+                                maxCount: peak
                             )
                         }
                     }
