@@ -72,12 +72,26 @@ struct HabitualComplicationProvider: TimelineProvider {
                 NSSortDescriptor(keyPath: \CDHabit.sortOrder, ascending: true),
                 NSSortDescriptor(keyPath: \CDHabit.createdAt, ascending: false),
             ]
-            request.fetchLimit = 1
 
             do {
-                if let cdHabit = try context.fetch(request).first {
-                    habit = cdHabit.toHabit()
+                let now = Date()
+                let habits = try context.fetch(request).map { $0.toHabit() }
+
+                // Sort: uncompleted habits first, then completed.
+                // Within each group, order by period urgency (daily → weekly → monthly → yearly).
+                let periodOrder: [Habit.GoalPeriod: Int] = [
+                    .daily: 0, .weekly: 1, .monthly: 2, .yearly: 3,
+                ]
+                let sorted = habits.sorted { first, second in
+                    let firstComplete = first.isPeriodComplete(for: now)
+                    let secondComplete = second.isPeriodComplete(for: now)
+                    if firstComplete != secondComplete {
+                        return !firstComplete
+                    }
+                    return (periodOrder[first.goalPeriod] ?? 4) < (periodOrder[second.goalPeriod] ?? 4)
                 }
+
+                habit = sorted.first
             } catch {
                 print("Complication fetch failed: \(error)")
             }
