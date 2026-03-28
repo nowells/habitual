@@ -66,6 +66,7 @@ struct HeatmapGridView: View {
                                     HeatmapCell(
                                         day: day,
                                         color: habit.color,
+                                        goal: habit.goalFrequency,
                                         size: cellSize,
                                         onTap: onTapDate
                                     )
@@ -136,28 +137,27 @@ struct HeatmapGridView: View {
 struct HeatmapCell: View {
     let day: DayData
     let color: Color
+    let goal: Int
     let size: CGFloat
     var onTap: ((Date) -> Void)?
 
     var body: some View {
-        RoundedRectangle(cornerRadius: size * 0.2)
-            .fill(cellColor)
-            .frame(width: size, height: size)
+        if day.isPadding {
+            Color.clear.frame(width: size, height: size)
+        } else {
+            LiquidFillCell(
+                count: day.count,
+                goal: goal,
+                color: color,
+                status: day.status,
+                size: size
+            )
             .onTapGesture {
-                if !day.isFuture {
+                if day.status != .future {
                     onTap?(day.date)
                 }
             }
-    }
-
-    private var cellColor: Color {
-        if day.isFuture {
-            return .clear
         }
-        if day.isCompleted {
-            return color.opacity(min(1.0, 0.4 + day.value * 0.6))
-        }
-        return Color.systemGray5
     }
 }
 
@@ -186,21 +186,21 @@ struct CompactHeatmapView: View {
                 VStack(spacing: cellSpacing) {
                     ForEach(weeks[weekIndex].indices, id: \.self) { dayIndex in
                         let day = weeks[weekIndex][dayIndex]
-                        RoundedRectangle(cornerRadius: cellSize * 0.2)
-                            .fill(cellColor(for: day))
-                            .frame(width: cellSize, height: cellSize)
+                        if day.isPadding {
+                            Color.clear.frame(width: cellSize, height: cellSize)
+                        } else {
+                            LiquidFillCell(
+                                count: day.count,
+                                goal: habit.goalFrequency,
+                                color: habit.color,
+                                status: day.status,
+                                size: cellSize
+                            )
+                        }
                     }
                 }
             }
         }
-    }
-
-    private func cellColor(for day: DayData) -> Color {
-        if day.isFuture { return .clear }
-        if day.isCompleted {
-            return habit.color.opacity(min(1.0, 0.4 + day.value * 0.6))
-        }
-        return Color.systemGray5
     }
 }
 

@@ -441,10 +441,10 @@ struct LargeHabitWidget: View {
     }
 }
 
-// MARK: - Widget Mini Heatmap (with pie-fill progress)
+// MARK: - Widget Mini Heatmap (with liquid fill progress)
 
-/// Renders the last 14 periods as small dots with pie-fill progress,
-/// matching the main app's `PieProgressFill` rendering.
+/// Renders the last 14 periods as small liquid-fill cells,
+/// matching the main app's `LiquidFillCell` rendering.
 struct WidgetMiniHeatmap: View {
     let habit: HabitSnapshot
     private let dotSize: CGFloat = 6
@@ -454,85 +454,22 @@ struct WidgetMiniHeatmap: View {
         HStack(spacing: 2) {
             ForEach(periods.indices, id: \.self) { idx in
                 let period = periods[idx]
-                if period.isFuture {
-                    Circle()
-                        .fill(Color.clear)
-                        .frame(width: dotSize, height: dotSize)
-                } else if period.completionCount <= 0 {
-                    Circle()
-                        .fill(Color.systemGray5)
-                        .frame(width: dotSize, height: dotSize)
-                } else {
-                    WidgetPieDot(
-                        completionCount: period.completionCount,
-                        goalFrequency: habit.goalFrequency,
-                        color: habit.color,
-                        size: dotSize
-                    )
-                }
+                let status: CellStatus = {
+                    if period.isFuture { return .future }
+                    if period.completionCount == 0 { return .missed }
+                    if period.completionCount < habit.goalFrequency { return .partial }
+                    if period.completionCount >= habit.goalFrequency * 2 { return .overComplete }
+                    return .complete
+                }()
+                LiquidFillCell(
+                    count: period.completionCount,
+                    goal: habit.goalFrequency,
+                    color: habit.color,
+                    status: status,
+                    size: dotSize
+                )
             }
         }
-    }
-}
-
-/// A tiny pie-fill dot for the widget heatmap, mirroring PieProgressFill.
-struct WidgetPieDot: View {
-    let completionCount: Int
-    let goalFrequency: Int
-    let color: Color
-    let size: CGFloat
-
-    private var fraction: Double {
-        guard goalFrequency > 0 else { return 0 }
-        let remainder = completionCount % goalFrequency
-        if remainder == 0 && completionCount > 0 { return 1.0 }
-        return Double(remainder) / Double(goalFrequency)
-    }
-
-    private var isOverGoal: Bool {
-        goalFrequency > 0 && completionCount > goalFrequency
-    }
-
-    var body: some View {
-        ZStack {
-            // Background circle
-            Circle()
-                .fill(Color.systemGray5)
-                .frame(width: size, height: size)
-
-            // If fully completed or over-completed, solid fill
-            if completionCount >= goalFrequency {
-                Circle()
-                    .fill(isOverGoal ? color.opacity(0.85) : color)
-                    .frame(width: size, height: size)
-            } else {
-                // Partial pie wedge
-                PieWedge(fraction: fraction)
-                    .fill(color)
-                    .frame(width: size, height: size)
-                    .clipShape(Circle())
-            }
-        }
-    }
-}
-
-/// A simple pie-wedge shape for partial completion.
-struct PieWedge: Shape {
-    let fraction: Double
-
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        path.move(to: center)
-        path.addArc(
-            center: center,
-            radius: max(rect.width, rect.height),
-            startAngle: .degrees(-90),
-            endAngle: .degrees(-90 + 360 * fraction),
-            clockwise: false
-        )
-        path.closeSubpath()
-        return path
     }
 }
 

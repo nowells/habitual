@@ -223,18 +223,20 @@ struct WatchHeatmapView: View {
                 VStack(spacing: spacing) {
                     ForEach(weeks[weekIndex].indices, id: \.self) { dayIndex in
                         let day = weeks[weekIndex][dayIndex]
-                        RoundedRectangle(cornerRadius: 1.5)
-                            .fill(cellColor(for: day))
-                            .frame(width: cellSize, height: cellSize)
+                        if day.isPadding {
+                            Color.clear.frame(width: cellSize, height: cellSize)
+                        } else {
+                            LiquidFillCell(
+                                count: day.count,
+                                goal: habit.goalFrequency,
+                                color: habit.color,
+                                status: day.status,
+                                size: cellSize
+                            )
+                        }
                     }
                 }
             }
         }
-    }
-
-    private func cellColor(for day: DayData) -> Color {
-        if day.isFuture { return .clear }
-        if day.isCompleted { return habit.color }
-        return Color.gray.opacity(0.3)
     }
 }

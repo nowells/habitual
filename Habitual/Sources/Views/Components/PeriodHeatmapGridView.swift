@@ -4,7 +4,7 @@ import SwiftUI
 
 /// A heatmap that shows one cell per period (day/week/month).
 /// Daily habits show a GitHub-style grid; weekly/monthly use a horizontal row.
-/// Cells use a pie fill: the rounded square fills clockwise as completions accumulate.
+/// Cells use liquid fill: a bottom-up fill with layered intensity levels.
 struct PeriodHeatmapGridView: View {
     let habit: Habit
     let months: Int
@@ -87,7 +87,6 @@ struct PeriodHeatmapGridView: View {
                         }
                     }
                     .onAppear {
-                        // Find the week containing today and scroll to it
                         if let todayWeek = weeks.lastIndex(where: { week in
                             week.contains { Calendar.current.isDate($0.date, inSameDayAs: today) }
                         }) {
@@ -104,30 +103,13 @@ struct PeriodHeatmapGridView: View {
         if day.isPadding {
             Color.clear.frame(width: cellSize, height: cellSize)
         } else {
-            let isToday = Calendar.current.isDateInToday(day.date)
-            ZStack {
-                RoundedRectangle(cornerRadius: cellSize * 0.2)
-                    .fill(day.isFuture ? Color.systemGray5.opacity(0.35) : Color.systemGray5)
-                    .frame(width: cellSize, height: cellSize)
-
-                if !day.isFuture {
-                    let count = habit.completionsInPeriod(containing: day.date)
-                    if count > 0 {
-                        PieProgressFill(
-                            completionCount: count,
-                            goalFrequency: habit.goalFrequency,
-                            baseColor: habit.color,
-                            size: cellSize
-                        )
-                    }
-                }
-
-                if isToday {
-                    RoundedRectangle(cornerRadius: cellSize * 0.2)
-                        .strokeBorder(habit.color, lineWidth: 1)
-                        .frame(width: cellSize, height: cellSize)
-                }
-            }
+            LiquidFillCell(
+                count: day.count,
+                goal: habit.goalFrequency,
+                color: habit.color,
+                status: day.status,
+                size: cellSize
+            )
         }
     }
 
@@ -211,31 +193,32 @@ struct PeriodHeatmapGridView: View {
     @ViewBuilder
     private func periodCell(_ period: PeriodData, size: CGFloat? = nil) -> some View {
         let effectiveSize = size ?? cellSize
-        ZStack {
-            RoundedRectangle(cornerRadius: effectiveSize * 0.2)
-                .fill(period.isFuture ? Color.systemGray5.opacity(0.35) : Color.systemGray5)
-                .frame(width: effectiveSize, height: effectiveSize)
-
-            if !period.isFuture && period.completionCount > 0 {
-                PieProgressFill(
-                    completionCount: period.completionCount,
-                    goalFrequency: period.goalFrequency,
-                    baseColor: habit.color,
-                    size: effectiveSize
-                )
-            }
-
-            if period.isCurrentPeriod {
-                RoundedRectangle(cornerRadius: effectiveSize * 0.2)
-                    .strokeBorder(habit.color, lineWidth: 1.5)
-                    .frame(width: effectiveSize, height: effectiveSize)
-            }
-        }
+        let status = periodCellStatus(period)
+        LiquidFillCell(
+            count: period.completionCount,
+            goal: period.goalFrequency,
+            color: habit.color,
+            status: status,
+            size: effectiveSize
+        )
+        .id(period.id)
         .onTapGesture {
             if !period.isFuture {
                 onTapPeriod?(period)
             }
         }
+    }
+
+    private func periodCellStatus(_ period: PeriodData) -> CellStatus {
+        if period.isFuture { return .future }
+        if period.isCurrentPeriod {
+            return .today
+        }
+        if period.completionCount == 0 { return .missed }
+        if period.completionCount < period.goalFrequency { return .partial }
+        if period.completionCount >= period.goalFrequency * 2 { return .overComplete }
+        if period.completionCount >= period.goalFrequency { return .complete }
+        return .partial
     }
 
     // MARK: - Labels
@@ -438,10 +421,8 @@ struct CompactPeriodHeatmapView: View {
     private func compactDaily(availableWidth: CGFloat) -> some View {
         let columnWidth = cellSize + cellSpacing
         let maxWeeks = max(1, Int(availableWidth / columnWidth))
-        // Convert weeks to months (roughly 4.33 weeks/month), request enough data + 1 week forward
         let months = max(1, Int(ceil(Double(maxWeeks) / 4.33)))
         let weeks = habit.heatmapData(months: months, forwardDays: 7, today: today)
-        // Take only as many weeks as fit
         let visibleWeeks = Array(weeks.suffix(maxWeeks))
         return HStack(spacing: cellSpacing) {
             ForEach(visibleWeeks.indices, id: \.self) { weekIndex in
@@ -460,30 +441,13 @@ struct CompactPeriodHeatmapView: View {
         if day.isPadding {
             Color.clear.frame(width: cellSize, height: cellSize)
         } else {
-            let isToday = Calendar.current.isDateInToday(day.date)
-            ZStack {
-                RoundedRectangle(cornerRadius: cellSize * 0.2)
-                    .fill(day.isFuture ? Color.systemGray5.opacity(0.35) : Color.systemGray5)
-                    .frame(width: cellSize, height: cellSize)
-
-                if !day.isFuture {
-                    let count = habit.completionsInPeriod(containing: day.date)
-                    if count > 0 {
-                        PieProgressFill(
-                            completionCount: count,
-                            goalFrequency: habit.goalFrequency,
-                            baseColor: habit.color,
-                            size: cellSize
-                        )
-                    }
-                }
-
-                if isToday {
-                    RoundedRectangle(cornerRadius: cellSize * 0.2)
-                        .strokeBorder(habit.color, lineWidth: 1)
-                        .frame(width: cellSize, height: cellSize)
-                }
-            }
+            LiquidFillCell(
+                count: day.count,
+                goal: habit.goalFrequency,
+                color: habit.color,
+                status: day.status,
+                size: cellSize
+            )
         }
     }
 
@@ -546,26 +510,24 @@ struct CompactPeriodHeatmapView: View {
     @ViewBuilder
     private func compactPeriodCell(_ period: PeriodData, size: CGFloat? = nil) -> some View {
         let effectiveSize = size ?? cellSize
-        ZStack {
-            RoundedRectangle(cornerRadius: effectiveSize * 0.2)
-                .fill(period.isFuture ? Color.systemGray5.opacity(0.35) : Color.systemGray5)
-                .frame(width: effectiveSize, height: effectiveSize)
+        let status = compactPeriodStatus(period)
+        LiquidFillCell(
+            count: period.completionCount,
+            goal: period.goalFrequency,
+            color: habit.color,
+            status: status,
+            size: effectiveSize
+        )
+    }
 
-            if !period.isFuture && period.completionCount > 0 {
-                PieProgressFill(
-                    completionCount: period.completionCount,
-                    goalFrequency: period.goalFrequency,
-                    baseColor: habit.color,
-                    size: effectiveSize
-                )
-            }
-
-            if period.isCurrentPeriod {
-                RoundedRectangle(cornerRadius: effectiveSize * 0.2)
-                    .strokeBorder(habit.color, lineWidth: 1)
-                    .frame(width: effectiveSize, height: effectiveSize)
-            }
-        }
+    private func compactPeriodStatus(_ period: PeriodData) -> CellStatus {
+        if period.isFuture { return .future }
+        if period.isCurrentPeriod { return .today }
+        if period.completionCount == 0 { return .missed }
+        if period.completionCount < period.goalFrequency { return .partial }
+        if period.completionCount >= period.goalFrequency * 2 { return .overComplete }
+        if period.completionCount >= period.goalFrequency { return .complete }
+        return .partial
     }
 }
 

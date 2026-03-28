@@ -441,13 +441,13 @@ final class HabitModelTests: XCTestCase {
     // MARK: - DayData Tests
 
     func testDayDataIsCompleted() {
-        let completedDay = DayData(date: Date(), value: 1.0, isFuture: false, isPadding: false)
+        let completedDay = DayData(date: Date(), value: 1.0, count: 1, isFuture: false, isPadding: false, status: .complete)
         XCTAssertTrue(completedDay.isCompleted)
 
-        let partialDay = DayData(date: Date(), value: 0.5, isFuture: false, isPadding: false)
+        let partialDay = DayData(date: Date(), value: 0.5, count: 1, isFuture: false, isPadding: false, status: .partial)
         XCTAssertTrue(partialDay.isCompleted)
 
-        let emptyDay = DayData(date: Date(), value: 0.0, isFuture: false, isPadding: false)
+        let emptyDay = DayData(date: Date(), value: 0.0, count: 0, isFuture: false, isPadding: false, status: .missed)
         XCTAssertFalse(emptyDay.isCompleted)
     }
 

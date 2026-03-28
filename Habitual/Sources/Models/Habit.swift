@@ -445,6 +445,43 @@ extension Habit {
         return periods
     }
 
+    /// Compute the cell status for a given day based on the liquid fill spec.
+    func cellStatus(
+        for date: Date,
+        count: Int,
+        goal: Int,
+        today: Date,
+        previousDayHadCompletion: Bool,
+        calendar: Calendar = .current
+    ) -> CellStatus {
+        let dayStart = calendar.startOfDay(for: date)
+        let todayStart = calendar.startOfDay(for: today)
+        let habitStart = calendar.startOfDay(for: createdAt)
+
+        if dayStart > todayStart {
+            return .future
+        }
+        if dayStart == todayStart {
+            return .today
+        }
+        if dayStart < habitStart {
+            return .missed
+        }
+        if count == 0 && previousDayHadCompletion {
+            return .brokeStreak
+        }
+        if count == 0 {
+            return .missed
+        }
+        if count >= goal * 2 {
+            return .overComplete
+        }
+        if count >= goal {
+            return .complete
+        }
+        return .partial
+    }
+
     /// Returns a grid of completion data for the heatmap, organized by weeks.
     /// Extends `forwardDays` days past today to show upcoming empty slots.
     func heatmapData(months: Int = 4, forwardDays: Int = 0, today: Date = Date()) -> [[DayData]] {
@@ -459,21 +496,53 @@ extension Habit {
 
         let endDate = calendar.date(byAdding: .day, value: forwardDays, to: today) ?? today
 
-        let completionDates = Dictionary(
+        // Group completions by day — both value sums and counts
+        let grouped = Dictionary(
             grouping: completions,
             by: { calendar.startOfDay(for: $0.date) }
-        ).mapValues { $0.reduce(0.0) { $0 + $1.value } }
+        )
+        let completionValues = grouped.mapValues { $0.reduce(0.0) { $0 + $1.value } }
+        let completionCounts = grouped.mapValues { $0.count }
 
         var weeks: [[DayData]] = []
         var currentDate = alignedStart
+        var previousDayHadCompletion = false
 
         while currentDate <= endDate {
             var week: [DayData] = []
             for _ in 0..<7 {
                 let isPadding = currentDate < alignedStart
                 let isFuture = !isPadding && currentDate > today
-                let value = (!isPadding && !isFuture) ? (completionDates[currentDate] ?? 0) : 0
-                week.append(DayData(date: currentDate, value: value, isFuture: isFuture, isPadding: isPadding))
+                let value = (!isPadding && !isFuture) ? (completionValues[currentDate] ?? 0) : 0
+                let count = (!isPadding && !isFuture) ? (completionCounts[currentDate] ?? 0) : 0
+
+                let status: CellStatus
+                if isPadding {
+                    status = .missed
+                } else {
+                    status = cellStatus(
+                        for: currentDate,
+                        count: count,
+                        goal: goalFrequency,
+                        today: today,
+                        previousDayHadCompletion: previousDayHadCompletion
+                    )
+                }
+
+                week.append(DayData(
+                    date: currentDate,
+                    value: value,
+                    count: count,
+                    isFuture: isFuture,
+                    isPadding: isPadding,
+                    status: status
+                ))
+
+                // Track previous day completion for broke-streak detection
+                if !isPadding && !isFuture {
+                    previousDayHadCompletion = count > 0
+                }
+
                 guard let nextDay = calendar.date(byAdding: .day, value: 1, to: currentDate) else { break }
                 currentDate = nextDay
             }
@@ -484,16 +553,40 @@ extension Habit {
     }
 }
 
+// MARK: - Cell Status (Liquid Fill System)
+
+/// The 7 visual states a cell can be in. Each state has a distinct rendering treatment.
+enum CellStatus: Equatable {
+    /// Days that haven't occurred yet
+    case future
+    /// The current calendar day
+    case today
+    /// Days before the habit was created/started
+    case missed
+    /// A day where the user had been on a streak but logged zero
+    case brokeStreak
+    /// Some completions but fewer than the goal
+    case partial
+    /// Exactly met the goal
+    case complete
+    /// Exceeded the goal
+    case overComplete
+}
+
 // MARK: - Day Data for Heatmap
 
 struct DayData: Identifiable {
     let id = UUID()
     let date: Date
     let value: Double
+    /// Number of individual completions logged on this day
+    let count: Int
     /// True when this date is after today (an upcoming empty slot to show)
     let isFuture: Bool
     /// True when this date is outside the history window (padding to align the week grid — hide the cell)
     let isPadding: Bool
+    /// The computed cell status for liquid fill rendering
+    let status: CellStatus
 
     var isCompleted: Bool { value > 0 }
 }

@@ -120,11 +120,12 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
 
     func testCalendarDayCell_Completed() {
         let view = CalendarDayCell(
-            date: TestData.referenceDate,
-            hasCompletionOnDay: true,
-            isToday: true,
-            isFuture: false,
+            dayNumber: 15,
+            count: 1,
+            goal: 1,
             color: .blue,
+            status: .today,
+            size: 40,
             onTap: {}
         )
         .padding()
@@ -135,11 +136,12 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
 
     func testCalendarDayCell_Today_Incomplete() {
         let view = CalendarDayCell(
-            date: TestData.referenceDate,
-            hasCompletionOnDay: false,
-            isToday: true,
-            isFuture: false,
+            dayNumber: 15,
+            count: 0,
+            goal: 1,
             color: .blue,
+            status: .today,
+            size: 40,
             onTap: {}
         )
         .padding()
@@ -150,11 +152,12 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
 
     func testCalendarDayCell_Past_Incomplete() {
         let view = CalendarDayCell(
-            date: TestData.date(daysAgo: 1),
-            hasCompletionOnDay: false,
-            isToday: false,
-            isFuture: false,
+            dayNumber: 14,
+            count: 0,
+            goal: 1,
             color: .blue,
+            status: .missed,
+            size: 40,
             onTap: {}
         )
         .padding()
@@ -165,11 +168,12 @@ final class DetailViewSnapshotTests: SnapshotTestCase {
 
     func testCalendarDayCell_Future() {
         let view = CalendarDayCell(
-            date: TestData.date(daysAgo: -1),
-            hasCompletionOnDay: false,
-            isToday: false,
-            isFuture: true,
+            dayNumber: 16,
+            count: 0,
+            goal: 1,
             color: .blue,
+            status: .future,
+            size: 40,
             onTap: {}
         )
         .padding()

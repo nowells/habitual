@@ -408,8 +408,11 @@ struct CalendarGridView: View {
     var onTapDate: ((Date) -> Void)?
     var onLongPressDate: ((Date) -> Void)?
 
+    @Environment(\.today) private var today
+
     private let calendar = Calendar.current
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
+    private let cellSize: CGFloat = 40
 
     var body: some View {
         VStack(spacing: 8) {
@@ -428,33 +431,49 @@ struct CalendarGridView: View {
             LazyVGrid(columns: columns, spacing: 6) {
                 ForEach(calendarDays, id: \.self) { date in
                     if let date = date {
+                        let count = habit.completionsInPeriod(containing: date)
+                        let status = calendarCellStatus(for: date, count: count)
+                        let dayNumber = calendar.component(.day, from: date)
+
                         CalendarDayCell(
-                            date: date,
-                            hasCompletionOnDay: habit.isCompletedOn(date: date),
-                            isToday: calendar.isDateInToday(date),
-                            isFuture: date > Date(),
+                            dayNumber: dayNumber,
+                            count: count,
+                            goal: habit.goalFrequency,
                             color: habit.color,
+                            status: status,
+                            size: cellSize,
                             onTap: {
-                                if date <= Date() {
+                                if status != .future {
                                     onTapDate?(date)
                                 }
                             },
                             onLongPress: {
-                                if date <= Date() {
+                                if status != .future && count > 0 {
                                     onLongPressDate?(date)
                                 }
-                            },
-                            periodCompletionCount: habit.completionsInPeriod(containing: date),
-                            goalFrequency: habit.goalFrequency,
-                            isDaily: habit.goalPeriod == .daily
+                            }
                         )
                     } else {
-                        Text("")
-                            .frame(width: 36, height: 36)
+                        Color.clear
+                            .frame(width: cellSize, height: cellSize)
                     }
                 }
             }
         }
+    }
+
+    private func calendarCellStatus(for date: Date, count: Int) -> CellStatus {
+        let dayStart = calendar.startOfDay(for: date)
+        let todayStart = calendar.startOfDay(for: today)
+        let habitStart = calendar.startOfDay(for: habit.createdAt)
+
+        if dayStart > todayStart { return .future }
+        if dayStart == todayStart { return .today }
+        if dayStart < habitStart { return .missed }
+        if count == 0 { return .missed }
+        if count >= habit.goalFrequency * 2 { return .overComplete }
+        if count >= habit.goalFrequency { return .complete }
+        return .partial
     }
 
     private var weekdaySymbols: [String] {
@@ -494,39 +513,16 @@ struct CalendarGridView: View {
 }
 
 struct CalendarDayCell: View {
-    let date: Date
-    /// Whether this specific day has at least one completion logged
-    let hasCompletionOnDay: Bool
-    let isToday: Bool
-    let isFuture: Bool
+    let dayNumber: Int
+    let count: Int
+    let goal: Int
     let color: Color
+    let status: CellStatus
+    let size: CGFloat
     let onTap: () -> Void
     var onLongPress: (() -> Void)?
-    /// Total completions across the entire period containing this day
-    var periodCompletionCount: Int = 0
-    var goalFrequency: Int = 1
-    /// Whether this is a daily-period habit (all days show period progress)
-    var isDaily: Bool = true
 
     @State private var longPressActivated = false
-
-    private let calendar = Calendar.current
-    private let cellSize: CGFloat = 36
-
-    /// For daily habits, every day shows the period fill.
-    /// For weekly/monthly habits, only days with actual completions show the fill.
-    private var showsFill: Bool {
-        if isDaily {
-            return periodCompletionCount > 0
-        } else {
-            return hasCompletionOnDay
-        }
-    }
-
-    /// Whether the period goal is fully met
-    private var isPeriodComplete: Bool {
-        periodCompletionCount >= goalFrequency
-    }
 
     var body: some View {
         Button {
@@ -536,28 +532,15 @@ struct CalendarDayCell: View {
                 onTap()
             }
         } label: {
-            ZStack {
-                if showsFill {
-                    // Pie-fill circle: partial fill for progress, with overlap colors
-                    CirclePieProgressFill(
-                        completionCount: periodCompletionCount,
-                        goalFrequency: goalFrequency,
-                        baseColor: color,
-                        size: cellSize
-                    )
-                } else if isToday {
-                    Circle()
-                        .strokeBorder(color, lineWidth: 1.5)
-                        .frame(width: cellSize, height: cellSize)
-                }
-
-                Text("\(calendar.component(.day, from: date))")
-                    .font(.caption)
-                    .fontWeight(isToday ? .bold : .regular)
-                    .foregroundStyle(foregroundColor)
-            }
-            .frame(width: cellSize, height: cellSize)
-            .contentShape(Circle())
+            CalendarLiquidFillCell(
+                dayNumber: dayNumber,
+                count: count,
+                goal: goal,
+                color: color,
+                status: status,
+                size: size
+            )
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .simultaneousGesture(
@@ -567,14 +550,6 @@ struct CalendarDayCell: View {
                     onLongPress?()
                 }
         )
-        .opacity(isFuture ? 0.3 : 1.0)
-    }
-
-    private var foregroundColor: Color {
-        if showsFill && isPeriodComplete { return .white }
-        if showsFill { return .primary }
-        if isFuture { return .secondary }
-        return .primary
     }
 }
 
