@@ -80,7 +80,7 @@ struct LiquidFillCell: View {
 
     private var todayCell: some View {
         ZStack(alignment: .bottom) {
-            if count > 0 {
+            if count >= 1 {
                 // Base level fill
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .fill(color.opacity(levelAlpha(fullLevels)))

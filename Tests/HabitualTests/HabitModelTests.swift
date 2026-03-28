@@ -70,11 +70,13 @@ final class HabitModelTests: XCTestCase {
     func testHabitEquality() {
         let id = UUID()
         let habit1 = Habit(id: id, name: "Exercise")
-        let habit2 = Habit(id: id, name: "Different Name")
+        let habit2 = Habit(id: id, name: "Exercise")
         let habit3 = Habit(name: "Exercise")
+        let habit4 = Habit(id: id, name: "Different Name")
 
-        XCTAssertEqual(habit1, habit2, "Habits with same ID should be equal")
+        XCTAssertEqual(habit1, habit2, "Habits with same ID and properties should be equal")
         XCTAssertNotEqual(habit1, habit3, "Habits with different IDs should not be equal")
+        XCTAssertNotEqual(habit1, habit4, "Habits with same ID but different name should not be equal")
     }
 
     // MARK: - GoalPeriod Tests
