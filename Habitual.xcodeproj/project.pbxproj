@@ -47,6 +47,7 @@
 		A20009 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10012 /* NotificationService.swift */; };
 		A20010 /* NudgeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10023 /* NudgeService.swift */; };
 		A20012 /* DeviceIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10033 /* DeviceIdentifier.swift */; };
+		A20013 /* LiquidFillCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10034 /* LiquidFillCell.swift */; };
 		A20011 /* HabitualComplications.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = C40001 /* HabitualComplications.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A30001 /* HabitualWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30001 /* HabitualWidgets.swift */; };
 		A30002 /* Habit.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10003 /* Habit.swift */; };
@@ -594,6 +595,7 @@
 				A20009 /* NotificationService.swift in Sources */,
 				A20010 /* NudgeService.swift in Sources */,
 				A20012 /* DeviceIdentifier.swift in Sources */,
+				A20013 /* LiquidFillCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -212,16 +212,11 @@ struct RadialProgressView: View {
             .shadow(color: ringColor.opacity(shadowOpacity), radius: lineWidth * 0.5)
     }
 
-    /// Returns a color for each ring rotation, cycling through complementary colors
+    /// Returns the color for each ring rotation.
+    /// All rotations use the base (habit) color to stay consistent with
+    /// the liquid-fill heatmap cells which use the same color at varying intensity.
     static func ringColor(base: Color, rotation: Int) -> Color {
-        switch rotation % 5 {
-        case 0: return base
-        case 1: return .orange
-        case 2: return .green
-        case 3: return .purple
-        case 4: return .pink
-        default: return base
-        }
+        base
     }
 }
 

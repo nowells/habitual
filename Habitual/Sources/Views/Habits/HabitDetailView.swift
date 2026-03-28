@@ -331,11 +331,8 @@ struct HabitDetailView: View {
                     }
                 },
                 onLongPressDate: { date in
-                    let count = currentHabit.completionsInPeriod(containing: date)
-                    if count > 0 {
-                        withAnimation(.spring(response: 0.3)) {
-                            habitStore.removeLastCompletion(for: currentHabit, on: date)
-                        }
+                    withAnimation(.spring(response: 0.3)) {
+                        habitStore.removeLastCompletion(for: currentHabit, on: date)
                     }
                 }
             )
@@ -415,10 +412,17 @@ struct CalendarGridView: View {
     private let cellSize: CGFloat = 40
 
     /// Pre-compute counts for all visible days to derive maxCount.
+    /// Uses a range-based check (dayStart ..< nextDay) instead of exact startOfDay
+    /// equality, which is more robust against Date precision issues from CloudKit sync.
     private var dayCounts: [(date: Date, count: Int)] {
         calendarDays.compactMap { date in
             guard let date else { return nil }
-            return (date, habit.completionsInPeriod(containing: date))
+            let dayStart = calendar.startOfDay(for: date)
+            guard let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) else {
+                return (date, 0)
+            }
+            let count = habit.completions.filter { $0.date >= dayStart && $0.date < dayEnd }.count
+            return (date, count)
         }
     }
 
@@ -449,7 +453,7 @@ struct CalendarGridView: View {
                         CalendarDayCell(
                             dayNumber: dayNumber,
                             count: count,
-                            goal: habit.goalFrequency,
+                            goal: 1,
                             color: habit.color,
                             status: status,
                             size: cellSize,
@@ -483,9 +487,10 @@ struct CalendarGridView: View {
         if dayStart == todayStart { return .today }
         if dayStart < habitStart { return .missed }
         if count == 0 { return .missed }
-        if count >= habit.goalFrequency * 2 { return .overComplete }
-        if count >= habit.goalFrequency { return .complete }
-        return .partial
+        // Calendar shows per-day activity: 1 completion = complete,
+        // multiple = over-complete. Period-level goal tracking is in the heatmap.
+        if count >= 2 { return .overComplete }
+        return .complete
     }
 
     private var weekdaySymbols: [String] {

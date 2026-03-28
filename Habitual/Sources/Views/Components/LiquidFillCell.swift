@@ -65,12 +65,12 @@ struct LiquidFillCell: View {
 
     private var futureCell: some View {
         RoundedRectangle(cornerRadius: cornerRadius)
-            .fill(Color.white.opacity(0.03))
+            .fill(Color.primary.opacity(0.04))
             .frame(width: size, height: size)
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .strokeBorder(
-                        Color.white.opacity(0.08),
+                        Color.primary.opacity(0.12),
                         style: StrokeStyle(lineWidth: 0.5, dash: [2, 2])
                     )
             )
@@ -108,7 +108,7 @@ struct LiquidFillCell: View {
         .frame(width: size, height: size)
         .overlay(
             RoundedRectangle(cornerRadius: cornerRadius)
-                .strokeBorder(color, lineWidth: size > 20 ? 2 : 1.5)
+                .stroke(Color.primary.opacity(0.6), lineWidth: size > 20 ? 2 : 1.5)
         )
         .shadow(color: color.opacity(0.35), radius: size > 20 ? 8 : 4)
     }
@@ -117,7 +117,7 @@ struct LiquidFillCell: View {
 
     private var missedCell: some View {
         RoundedRectangle(cornerRadius: cornerRadius)
-            .fill(Color.white.opacity(0.03))
+            .fill(Color.primary.opacity(0.04))
             .frame(width: size, height: size)
     }
 
@@ -227,12 +227,12 @@ struct LiquidFillLegend: View {
             ForEach(0..<5) { level in
                 let alpha: CGFloat = CGFloat(level) / 4.0
                 RoundedRectangle(cornerRadius: cellSize > 14 ? 2 : 1)
-                    .fill(level == 0 ? Color.white.opacity(0.03) : color.opacity(alpha))
+                    .fill(level == 0 ? Color.primary.opacity(0.04) : color.opacity(alpha))
                     .frame(width: cellSize, height: cellSize)
                     .overlay(
                         RoundedRectangle(cornerRadius: cellSize > 14 ? 2 : 1)
                             .strokeBorder(
-                                level == 0 ? Color.white.opacity(0.08) : Color.clear,
+                                level == 0 ? Color.primary.opacity(0.12) : Color.clear,
                                 lineWidth: 0.5
                             )
                     )
@@ -315,5 +315,4 @@ struct LiquidFillLegend: View {
         LiquidFillLegend(color: .blue, cellSize: 12)
     }
     .padding()
-    .background(Color(red: 0.004, green: 0.016, blue: 0.035))
 }
