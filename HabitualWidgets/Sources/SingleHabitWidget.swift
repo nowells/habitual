@@ -64,8 +64,11 @@ struct SingleHabitWidgetProvider: AppIntentTimelineProvider {
 
         let weeks = habit.heatmapData(months: 3)
         let heatmapValues = weeks.flatMap { week in
-            week.map { day -> HeatmapDay in
-                HeatmapDay(isCompleted: day.isCompleted, isFuture: day.isFuture)
+            week.map { day -> WidgetHeatmapDay in
+                WidgetHeatmapDay(
+                    count: day.count,
+                    status: day.status
+                )
             }
         }
 
@@ -98,7 +101,7 @@ struct SingleHabitEntry: TimelineEntry {
     let goalFrequency: Int
     let currentStreak: Int
     let completionRate: Double
-    let heatmapDays: [HeatmapDay]
+    let heatmapDays: [WidgetHeatmapDay]
 
     var color: Color {
         Color(red: colorRed, green: colorGreen, blue: colorBlue)
@@ -122,9 +125,9 @@ struct SingleHabitEntry: TimelineEntry {
     )
 }
 
-struct HeatmapDay {
-    let isCompleted: Bool
-    let isFuture: Bool
+struct WidgetHeatmapDay {
+    let count: Int
+    let status: CellStatus
 }
 
 struct SingleHabitWidget: Widget {
@@ -173,8 +176,12 @@ struct SingleHabitWidgetView: View {
             }
 
             if family == .systemMedium {
-                // Mini heatmap grid
-                WidgetHeatmapGrid(days: entry.heatmapDays, color: entry.color)
+                // Mini heatmap grid using liquid fill cells
+                WidgetHeatmapGrid(
+                    days: entry.heatmapDays,
+                    color: entry.color,
+                    goal: entry.goalFrequency
+                )
             }
 
             Spacer()
@@ -200,10 +207,15 @@ struct SingleHabitWidgetView: View {
 }
 
 struct WidgetHeatmapGrid: View {
-    let days: [HeatmapDay]
+    let days: [WidgetHeatmapDay]
     let color: Color
+    let goal: Int
     let cellSize: CGFloat = 8
     let spacing: CGFloat = 2
+
+    private var peak: Int {
+        days.map(\.count).max() ?? 0
+    }
 
     var body: some View {
         let rows = 7
@@ -215,19 +227,19 @@ struct WidgetHeatmapGrid: View {
                     ForEach(0..<rows, id: \.self) { row in
                         let index = col * rows + row
                         if index < days.count {
-                            RoundedRectangle(cornerRadius: 1.5)
-                                .fill(cellColor(for: days[index]))
-                                .frame(width: cellSize, height: cellSize)
+                            let day = days[index]
+                            LiquidFillCell(
+                                count: day.count,
+                                goal: goal,
+                                color: color,
+                                status: day.status,
+                                size: cellSize,
+                                maxCount: peak
+                            )
                         }
                     }
                 }
             }
         }
-    }
-
-    private func cellColor(for day: HeatmapDay) -> Color {
-        if day.isFuture { return .clear }
-        if day.isCompleted { return color }
-        return Color.systemGray5
     }
 }

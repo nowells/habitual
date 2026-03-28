@@ -212,9 +212,24 @@ struct PersistenceController {
             )
         }
 
-        container.loadPersistentStores { _, error in
+        let persistentContainer = container
+        container.loadPersistentStores { storeDescription, error in
             if let error = error as NSError? {
-                fatalError("Unresolved error \(error), \(error.userInfo)")
+                // On watch or when the app group isn't available, retry without the
+                // custom store URL by falling back to the default location.
+                print("[CoreData] ⚠️ Failed to load store at \(storeDescription.url?.absoluteString ?? "nil"): \(error)")
+                let fallbackURL = NSPersistentCloudKitContainer.defaultDirectoryURL()
+                    .appendingPathComponent("Habitual.sqlite")
+                if storeDescription.url != fallbackURL {
+                    print("[CoreData] 🔄 Retrying with default store location...")
+                    storeDescription.url = fallbackURL
+                    storeDescription.cloudKitContainerOptions = nil
+                    persistentContainer.loadPersistentStores { _, retryError in
+                        if let retryError = retryError as NSError? {
+                            print("[CoreData] ❌ Fallback also failed: \(retryError)")
+                        }
+                    }
+                }
             }
         }
 

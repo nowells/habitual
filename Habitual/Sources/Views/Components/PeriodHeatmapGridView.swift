@@ -4,7 +4,7 @@ import SwiftUI
 
 /// A heatmap that shows one cell per period (day/week/month).
 /// Daily habits show a GitHub-style grid; weekly/monthly use a horizontal row.
-/// Cells use a pie fill: the rounded square fills clockwise as completions accumulate.
+/// Cells use liquid fill: a bottom-up fill with layered intensity levels.
 struct PeriodHeatmapGridView: View {
     let habit: Habit
     let months: Int
@@ -63,36 +63,43 @@ struct PeriodHeatmapGridView: View {
     private var dailyLayout: some View {
         // 1 week of future empty slots
         let weeks = habit.heatmapData(months: months, forwardDays: 7, today: today)
-        return VStack(alignment: .leading, spacing: 4) {
+        let peak = maxCount(in: weeks)
+        return HStack(alignment: .top, spacing: cellSpacing) {
             if showLabels {
-                dailyMonthLabels(weeks: weeks)
-            }
-
-            HStack(alignment: .top, spacing: cellSpacing) {
-                if showLabels {
+                // Day-of-week labels with top spacer matching the month label row
+                VStack(alignment: .trailing, spacing: 0) {
+                    Text("")
+                        .font(.system(size: 10))
+                        .frame(height: 16)
+                        .padding(.bottom, 4)
                     dayOfWeekLabels
                 }
+            }
 
-                ScrollViewReader { proxy in
-                    ScrollView(.horizontal, showsIndicators: false) {
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        if showLabels {
+                            dailyMonthLabels(weeks: weeks)
+                        }
+
                         HStack(spacing: cellSpacing) {
                             ForEach(weeks.indices, id: \.self) { weekIndex in
                                 VStack(spacing: cellSpacing) {
                                     ForEach(weeks[weekIndex].indices, id: \.self) { dayIndex in
-                                        dailyCell(day: weeks[weekIndex][dayIndex])
+                                        dailyCell(day: weeks[weekIndex][dayIndex], maxCount: peak)
                                     }
                                 }
                                 .id(weekIndex)
                             }
                         }
                     }
-                    .onAppear {
-                        // Find the week containing today and scroll to it
-                        if let todayWeek = weeks.lastIndex(where: { week in
-                            week.contains { Calendar.current.isDate($0.date, inSameDayAs: today) }
-                        }) {
-                            proxy.scrollTo(todayWeek, anchor: .trailing)
-                        }
+                }
+                .onAppear {
+                    if let todayWeek = weeks.lastIndex(where: { week in
+                        week.contains { Calendar.current.isDate($0.date, inSameDayAs: today) }
+                    }) {
+                        proxy.scrollTo(todayWeek, anchor: .trailing)
                     }
                 }
             }
@@ -100,107 +107,102 @@ struct PeriodHeatmapGridView: View {
     }
 
     @ViewBuilder
-    private func dailyCell(day: DayData) -> some View {
+    private func dailyCell(day: DayData, maxCount peak: Int) -> some View {
         if day.isPadding {
-            Color.clear.frame(width: cellSize, height: cellSize)
+            Color.clear.frame(width: periodCellSize, height: periodCellSize)
         } else {
-            let isToday = Calendar.current.isDateInToday(day.date)
-            ZStack {
-                RoundedRectangle(cornerRadius: cellSize * 0.2)
-                    .fill(day.isFuture ? Color.systemGray5.opacity(0.35) : Color.systemGray5)
-                    .frame(width: cellSize, height: cellSize)
-
-                if !day.isFuture {
-                    let count = habit.completionsInPeriod(containing: day.date)
-                    if count > 0 {
-                        PieProgressFill(
-                            completionCount: count,
-                            goalFrequency: habit.goalFrequency,
-                            baseColor: habit.color,
-                            size: cellSize
-                        )
-                    }
-                }
-
-                if isToday {
-                    RoundedRectangle(cornerRadius: cellSize * 0.2)
-                        .strokeBorder(habit.color, lineWidth: 1)
-                        .frame(width: cellSize, height: cellSize)
-                }
-            }
+            LiquidFillCell(
+                count: day.count,
+                goal: habit.goalFrequency,
+                color: habit.color,
+                status: day.status,
+                size: periodCellSize,
+                maxCount: peak
+            )
         }
     }
 
-    // MARK: - Weekly Layout
+    // MARK: - Shared Period Constants
+
+    /// All period types (weekly/monthly/yearly) use the same cell size for consistency.
+    private var periodCellSize: CGFloat { cellSize * 2.2 }
+    private let weeklyRows = 4
+    private let monthlyRows = 6
+    private let yearlyRows = 4
+
+    // MARK: - Weekly Layout (4 rows)
 
     private var weeklyLayout: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            if showLabels {
-                weeklyLabels
-            }
-
-            ScrollViewReader { proxy in
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: cellSpacing) {
-                        ForEach(periodData) { period in
-                            periodCell(period)
-                        }
-                    }
-                }
-                .onAppear {
-                    if let current = periodData.first(where: { $0.isCurrentPeriod }) {
-                        proxy.scrollTo(current.id, anchor: .trailing)
-                    }
-                }
-            }
+        periodGridLayout(rows: weeklyRows) { date in
+            let formatter = DateFormatter()
+            formatter.dateFormat = "MMM"
+            return formatter.string(from: date)
         }
     }
 
-    // MARK: - Monthly Layout
+    // MARK: - Monthly Layout (6 rows)
 
     private var monthlyLayout: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            if showLabels {
-                monthlyLabels
-            }
-
-            ScrollViewReader { proxy in
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: cellSpacing + 2) {
-                        ForEach(periodData) { period in
-                            periodCell(period, size: cellSize * 1.8)
-                        }
-                    }
-                }
-                .onAppear {
-                    if let current = periodData.first(where: { $0.isCurrentPeriod }) {
-                        proxy.scrollTo(current.id, anchor: .trailing)
-                    }
-                }
-            }
+        periodGridLayout(rows: monthlyRows) { date in
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy"
+            return formatter.string(from: date)
         }
     }
 
-    // MARK: - Yearly Layout
+    // MARK: - Yearly Layout (4 rows)
 
     private var yearlyLayout: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            if showLabels {
-                yearlyLabels
-            }
+        periodGridLayout(rows: yearlyRows) { date in
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy"
+            return formatter.string(from: date)
+        }
+    }
 
-            ScrollViewReader { proxy in
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: cellSpacing + 4) {
-                        ForEach(periodData) { period in
-                            periodCell(period, size: cellSize * 2.2)
+    /// Shared vertical-stacking grid layout for all period types.
+    private func periodGridLayout(rows: Int, labelForDate: @escaping (Date) -> String) -> some View {
+        let periods = periodData
+        let peak = maxCount(in: periods)
+        let columns = stride(from: 0, to: periods.count, by: rows).map { start in
+            Array(periods[start..<min(start + rows, periods.count)])
+        }
+        return ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 4) {
+                    if showLabels {
+                        HStack(spacing: cellSpacing) {
+                            ForEach(columns.indices, id: \.self) { colIndex in
+                                if let firstPeriod = columns[colIndex].first {
+                                    Text(labelForDate(firstPeriod.periodStart))
+                                        .font(.system(size: 10))
+                                        .foregroundStyle(.secondary)
+                                        .frame(width: periodCellSize)
+                                }
+                            }
+                        }
+                    }
+
+                    HStack(spacing: cellSpacing) {
+                        ForEach(columns.indices, id: \.self) { colIndex in
+                            VStack(spacing: cellSpacing) {
+                                ForEach(columns[colIndex]) { period in
+                                    periodCell(period, size: periodCellSize, maxCount: peak)
+                                }
+                                // Pad short last column
+                                ForEach(0..<(rows - columns[colIndex].count), id: \.self) { _ in
+                                    Color.clear.frame(width: periodCellSize, height: periodCellSize)
+                                }
+                            }
+                            .id(colIndex)
                         }
                     }
                 }
-                .onAppear {
-                    if let current = periodData.first(where: { $0.isCurrentPeriod }) {
-                        proxy.scrollTo(current.id, anchor: .trailing)
-                    }
+            }
+            .onAppear {
+                if let currentIdx = periods.firstIndex(where: { $0.isCurrentPeriod }) {
+                    let colIdx = currentIdx / rows
+                    proxy.scrollTo(colIdx, anchor: .trailing)
                 }
             }
         }
@@ -209,33 +211,35 @@ struct PeriodHeatmapGridView: View {
     // MARK: - Period Cell (weekly/monthly/yearly)
 
     @ViewBuilder
-    private func periodCell(_ period: PeriodData, size: CGFloat? = nil) -> some View {
+    private func periodCell(_ period: PeriodData, size: CGFloat? = nil, maxCount peak: Int = 0) -> some View {
         let effectiveSize = size ?? cellSize
-        ZStack {
-            RoundedRectangle(cornerRadius: effectiveSize * 0.2)
-                .fill(period.isFuture ? Color.systemGray5.opacity(0.35) : Color.systemGray5)
-                .frame(width: effectiveSize, height: effectiveSize)
-
-            if !period.isFuture && period.completionCount > 0 {
-                PieProgressFill(
-                    completionCount: period.completionCount,
-                    goalFrequency: period.goalFrequency,
-                    baseColor: habit.color,
-                    size: effectiveSize
-                )
-            }
-
-            if period.isCurrentPeriod {
-                RoundedRectangle(cornerRadius: effectiveSize * 0.2)
-                    .strokeBorder(habit.color, lineWidth: 1.5)
-                    .frame(width: effectiveSize, height: effectiveSize)
-            }
-        }
+        let status = periodCellStatus(period)
+        LiquidFillCell(
+            count: period.completionCount,
+            goal: period.goalFrequency,
+            color: habit.color,
+            status: status,
+            size: effectiveSize,
+            maxCount: peak
+        )
+        .id(period.id)
         .onTapGesture {
             if !period.isFuture {
                 onTapPeriod?(period)
             }
         }
+    }
+
+    private func periodCellStatus(_ period: PeriodData) -> CellStatus {
+        if period.isFuture { return .future }
+        if period.isCurrentPeriod {
+            return .today
+        }
+        if period.completionCount == 0 { return .missed }
+        if period.completionCount < period.goalFrequency { return .partial }
+        if period.completionCount >= period.goalFrequency * 2 { return .overComplete }
+        if period.completionCount >= period.goalFrequency { return .complete }
+        return .partial
     }
 
     // MARK: - Labels
@@ -247,11 +251,11 @@ struct PeriodHeatmapGridView: View {
                     Text(dayLabelStrings[index])
                         .font(.system(size: 9))
                         .foregroundStyle(.secondary)
-                        .frame(height: cellSize)
+                        .frame(height: periodCellSize)
                 } else {
                     Text("")
                         .font(.system(size: 9))
-                        .frame(height: cellSize)
+                        .frame(height: periodCellSize)
                 }
             }
         }
@@ -268,16 +272,11 @@ struct PeriodHeatmapGridView: View {
 
     private func dailyMonthLabels(weeks: [[DayData]]) -> some View {
         HStack(spacing: 0) {
-            if showLabels { Spacer().frame(width: 24) }
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 0) {
-                    ForEach(monthPositions(from: weeks), id: \.offset) { item in
-                        Text(item.label)
-                            .font(.system(size: 10))
-                            .foregroundStyle(.secondary)
-                            .frame(width: CGFloat(item.span) * (cellSize + cellSpacing), alignment: .leading)
-                    }
-                }
+            ForEach(monthPositions(from: weeks), id: \.offset) { item in
+                Text(item.label)
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+                    .frame(width: CGFloat(item.span) * (periodCellSize + cellSpacing), alignment: .leading)
             }
         }
     }
@@ -309,82 +308,6 @@ struct PeriodHeatmapGridView: View {
         return positions
     }
 
-    private var weeklyLabels: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 0) {
-                ForEach(weeklyLabelPositions, id: \.offset) { item in
-                    Text(item.label)
-                        .font(.system(size: 10))
-                        .foregroundStyle(.secondary)
-                        .frame(width: CGFloat(item.span) * (cellSize + cellSpacing), alignment: .leading)
-                }
-            }
-        }
-    }
-
-    private var weeklyLabelPositions: [(offset: Int, label: String, span: Int)] {
-        guard !periodData.isEmpty else { return [] }
-        let calendar = Calendar.current
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM"
-
-        var positions: [(offset: Int, label: String, span: Int)] = []
-        var lastMonth = -1
-
-        for (index, period) in periodData.enumerated() {
-            let month = calendar.component(.month, from: period.periodStart)
-            if month != lastMonth {
-                if !positions.isEmpty {
-                    positions[positions.count - 1].span = index - positions[positions.count - 1].offset
-                }
-                positions.append((offset: index, label: formatter.string(from: period.periodStart), span: 1))
-                lastMonth = month
-            }
-        }
-        if let last = positions.last {
-            positions[positions.count - 1].span = periodData.count - last.offset
-        }
-
-        return positions
-    }
-
-    private var monthlyLabels: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: cellSpacing + 2) {
-                ForEach(periodData) { period in
-                    Text(monthLabel(for: period.periodStart))
-                        .font(.system(size: 10))
-                        .foregroundStyle(.secondary)
-                        .frame(width: cellSize * 1.8)
-                }
-            }
-        }
-    }
-
-    private func monthLabel(for date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM"
-        return formatter.string(from: date)
-    }
-
-    private var yearlyLabels: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: cellSpacing + 4) {
-                ForEach(periodData) { period in
-                    Text(yearLabel(for: period.periodStart))
-                        .font(.system(size: 10))
-                        .foregroundStyle(.secondary)
-                        .frame(width: cellSize * 2.2)
-                }
-            }
-        }
-    }
-
-    private func yearLabel(for date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy"
-        return formatter.string(from: date)
-    }
 }
 
 // MARK: - Compact Period Heatmap (for cards)
@@ -420,34 +343,44 @@ struct CompactPeriodHeatmapView: View {
         .frame(height: compactHeight)
     }
 
+    /// All period types use the same cell size for consistency (matches yearly).
+    private var compactPeriodCellSize: CGFloat { cellSize * 2 }
+    private let compactWeeklyRows = 4
+    private let compactMonthlyRows = 6
+    private let compactYearlyRows = 4
+
     private var compactHeight: CGFloat {
+        let pSize = compactPeriodCellSize
         switch habit.goalPeriod {
         case .daily:
-            return 7 * cellSize + 6 * cellSpacing
+            return 7 * pSize + 6 * cellSpacing
         case .weekly:
-            return cellSize
+            let rows = CGFloat(compactWeeklyRows)
+            return rows * pSize + (rows - 1) * cellSpacing
         case .monthly:
-            return cellSize * 1.5
+            let rows = CGFloat(compactMonthlyRows)
+            return rows * pSize + (rows - 1) * cellSpacing
         case .yearly:
-            return cellSize * 2
+            let rows = CGFloat(compactYearlyRows)
+            return rows * pSize + (rows - 1) * cellSpacing
         }
     }
 
     // MARK: - Daily
 
     private func compactDaily(availableWidth: CGFloat) -> some View {
-        let columnWidth = cellSize + cellSpacing
+        let pSize = compactPeriodCellSize
+        let columnWidth = pSize + cellSpacing
         let maxWeeks = max(1, Int(availableWidth / columnWidth))
-        // Convert weeks to months (roughly 4.33 weeks/month), request enough data + 1 week forward
         let months = max(1, Int(ceil(Double(maxWeeks) / 4.33)))
         let weeks = habit.heatmapData(months: months, forwardDays: 7, today: today)
-        // Take only as many weeks as fit
         let visibleWeeks = Array(weeks.suffix(maxWeeks))
+        let peak = maxCount(in: visibleWeeks)
         return HStack(spacing: cellSpacing) {
             ForEach(visibleWeeks.indices, id: \.self) { weekIndex in
                 VStack(spacing: cellSpacing) {
                     ForEach(visibleWeeks[weekIndex].indices, id: \.self) { dayIndex in
-                        compactDailyCell(day: visibleWeeks[weekIndex][dayIndex])
+                        compactDailyCell(day: visibleWeeks[weekIndex][dayIndex], maxCount: peak)
                     }
                 }
             }
@@ -456,86 +389,106 @@ struct CompactPeriodHeatmapView: View {
     }
 
     @ViewBuilder
-    private func compactDailyCell(day: DayData) -> some View {
+    private func compactDailyCell(day: DayData, maxCount peak: Int) -> some View {
+        let pSize = compactPeriodCellSize
         if day.isPadding {
-            Color.clear.frame(width: cellSize, height: cellSize)
+            Color.clear.frame(width: pSize, height: pSize)
         } else {
-            let isToday = Calendar.current.isDateInToday(day.date)
-            ZStack {
-                RoundedRectangle(cornerRadius: cellSize * 0.2)
-                    .fill(day.isFuture ? Color.systemGray5.opacity(0.35) : Color.systemGray5)
-                    .frame(width: cellSize, height: cellSize)
-
-                if !day.isFuture {
-                    let count = habit.completionsInPeriod(containing: day.date)
-                    if count > 0 {
-                        PieProgressFill(
-                            completionCount: count,
-                            goalFrequency: habit.goalFrequency,
-                            baseColor: habit.color,
-                            size: cellSize
-                        )
-                    }
-                }
-
-                if isToday {
-                    RoundedRectangle(cornerRadius: cellSize * 0.2)
-                        .strokeBorder(habit.color, lineWidth: 1)
-                        .frame(width: cellSize, height: cellSize)
-                }
-            }
+            LiquidFillCell(
+                count: day.count,
+                goal: habit.goalFrequency,
+                color: habit.color,
+                status: day.status,
+                size: pSize,
+                maxCount: peak
+            )
         }
     }
 
-    // MARK: - Weekly
+    // MARK: - Weekly (4 rows)
 
     private func compactWeekly(availableWidth: CGFloat) -> some View {
-        let columnWidth = cellSize + cellSpacing
-        let maxPeriods = max(1, Int(availableWidth / columnWidth))
+        let pSize = compactPeriodCellSize
+        let columnWidth = pSize + cellSpacing
+        let maxColumns = max(1, Int(availableWidth / columnWidth))
+        let maxPeriods = maxColumns * compactWeeklyRows
         let months = max(1, Int(ceil(Double(maxPeriods) / 4.33)))
         let periods = habit.periodHeatmapData(months: months, forwardPeriods: 5, today: today)
         let visiblePeriods = Array(periods.suffix(maxPeriods))
+        let peak = maxCount(in: visiblePeriods)
+        let columns = stride(from: 0, to: visiblePeriods.count, by: compactWeeklyRows).map { start in
+            Array(visiblePeriods[start..<min(start + compactWeeklyRows, visiblePeriods.count)])
+        }
         return HStack(spacing: cellSpacing) {
-            ForEach(visiblePeriods) { period in
-                compactPeriodCell(period)
+            ForEach(columns.indices, id: \.self) { colIndex in
+                VStack(spacing: cellSpacing) {
+                    ForEach(columns[colIndex]) { period in
+                        compactPeriodCell(period, size: pSize, maxCount: peak)
+                    }
+                    ForEach(0..<(compactWeeklyRows - columns[colIndex].count), id: \.self) { _ in
+                        Color.clear.frame(width: pSize, height: pSize)
+                    }
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
     }
 
-    // MARK: - Monthly
+    // MARK: - Monthly (6 rows)
 
     private func compactMonthly(availableWidth: CGFloat) -> some View {
-        let monthlyCellSize = cellSize * 1.5
-        let monthlySpacing = cellSpacing + 1
-        let columnWidth = monthlyCellSize + monthlySpacing
-        let maxPeriods = max(1, Int(availableWidth / columnWidth))
+        let pSize = compactPeriodCellSize
+        let columnWidth = pSize + cellSpacing
+        let maxColumns = max(1, Int(availableWidth / columnWidth))
+        let maxPeriods = maxColumns * compactMonthlyRows
         let backMonths = max(1, maxPeriods)
         let forwardMonths = min(12, maxPeriods / 3)
         let periods = habit.periodHeatmapData(months: backMonths, forwardPeriods: forwardMonths, today: today)
         let visiblePeriods = Array(periods.suffix(maxPeriods))
-        return HStack(spacing: monthlySpacing) {
-            ForEach(visiblePeriods) { period in
-                compactPeriodCell(period, size: monthlyCellSize)
+        let peak = maxCount(in: visiblePeriods)
+        let columns = stride(from: 0, to: visiblePeriods.count, by: compactMonthlyRows).map { start in
+            Array(visiblePeriods[start..<min(start + compactMonthlyRows, visiblePeriods.count)])
+        }
+        return HStack(spacing: cellSpacing) {
+            ForEach(columns.indices, id: \.self) { colIndex in
+                VStack(spacing: cellSpacing) {
+                    ForEach(columns[colIndex]) { period in
+                        compactPeriodCell(period, size: pSize, maxCount: peak)
+                    }
+                    ForEach(0..<(compactMonthlyRows - columns[colIndex].count), id: \.self) { _ in
+                        Color.clear.frame(width: pSize, height: pSize)
+                    }
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
     }
 
-    // MARK: - Yearly
+    // MARK: - Yearly (4 rows)
 
     private func compactYearly(availableWidth: CGFloat) -> some View {
-        let yearlyCellSize = cellSize * 2
-        let yearlySpacing = cellSpacing + 2
-        let columnWidth = yearlyCellSize + yearlySpacing
-        let maxPeriods = max(1, Int(availableWidth / columnWidth))
+        let pSize = compactPeriodCellSize
+        let columnWidth = pSize + cellSpacing
+        let maxColumns = max(1, Int(availableWidth / columnWidth))
+        let maxPeriods = maxColumns * compactYearlyRows
         let backMonths = max(12, maxPeriods * 12)
         let forwardYears = min(3, maxPeriods / 3)
         let periods = habit.periodHeatmapData(months: backMonths, forwardPeriods: forwardYears, today: today)
         let visiblePeriods = Array(periods.suffix(maxPeriods))
-        return HStack(spacing: yearlySpacing) {
-            ForEach(visiblePeriods) { period in
-                compactPeriodCell(period, size: yearlyCellSize)
+        let peak = maxCount(in: visiblePeriods)
+        let columns = stride(from: 0, to: visiblePeriods.count, by: compactYearlyRows).map { start in
+            Array(visiblePeriods[start..<min(start + compactYearlyRows, visiblePeriods.count)])
+        }
+        return HStack(spacing: cellSpacing) {
+            ForEach(columns.indices, id: \.self) { colIndex in
+                VStack(spacing: cellSpacing) {
+                    ForEach(columns[colIndex]) { period in
+                        compactPeriodCell(period, size: pSize, maxCount: peak)
+                    }
+                    ForEach(0..<(compactYearlyRows - columns[colIndex].count), id: \.self) { _ in
+                        Color.clear.frame(width: pSize, height: pSize)
+                    }
+                }
             }
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
@@ -544,28 +497,27 @@ struct CompactPeriodHeatmapView: View {
     // MARK: - Period Cell
 
     @ViewBuilder
-    private func compactPeriodCell(_ period: PeriodData, size: CGFloat? = nil) -> some View {
+    private func compactPeriodCell(_ period: PeriodData, size: CGFloat? = nil, maxCount peak: Int = 0) -> some View {
         let effectiveSize = size ?? cellSize
-        ZStack {
-            RoundedRectangle(cornerRadius: effectiveSize * 0.2)
-                .fill(period.isFuture ? Color.systemGray5.opacity(0.35) : Color.systemGray5)
-                .frame(width: effectiveSize, height: effectiveSize)
+        let status = compactPeriodStatus(period)
+        LiquidFillCell(
+            count: period.completionCount,
+            goal: period.goalFrequency,
+            color: habit.color,
+            status: status,
+            size: effectiveSize,
+            maxCount: peak
+        )
+    }
 
-            if !period.isFuture && period.completionCount > 0 {
-                PieProgressFill(
-                    completionCount: period.completionCount,
-                    goalFrequency: period.goalFrequency,
-                    baseColor: habit.color,
-                    size: effectiveSize
-                )
-            }
-
-            if period.isCurrentPeriod {
-                RoundedRectangle(cornerRadius: effectiveSize * 0.2)
-                    .strokeBorder(habit.color, lineWidth: 1)
-                    .frame(width: effectiveSize, height: effectiveSize)
-            }
-        }
+    private func compactPeriodStatus(_ period: PeriodData) -> CellStatus {
+        if period.isFuture { return .future }
+        if period.isCurrentPeriod { return .today }
+        if period.completionCount == 0 { return .missed }
+        if period.completionCount < period.goalFrequency { return .partial }
+        if period.completionCount >= period.goalFrequency * 2 { return .overComplete }
+        if period.completionCount >= period.goalFrequency { return .complete }
+        return .partial
     }
 }
 

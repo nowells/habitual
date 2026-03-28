@@ -1,4 +1,5 @@
 import SwiftUI
+import WatchKit
 
 struct WatchContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -43,6 +44,13 @@ struct WatchContentView: View {
                 }
                 .navigationTitle("Habitual")
             }
+        }
+        .onAppear {
+            // Schedule periodic background refresh for CloudKit sync
+            WKApplication.shared().scheduleBackgroundRefresh(
+                withPreferredDate: Date(timeIntervalSinceNow: 30 * 60),
+                userInfo: nil
+            ) { _ in }
         }
     }
 }
@@ -218,23 +226,29 @@ struct WatchHeatmapView: View {
     }
 
     var body: some View {
+        let weeksData = weeks
+        let peak = maxCount(in: weeksData)
+
         HStack(spacing: spacing) {
-            ForEach(weeks.indices, id: \.self) { weekIndex in
+            ForEach(weeksData.indices, id: \.self) { weekIndex in
                 VStack(spacing: spacing) {
-                    ForEach(weeks[weekIndex].indices, id: \.self) { dayIndex in
-                        let day = weeks[weekIndex][dayIndex]
-                        RoundedRectangle(cornerRadius: 1.5)
-                            .fill(cellColor(for: day))
-                            .frame(width: cellSize, height: cellSize)
+                    ForEach(weeksData[weekIndex].indices, id: \.self) { dayIndex in
+                        let day = weeksData[weekIndex][dayIndex]
+                        if day.isPadding {
+                            Color.clear.frame(width: cellSize, height: cellSize)
+                        } else {
+                            LiquidFillCell(
+                                count: day.count,
+                                goal: habit.goalFrequency,
+                                color: habit.color,
+                                status: day.status,
+                                size: cellSize,
+                                maxCount: peak
+                            )
+                        }
                     }
                 }
             }
         }
-    }
-
-    private func cellColor(for day: DayData) -> Color {
-        if day.isFuture { return .clear }
-        if day.isCompleted { return habit.color }
-        return Color.gray.opacity(0.3)
     }
 }

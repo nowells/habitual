@@ -70,11 +70,13 @@ final class HabitModelTests: XCTestCase {
     func testHabitEquality() {
         let id = UUID()
         let habit1 = Habit(id: id, name: "Exercise")
-        let habit2 = Habit(id: id, name: "Different Name")
+        let habit2 = Habit(id: id, name: "Exercise")
         let habit3 = Habit(name: "Exercise")
+        let habit4 = Habit(id: id, name: "Different Name")
 
-        XCTAssertEqual(habit1, habit2, "Habits with same ID should be equal")
+        XCTAssertEqual(habit1, habit2, "Habits with same ID and properties should be equal")
         XCTAssertNotEqual(habit1, habit3, "Habits with different IDs should not be equal")
+        XCTAssertNotEqual(habit1, habit4, "Habits with same ID but different name should not be equal")
     }
 
     // MARK: - GoalPeriod Tests
@@ -441,13 +443,15 @@ final class HabitModelTests: XCTestCase {
     // MARK: - DayData Tests
 
     func testDayDataIsCompleted() {
-        let completedDay = DayData(date: Date(), value: 1.0, isFuture: false, isPadding: false)
+        let completedDay = DayData(
+            date: Date(), value: 1.0, count: 1, isFuture: false, isPadding: false, status: .complete)
         XCTAssertTrue(completedDay.isCompleted)
 
-        let partialDay = DayData(date: Date(), value: 0.5, isFuture: false, isPadding: false)
+        let partialDay = DayData(
+            date: Date(), value: 0.5, count: 1, isFuture: false, isPadding: false, status: .partial)
         XCTAssertTrue(partialDay.isCompleted)
 
-        let emptyDay = DayData(date: Date(), value: 0.0, isFuture: false, isPadding: false)
+        let emptyDay = DayData(date: Date(), value: 0.0, count: 0, isFuture: false, isPadding: false, status: .missed)
         XCTAssertFalse(emptyDay.isCompleted)
     }
 
