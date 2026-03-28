@@ -258,7 +258,8 @@ struct LiquidFillLegend: View {
                         count: count,
                         goal: 3,
                         color: .blue,
-                        status: count == 0 ? .missed : (count < 3 ? .partial : (count == 3 ? .complete : .overComplete)),
+                        status: count == 0
+                            ? .missed : (count < 3 ? .partial : (count == 3 ? .complete : .overComplete)),
                         size: 32,
                         maxCount: maxCount
                     )

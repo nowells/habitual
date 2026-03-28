@@ -149,6 +149,13 @@ struct Habit: Identifiable, Equatable {
         self.completions = completions
     }
 
+    /// The effective start date for this habit, accounting for back-dated completions.
+    /// Uses the earlier of `createdAt` or the earliest completion date.
+    var effectiveStartDate: Date {
+        guard let earliest = completions.map(\.date).min() else { return createdAt }
+        return min(earliest, createdAt)
+    }
+
     static func == (lhs: Habit, rhs: Habit) -> Bool {
         lhs.id == rhs.id
             && lhs.name == rhs.name
@@ -291,8 +298,8 @@ extension Habit {
         let calendar = Calendar.current
         guard !completions.isEmpty else { return 0 }
 
-        // Find the range of periods to check: from createdAt to today
-        let startDate = calendar.startOfDay(for: createdAt)
+        // Find the range of periods to check: from effectiveStartDate to today
+        let startDate = calendar.startOfDay(for: effectiveStartDate)
         let todayStart = calendar.startOfDay(for: today)
         var periodStart = goalPeriod.periodStart(for: startDate, calendar: calendar)
         let endPeriod = goalPeriod.periodEnd(for: todayStart, calendar: calendar)
@@ -338,7 +345,7 @@ extension Habit {
     /// Fraction of elapsed periods where the goal was met (0.0–1.0).
     func completionRate(asOf today: Date) -> Double {
         let calendar = Calendar.current
-        let startDate = calendar.startOfDay(for: createdAt)
+        let startDate = calendar.startOfDay(for: effectiveStartDate)
         let todayStart = calendar.startOfDay(for: today)
 
         var periodStart = goalPeriod.periodStart(for: startDate, calendar: calendar)
@@ -458,7 +465,7 @@ extension Habit {
     ) -> CellStatus {
         let dayStart = calendar.startOfDay(for: date)
         let todayStart = calendar.startOfDay(for: today)
-        let habitStart = calendar.startOfDay(for: createdAt)
+        let habitStart = calendar.startOfDay(for: effectiveStartDate)
 
         if dayStart > todayStart {
             return .future
@@ -466,23 +473,20 @@ extension Habit {
         if dayStart == todayStart {
             return .today
         }
+        // Check count before habitStart — back-dated completions should still show
+        if count > 0 {
+            if count >= goal * 2 { return .overComplete }
+            if count >= goal { return .complete }
+            return .partial
+        }
         if dayStart < habitStart {
             return .missed
         }
         // Broke streak requires a real streak (2+ consecutive days) that was broken
-        if count == 0 && consecutiveCompletionDays >= 2 {
+        if consecutiveCompletionDays >= 2 {
             return .brokeStreak
         }
-        if count == 0 {
-            return .missed
-        }
-        if count >= goal * 2 {
-            return .overComplete
-        }
-        if count >= goal {
-            return .complete
-        }
-        return .partial
+        return .missed
     }
 
     /// Returns a grid of completion data for the heatmap, organized by weeks.
@@ -532,14 +536,15 @@ extension Habit {
                     )
                 }
 
-                week.append(DayData(
-                    date: currentDate,
-                    value: value,
-                    count: count,
-                    isFuture: isFuture,
-                    isPadding: isPadding,
-                    status: status
-                ))
+                week.append(
+                    DayData(
+                        date: currentDate,
+                        value: value,
+                        count: count,
+                        isFuture: isFuture,
+                        isPadding: isPadding,
+                        status: status
+                    ))
 
                 // Track consecutive completion days for broke-streak detection
                 if !isPadding && !isFuture {

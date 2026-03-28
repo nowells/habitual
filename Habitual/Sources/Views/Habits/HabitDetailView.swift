@@ -481,16 +481,13 @@ struct CalendarGridView: View {
     private func calendarCellStatus(for date: Date, count: Int) -> CellStatus {
         let dayStart = calendar.startOfDay(for: date)
         let todayStart = calendar.startOfDay(for: today)
-        let habitStart = calendar.startOfDay(for: habit.createdAt)
 
         if dayStart > todayStart { return .future }
         if dayStart == todayStart { return .today }
-        if dayStart < habitStart { return .missed }
-        if count == 0 { return .missed }
-        // Calendar shows per-day activity: 1 completion = complete,
-        // multiple = over-complete. Period-level goal tracking is in the heatmap.
+        // Check count before habitStart — back-dated completions should still show
         if count >= 2 { return .overComplete }
-        return .complete
+        if count >= 1 { return .complete }
+        return .missed
     }
 
     private var weekdaySymbols: [String] {

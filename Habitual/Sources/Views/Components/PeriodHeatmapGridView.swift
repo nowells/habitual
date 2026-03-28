@@ -173,11 +173,12 @@ struct PeriodHeatmapGridView: View {
                     if showLabels {
                         HStack(spacing: cellSpacing) {
                             ForEach(columns.indices, id: \.self) { colIndex in
-                                let firstPeriod = columns[colIndex].first!
-                                Text(labelForDate(firstPeriod.periodStart))
-                                    .font(.system(size: 10))
-                                    .foregroundStyle(.secondary)
-                                    .frame(width: periodCellSize)
+                                if let firstPeriod = columns[colIndex].first {
+                                    Text(labelForDate(firstPeriod.periodStart))
+                                        .font(.system(size: 10))
+                                        .foregroundStyle(.secondary)
+                                        .frame(width: periodCellSize)
+                                }
                             }
                         }
                     }
