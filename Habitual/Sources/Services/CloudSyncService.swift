@@ -1,6 +1,6 @@
-@preconcurrency import Dispatch
 import CloudKit
 import CoreData
+@preconcurrency import Dispatch
 
 actor CloudSyncService {
     static let shared = CloudSyncService()
@@ -69,7 +69,7 @@ actor CloudSyncService {
             nonisolated(unsafe) var observer: NSObjectProtocol?
             nonisolated(unsafe) var resumed = false
 
-            let finish = { @Sendable (didImport: Bool) in
+            let finish = { @Sendable(didImport: Bool) in
                 DispatchQueue.main.async {
                     guard !resumed else { return }
                     resumed = true
@@ -130,22 +130,23 @@ actor CloudSyncService {
             else { continue }
 
             ckRecordIDToHabitUUID[record.recordID.recordName] = uuid
-            remoteHabits.append(RemoteHabitData(
-                id: uuid,
-                name: record["CD_name"] as? String ?? "",
-                habitDescription: record["CD_habitDescription"] as? String,
-                icon: record["CD_icon"] as? String,
-                colorRed: record["CD_colorRed"] as? Double ?? 0.35,
-                colorGreen: record["CD_colorGreen"] as? Double ?? 0.65,
-                colorBlue: record["CD_colorBlue"] as? Double ?? 0.85,
-                createdAt: record["CD_createdAt"] as? Date,
-                updatedAt: record["CD_updatedAt"] as? Date,
-                isArchived: (record["CD_isArchived"] as? Int64 ?? 0) != 0,
-                goalFrequency: Int16(record["CD_goalFrequency"] as? Int64 ?? 1),
-                goalPeriod: record["CD_goalPeriod"] as? String ?? "daily",
-                reminderTime: record["CD_reminderTime"] as? Date,
-                sortOrder: Int16(record["CD_sortOrder"] as? Int64 ?? 0)
-            ))
+            remoteHabits.append(
+                RemoteHabitData(
+                    id: uuid,
+                    name: record["CD_name"] as? String ?? "",
+                    habitDescription: record["CD_habitDescription"] as? String,
+                    icon: record["CD_icon"] as? String,
+                    colorRed: record["CD_colorRed"] as? Double ?? 0.35,
+                    colorGreen: record["CD_colorGreen"] as? Double ?? 0.65,
+                    colorBlue: record["CD_colorBlue"] as? Double ?? 0.85,
+                    createdAt: record["CD_createdAt"] as? Date,
+                    updatedAt: record["CD_updatedAt"] as? Date,
+                    isArchived: (record["CD_isArchived"] as? Int64 ?? 0) != 0,
+                    goalFrequency: Int16(record["CD_goalFrequency"] as? Int64 ?? 1),
+                    goalPeriod: record["CD_goalPeriod"] as? String ?? "daily",
+                    reminderTime: record["CD_reminderTime"] as? Date,
+                    sortOrder: Int16(record["CD_sortOrder"] as? Int64 ?? 0)
+                ))
         }
 
         // 2. Fetch all completion records from CloudKit.
@@ -160,15 +161,16 @@ actor CloudSyncService {
             let habitRef = record["CD_habit"] as? CKRecord.Reference
             let habitUUID = habitRef.flatMap { ckRecordIDToHabitUUID[$0.recordID.recordName] }
 
-            remoteCompletions.append(RemoteCompletionData(
-                id: uuid,
-                habitID: habitUUID,
-                date: record["CD_date"] as? Date,
-                value: record["CD_value"] as? Double ?? 1.0,
-                note: record["CD_note"] as? String,
-                deviceID: record["CD_deviceID"] as? String,
-                createdAt: record["CD_createdAt"] as? Date
-            ))
+            remoteCompletions.append(
+                RemoteCompletionData(
+                    id: uuid,
+                    habitID: habitUUID,
+                    date: record["CD_date"] as? Date,
+                    value: record["CD_value"] as? Double ?? 1.0,
+                    note: record["CD_note"] as? String,
+                    deviceID: record["CD_deviceID"] as? String,
+                    createdAt: record["CD_createdAt"] as? Date
+                ))
         }
 
         // 3. Merge into CoreData — insert only missing records.
@@ -215,8 +217,8 @@ actor CloudSyncService {
         let localHabits = (try? context.fetch(habitRequest)) ?? []
         let localHabitIDs = Set(localHabits.compactMap { $0.id })
         var habitByID: [UUID: CDHabit] = [:]
-        for h in localHabits {
-            if let id = h.id { habitByID[id] = h }
+        for habit in localHabits {
+            if let id = habit.id { habitByID[id] = habit }
         }
 
         let completionRequest: NSFetchRequest<CDCompletion> = CDCompletion.fetchRequest()

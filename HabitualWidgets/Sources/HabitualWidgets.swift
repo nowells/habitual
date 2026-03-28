@@ -91,11 +91,11 @@ struct HabitWidgetProvider: TimelineProvider {
         }
         // Sort: incomplete habits first, then completed — within each group
         // order by period frequency (daily → weekly → monthly → yearly).
-        .sorted { a, b in
-            if a.isPeriodComplete != b.isPeriodComplete {
-                return !a.isPeriodComplete
+        .sorted { first, second in
+            if first.isPeriodComplete != second.isPeriodComplete {
+                return !first.isPeriodComplete
             }
-            return a.periodSortOrder < b.periodSortOrder
+            return first.periodSortOrder < second.periodSortOrder
         }
 
         let completedCount = habits.filter { $0.isPeriodComplete(for: now) }.count
