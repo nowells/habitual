@@ -122,6 +122,24 @@ struct HabitWidgetEntry: TimelineEntry {
         return Double(completedToday) / Double(totalHabits)
     }
 
+    /// Per-period completion data for concentric rings.
+    /// Returns an array of (period, completed, total) for each period that has habits,
+    /// ordered from daily (outermost ring) to yearly (innermost ring).
+    var periodRings: [PeriodRingData] {
+        let periods = ["daily", "weekly", "monthly", "yearly"]
+        return periods.compactMap { period in
+            let periodHabits = habits.filter { $0.goalPeriod == period }
+            guard !periodHabits.isEmpty else { return nil }
+            let completed = periodHabits.filter(\.isPeriodComplete).count
+            return PeriodRingData(
+                period: period,
+                completed: completed,
+                total: periodHabits.count,
+                color: PeriodRingData.color(for: period)
+            )
+        }
+    }
+
     static let placeholder = HabitWidgetEntry(
         date: Date(),
         habits: [
@@ -137,10 +155,51 @@ struct HabitWidgetEntry: TimelineEntry {
                 id: UUID(), name: "Meditate", icon: "brain.head.profile", colorRed: 0.65, colorGreen: 0.35,
                 colorBlue: 0.90, isPeriodComplete: true, periodCompletions: 3, goalFrequency: 3, goalPeriod: "daily",
                 currentStreak: 12, completionRate: 0.75, recentPeriods: []),
+            HabitSnapshot(
+                id: UUID(), name: "Review Goals", icon: "checklist", colorRed: 1.0, colorGreen: 0.6, colorBlue: 0.0,
+                isPeriodComplete: false, periodCompletions: 0, goalFrequency: 1, goalPeriod: "weekly",
+                currentStreak: 4, completionRate: 0.80, recentPeriods: []),
+            HabitSnapshot(
+                id: UUID(), name: "Budget", icon: "dollarsign.circle", colorRed: 0.6, colorGreen: 0.2, colorBlue: 0.9,
+                isPeriodComplete: true, periodCompletions: 1, goalFrequency: 1, goalPeriod: "monthly",
+                currentStreak: 6, completionRate: 0.90, recentPeriods: []),
         ],
-        totalHabits: 3,
-        completedToday: 2
+        totalHabits: 5,
+        completedToday: 3
     )
+}
+
+/// Completion data for one period type's ring.
+struct PeriodRingData {
+    let period: String
+    let completed: Int
+    let total: Int
+    let color: Color
+
+    var fraction: Double {
+        guard total > 0 else { return 0 }
+        return Double(completed) / Double(total)
+    }
+
+    var label: String {
+        switch period {
+        case "daily": return "D"
+        case "weekly": return "W"
+        case "monthly": return "M"
+        case "yearly": return "Y"
+        default: return "?"
+        }
+    }
+
+    static func color(for period: String) -> Color {
+        switch period {
+        case "daily": return .green
+        case "weekly": return .blue
+        case "monthly": return .orange
+        case "yearly": return .purple
+        default: return .gray
+        }
+    }
 }
 
 /// One period's worth of completion data for the widget mini heatmap.
@@ -183,46 +242,73 @@ struct HabitSnapshot: Identifiable {
     }
 }
 
+// MARK: - Concentric Rings View
+
+/// Renders concentric completion rings — one per period type that has habits.
+/// Outermost ring = daily, innermost = yearly.
+struct ConcentricRingsView: View {
+    let rings: [PeriodRingData]
+    let size: CGFloat
+
+    private var lineWidth: CGFloat { max(size / 12, 3) }
+    private var gap: CGFloat { lineWidth + 2 }
+
+    var body: some View {
+        ZStack {
+            ForEach(Array(rings.enumerated()), id: \.offset) { index, ring in
+                let ringSize = size - CGFloat(index) * gap * 2
+
+                // Track
+                Circle()
+                    .stroke(ring.color.opacity(0.2), lineWidth: lineWidth)
+                    .frame(width: ringSize, height: ringSize)
+
+                // Fill
+                Circle()
+                    .trim(from: 0, to: ring.fraction)
+                    .stroke(
+                        ring.color,
+                        style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+                    )
+                    .frame(width: ringSize, height: ringSize)
+                    .rotationEffect(.degrees(-90))
+            }
+        }
+        .frame(width: size, height: size)
+    }
+}
+
 // MARK: - Small Widget
 
 struct SmallHabitWidget: View {
     let entry: HabitWidgetEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // Progress header
+        VStack(spacing: 6) {
+            // Header
             HStack {
                 Text("Habitual")
                     .font(.caption2)
                     .fontWeight(.semibold)
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text("\(entry.completedToday)/\(entry.totalHabits)")
-                    .font(.caption2)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.primary)
             }
 
-            // Progress ring
-            HStack {
+            // Concentric rings with vertical legend
+            HStack(spacing: 8) {
                 Spacer()
-                ZStack {
-                    Circle()
-                        .stroke(Color.systemGray5, lineWidth: 5)
-                        .frame(width: 46, height: 46)
-
-                    Circle()
-                        .trim(from: 0, to: entry.completionFraction)
-                        .stroke(
-                            Color.green,
-                            style: StrokeStyle(lineWidth: 5, lineCap: .round)
-                        )
-                        .frame(width: 46, height: 46)
-                        .rotationEffect(.degrees(-90))
-
-                    Text("\(Int(entry.completionFraction * 100))%")
-                        .font(.caption)
-                        .fontWeight(.bold)
+                ConcentricRingsView(rings: entry.periodRings, size: 56)
+                VStack(alignment: .leading, spacing: 3) {
+                    ForEach(entry.periodRings, id: \.period) { ring in
+                        HStack(spacing: 3) {
+                            Circle()
+                                .fill(ring.color)
+                                .frame(width: 5, height: 5)
+                            Text(ring.label)
+                                .font(.system(size: 8))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
                 Spacer()
             }
@@ -234,7 +320,7 @@ struct SmallHabitWidget: View {
             let topRow = Array(icons.prefix(min(icons.count, 5)))
             let bottomRow = icons.count > 5 ? Array(icons.suffix(from: 5)) : []
 
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(spacing: 3) {
                 HStack(spacing: 4) {
                     ForEach(topRow) { habit in
                         HabitIcon.image(habit.icon)
@@ -265,15 +351,13 @@ struct MediumHabitWidget: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Header
-            HStack {
+            HStack(spacing: 8) {
                 Text("Habitual")
                     .font(.caption)
                     .fontWeight(.semibold)
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text("\(entry.completedToday) of \(entry.totalHabits) done")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                ConcentricRingsView(rings: entry.periodRings, size: 28)
             }
 
             // Habit list
@@ -341,29 +425,27 @@ struct LargeHabitWidget: View {
         VStack(alignment: .leading, spacing: 10) {
             // Header
             HStack {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text("Habitual")
                         .font(.headline)
-                    Text("Today's Progress")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    // Ring legend
+                    HStack(spacing: 6) {
+                        ForEach(entry.periodRings, id: \.period) { ring in
+                            HStack(spacing: 2) {
+                                Circle()
+                                    .fill(ring.color)
+                                    .frame(width: 6, height: 6)
+                                Text("\(ring.label) \(ring.completed)/\(ring.total)")
+                                    .font(.system(size: 9))
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
                 }
                 Spacer()
 
-                // Progress ring
-                ZStack {
-                    Circle()
-                        .stroke(Color.systemGray5, lineWidth: 4)
-                        .frame(width: 36, height: 36)
-                    Circle()
-                        .trim(from: 0, to: entry.completionFraction)
-                        .stroke(Color.green, style: StrokeStyle(lineWidth: 4, lineCap: .round))
-                        .frame(width: 36, height: 36)
-                        .rotationEffect(.degrees(-90))
-                    Text("\(entry.completedToday)/\(entry.totalHabits)")
-                        .font(.system(size: 9))
-                        .fontWeight(.bold)
-                }
+                // Concentric period rings
+                ConcentricRingsView(rings: entry.periodRings, size: 42)
             }
 
             Divider()
