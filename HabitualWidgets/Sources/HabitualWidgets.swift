@@ -246,28 +246,37 @@ struct HabitSnapshot: Identifiable {
 
 /// Renders concentric completion rings — one per period type that has habits.
 /// Outermost ring = daily, innermost = yearly.
+/// Adapts to monochrome/accented widget rendering modes by using high-contrast
+/// track vs fill so partial rings remain visually distinct when desaturated.
 struct ConcentricRingsView: View {
     let rings: [PeriodRingData]
     let size: CGFloat
 
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
     private var lineWidth: CGFloat { max(size / 12, 3) }
     private var gap: CGFloat { lineWidth + 2 }
+
+    private var isFullColor: Bool { renderingMode == .fullColor }
 
     var body: some View {
         ZStack {
             ForEach(Array(rings.enumerated()), id: \.offset) { index, ring in
                 let ringSize = size - CGFloat(index) * gap * 2
 
-                // Track
+                // Track — use low opacity of primary in monochrome for clear contrast
                 Circle()
-                    .stroke(ring.color.opacity(0.2), lineWidth: lineWidth)
+                    .stroke(
+                        isFullColor ? ring.color.opacity(0.2) : Color.primary.opacity(0.15),
+                        lineWidth: lineWidth
+                    )
                     .frame(width: ringSize, height: ringSize)
 
                 // Fill
                 Circle()
                     .trim(from: 0, to: ring.fraction)
                     .stroke(
-                        ring.color,
+                        isFullColor ? ring.color : Color.primary,
                         style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                     )
                     .frame(width: ringSize, height: ringSize)
